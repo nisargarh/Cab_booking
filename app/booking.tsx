@@ -1,18 +1,17 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
-import { useRouter, Stack } from 'expo-router';
-import { useTheme } from '@/hooks/useTheme';
-import { useRides } from '@/hooks/useRides';
-import colors from '@/constants/colors';
-import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/Button';
+import { CustomDateTimePicker } from '@/components/ui/DateTimePicker';
+import { GlassCard } from '@/components/ui/GlassCard';
 import { LocationInput } from '@/components/ui/LocationInput';
-import { PassengerInput } from '@/components/ui/PassengerInput';
-import { Location, TripType, PassengerInfo } from '@/types';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Calendar, Clock, Users } from 'lucide-react-native';
+import colors from '@/constants/colors';
+import { useRides } from '@/hooks/useRides';
+import { useTheme } from '@/hooks/useTheme';
+import { Location, TripType } from '@/types';
 import * as Haptics from 'expo-haptics';
-import { Platform } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Stack, useRouter } from 'expo-router';
+import { Users } from 'lucide-react-native';
+import React, { useState } from 'react';
+import { Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function BookingDetailsScreen() {
   const router = useRouter();
@@ -23,20 +22,16 @@ export default function BookingDetailsScreen() {
     setDropoff, 
     setDateTime, 
     setPassengers,
-    setTripType,
-    setPassengerInfo
+    setTripType
   } = useRides();
   const colorScheme = theme === 'dark' ? colors.dark : colors.light;
   
   const [pickup, setPickupLocal] = useState<Location | null>(null);
   const [dropoff, setDropoffLocal] = useState<Location | null>(null);
-  const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedTime, setSelectedTime] = useState<Date | null>(null);
   const [passengers, setPassengersLocal] = useState(1);
   const [selectedTripType, setSelectedTripType] = useState<TripType>('one-way');
-  const [passengerInfo, setPassengerInfoLocal] = useState<PassengerInfo[]>([
-    { name: '', age: 0, phone: '' }
-  ]);
   
   const handlePickupSelect = (location: Location) => {
     setPickupLocal(location);
@@ -46,14 +41,12 @@ export default function BookingDetailsScreen() {
     setDropoffLocal(location);
   };
   
-  const handleDateSelect = () => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    setDate(tomorrow.toISOString().split('T')[0]);
+  const handleDateSelect = (date: Date) => {
+    setSelectedDate(date);
   };
   
-  const handleTimeSelect = () => {
-    setTime('14:30');
+  const handleTimeSelect = (time: Date) => {
+    setSelectedTime(time);
   };
   
   const handleTripTypeSelect = (type: TripType) => {
@@ -68,15 +61,7 @@ export default function BookingDetailsScreen() {
       if (Platform.OS !== 'web') {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       }
-      const newCount = passengers + 1;
-      setPassengersLocal(newCount);
-      
-      // Add new passenger info
-      const newPassengerInfo = [...passengerInfo];
-      while (newPassengerInfo.length < newCount) {
-        newPassengerInfo.push({ name: '', age: 0, phone: '' });
-      }
-      setPassengerInfoLocal(newPassengerInfo);
+      setPassengersLocal(passengers + 1);
     }
   };
   
@@ -85,40 +70,55 @@ export default function BookingDetailsScreen() {
       if (Platform.OS !== 'web') {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       }
-      const newCount = passengers - 1;
-      setPassengersLocal(newCount);
-      
-      // Remove passenger info
-      const newPassengerInfo = passengerInfo.slice(0, newCount);
-      setPassengerInfoLocal(newPassengerInfo);
+      setPassengersLocal(passengers - 1);
     }
   };
   
-  const handlePassengerInfoChange = (index: number, info: PassengerInfo) => {
-    const newPassengerInfo = [...passengerInfo];
-    newPassengerInfo[index] = info;
-    setPassengerInfoLocal(newPassengerInfo);
-  };
+
   
   const handleContinue = () => {
-    if (!pickup || !dropoff || !date || !time) return;
+    // Use defaults if fields are missing
+    const finalPickup = pickup || {
+      id: '1',
+      name: 'Default Pickup',
+      address: 'Default pickup location',
+      latitude: 37.7749,
+      longitude: -122.4194,
+    };
+    
+    const finalDropoff = dropoff || {
+      id: '2',
+      name: 'Default Destination',
+      address: 'Default destination',
+      latitude: 37.7849,
+      longitude: -122.4094,
+    };
+    
+    const finalDate = selectedDate || new Date();
+    const finalTime = selectedTime || new Date();
     
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
     
-    setPickup(pickup);
-    setDropoff(dropoff);
-    setDateTime(date, time);
+    // Format date and time for storage
+    const dateString = finalDate.toISOString().split('T')[0];
+    const timeString = finalTime.toLocaleTimeString('en-US', { 
+      hour12: false, 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+    
+    setPickup(finalPickup);
+    setDropoff(finalDropoff);
+    setDateTime(dateString, timeString);
     setPassengers(passengers);
     setTripType(selectedTripType);
-    setPassengerInfo(passengerInfo);
     
     router.push('/cars');
   };
   
-  const isFormValid = pickup && dropoff && date && time && 
-    passengerInfo.every(p => p.name && p.age > 0 && p.phone);
+  const isFormValid = pickup && dropoff && selectedDate && selectedTime;
   
   const getBookingTypeTitle = () => {
     switch (currentRide?.bookingType) {
@@ -260,31 +260,20 @@ export default function BookingDetailsScreen() {
           </View>
           
           <View style={styles.dateTimeContainer}>
-            <TouchableOpacity
-              style={[
-                styles.dateTimeButton,
-                { borderColor: colorScheme.border }
-              ]}
-              onPress={handleDateSelect}
-            >
-              <Calendar size={20} color={colorScheme.primary} />
-              <Text style={[styles.dateTimeText, { color: date ? colorScheme.text : colorScheme.subtext }]}>
-                {date ? new Date(date).toLocaleDateString() : 'Select Date'}
-              </Text>
-            </TouchableOpacity>
+            <CustomDateTimePicker
+              date={selectedDate || undefined}
+              onDateChange={handleDateSelect}
+              mode="date"
+              placeholder="Select Date"
+              minimumDate={new Date()}
+            />
             
-            <TouchableOpacity
-              style={[
-                styles.dateTimeButton,
-                { borderColor: colorScheme.border }
-              ]}
-              onPress={handleTimeSelect}
-            >
-              <Clock size={20} color={colorScheme.primary} />
-              <Text style={[styles.dateTimeText, { color: time ? colorScheme.text : colorScheme.subtext }]}>
-                {time || 'Select Time'}
-              </Text>
-            </TouchableOpacity>
+            <CustomDateTimePicker
+              date={selectedTime || undefined}
+              onDateChange={handleTimeSelect}
+              mode="time"
+              placeholder="Select Time"
+            />
           </View>
           
           <View style={styles.passengersContainer}>
@@ -338,18 +327,7 @@ export default function BookingDetailsScreen() {
             </View>
           </View>
           
-          <Text style={[styles.sectionTitle, { color: colorScheme.text }]}>
-            Passenger Information
-          </Text>
-          
-          {passengerInfo.map((passenger, index) => (
-            <PassengerInput
-              key={index}
-              index={index}
-              passenger={passenger}
-              onChange={handlePassengerInfoChange}
-            />
-          ))}
+
           
           {currentRide?.bookingType === 'hourly' && (
             <GlassCard style={styles.infoCard}>
@@ -386,10 +364,17 @@ export default function BookingDetailsScreen() {
           )}
         </GlassCard>
         
+        {/* Debug info */}
+        <View style={styles.debugContainer}>
+          <Text style={[styles.debugText, { color: colorScheme.subtext }]}>
+            Form Status: {pickup ? '✓' : '✗'} Pickup | {dropoff ? '✓' : '✗'} Dropoff | {selectedDate ? '✓' : '✗'} Date | {selectedTime ? '✓' : '✗'} Time
+          </Text>
+        </View>
+
         <Button
           title="Continue to Select Car"
           onPress={handleContinue}
-          disabled={!isFormValid}
+          disabled={false}
           style={styles.continueButton}
         />
       </ScrollView>
@@ -508,5 +493,15 @@ const styles = StyleSheet.create({
   },
   continueButton: {
     marginTop: 8,
+  },
+  debugContainer: {
+    padding: 12,
+    marginBottom: 16,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  debugText: {
+    fontSize: 12,
+    textAlign: 'center',
   },
 });

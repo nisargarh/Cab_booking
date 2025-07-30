@@ -23,9 +23,24 @@ export const rides: Ride[] = [
     date: '2025-07-10',
     time: '14:30',
     passengers: 2,
+    passengerInfo: [
+      {
+        name: 'Alice Johnson',
+        age: 32,
+        phone: '555-0123',
+      },
+      {
+        name: 'Bob Wilson',
+        age: 28,
+        phone: '555-0124',
+      }
+    ],
     status: 'pending',
     fare: {
       base: 35,
+      distance: 15.2,
+      time: 25,
+      surge: 0,
       tax: 3.5,
       total: 38.5,
       advancePayment: 9.63,
@@ -58,9 +73,19 @@ export const rides: Ride[] = [
     date: '2025-07-09',
     time: '08:15',
     passengers: 1,
+    passengerInfo: [
+      {
+        name: 'Charlie Brown',
+        age: 35,
+        phone: '555-0125',
+      }
+    ],
     status: 'completed',
     fare: {
       base: 45,
+      distance: 18.5,
+      time: 30,
+      surge: 0,
       tax: 4.5,
       total: 49.5,
       advancePayment: 12.38,
@@ -95,9 +120,29 @@ export const rides: Ride[] = [
     date: '2025-07-11',
     time: '10:00',
     passengers: 3,
+    passengerInfo: [
+      {
+        name: 'Diana Prince',
+        age: 29,
+        phone: '555-0126',
+      },
+      {
+        name: 'Edward Smith',
+        age: 31,
+        phone: '555-0127',
+      },
+      {
+        name: 'Fiona Davis',
+        age: 27,
+        phone: '555-0128',
+      }
+    ],
     status: 'pending',
     fare: {
       base: 60,
+      distance: 5.8,
+      time: 120,
+      surge: 0,
       tax: 6,
       total: 66,
       advancePayment: 16.5,

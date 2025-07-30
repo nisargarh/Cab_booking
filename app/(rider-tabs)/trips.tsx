@@ -6,7 +6,7 @@ import { Ride } from '@/types';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ChevronRight, Clock, MapPin, Star } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function TripsScreen() {
   const { theme } = useTheme();
@@ -40,9 +40,19 @@ export default function TripsScreen() {
       date: '2025-07-08',
       time: '14:30',
       passengers: 2,
+      passengerInfo: [
+        {
+          name: 'John Doe',
+          age: 30,
+          phone: '555-1234',
+        }
+      ],
       status: 'completed',
       fare: {
         base: 45,
+        distance: 18.5,
+        time: 30,
+        surge: 0,
         tax: 4.5,
         total: 49.5,
         advancePayment: 12.38,
@@ -75,11 +85,21 @@ export default function TripsScreen() {
         longitude: -122.4167,
       },
       date: '2025-07-07',
-      time: '18:15',
+      time: '16:45',
       passengers: 1,
+      passengerInfo: [
+        {
+          name: 'Jane Smith',
+          age: 28,
+          phone: '555-5678',
+        }
+      ],
       status: 'completed',
       fare: {
         base: 25,
+        distance: 8.2,
+        time: 15,
+        surge: 0,
         tax: 2.5,
         total: 27.5,
         advancePayment: 6.88,
@@ -94,7 +114,7 @@ export default function TripsScreen() {
   ];
   
   const renderTripCard = (ride: Ride) => (
-    <TouchableOpacity key={ride.id} style={styles.tripCardContainer}>
+    <TouchableOpacity style={styles.tripCardContainer}>
       <GlassCard style={styles.tripCard}>
         <View style={styles.tripHeader}>
           <View style={styles.tripTypeContainer}>
@@ -223,33 +243,29 @@ export default function TripsScreen() {
         </View>
       </View>
       
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {activeTab === 'completed' ? (
-          mockRides.filter(ride => ride.status === 'completed').length > 0 ? (
-            mockRides
-              .filter(ride => ride.status === 'completed')
-              .map(renderTripCard)
-          ) : (
-            <GlassCard style={styles.emptyCard}>
-              <Text style={[styles.emptyTitle, { color: colorScheme.text }]}>
-                No completed trips
-              </Text>
-              <Text style={[styles.emptyText, { color: colorScheme.subtext }]}>
-                Your completed trips will appear here
-              </Text>
-            </GlassCard>
-          )
-        ) : (
+      <FlatList
+        data={activeTab === 'completed' 
+          ? mockRides.filter(ride => ride.status === 'completed')
+          : mockRides.filter(ride => ride.status !== 'completed')
+        }
+        renderItem={({ item }) => renderTripCard(item)}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        ListEmptyComponent={() => (
           <GlassCard style={styles.emptyCard}>
             <Text style={[styles.emptyTitle, { color: colorScheme.text }]}>
-              No upcoming trips
+              {activeTab === 'completed' ? 'No completed trips' : 'No upcoming trips'}
             </Text>
             <Text style={[styles.emptyText, { color: colorScheme.subtext }]}>
-              Book a ride to see your upcoming trips
+              {activeTab === 'completed' 
+                ? 'Your completed trips will appear here'
+                : 'Book a ride to see your upcoming trips'
+              }
             </Text>
           </GlassCard>
         )}
-      </ScrollView>
+      />
     </LinearGradient>
   );
 }
@@ -287,6 +303,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 20,
     paddingTop: 10,
+    flexGrow: 1,
   },
   tripCardContainer: {
     marginBottom: 16,

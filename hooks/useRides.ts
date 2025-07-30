@@ -1,4 +1,4 @@
-import { BookingType, Location, PassengerInfo, Ride, TripType, Vehicle } from '@/types';
+import { BookingType, Location, Ride, TripType, Vehicle } from '@/types';
 import { create } from 'zustand';
 
 type RideState = {
@@ -10,7 +10,7 @@ type RideState = {
   setDropoff: (location: Location) => void;
   setDateTime: (date: string, time: string) => void;
   setPassengers: (count: number) => void;
-  setPassengerInfo: (info: PassengerInfo[]) => void;
+
   setVehicle: (vehicle: Vehicle) => void;
   setPaymentMethod: (method: 'cash' | 'online' | 'card') => void;
   completeRide: (rating?: number, review?: string) => void;
@@ -51,10 +51,7 @@ export const useRideStore = create<RideState>((set) => ({
       currentRide: { ...state.currentRide, passengers } 
     })),
   
-  setPassengerInfo: (passengerInfo) => 
-    set((state) => ({ 
-      currentRide: { ...state.currentRide, passengerInfo } 
-    })),
+
   
   setVehicle: (vehicle) => 
     set((state) => {
@@ -103,6 +100,7 @@ export const useRideStore = create<RideState>((set) => ({
         riderId: 'user1',
         status: 'completed' as const,
         paymentStatus: 'completed' as const,
+        passengerInfo: [], // Empty array since we removed passenger info collection
         rating,
         review,
       } as Ride;

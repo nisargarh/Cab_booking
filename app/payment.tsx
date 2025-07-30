@@ -16,7 +16,7 @@ type PaymentMethod = 'card' | 'paypal' | 'apple_pay' | 'google_pay' | 'cash';
 export default function PaymentScreen() {
   const router = useRouter();
   const { theme } = useTheme();
-  const { currentRide } = useRides();
+  const { currentRide, setPaymentMethod } = useRides();
   const colorScheme = theme === 'dark' ? colors.dark : colors.light;
   
   const [selectedPayment, setSelectedPayment] = useState<PaymentMethod>('card');
@@ -50,6 +50,9 @@ export default function PaymentScreen() {
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
+    
+    // Set the payment method
+    setPaymentMethod(selectedPayment === 'cash' ? 'cash' : selectedPayment === 'card' ? 'card' : 'online');
     
     // Navigate to OTP screen for rider
     router.push('/rider-otp');

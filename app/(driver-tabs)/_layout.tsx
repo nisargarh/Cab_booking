@@ -28,7 +28,7 @@ export default function DriverTabLayout() {
         name="index"
         options={{
           title: 'Dashboard',
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
             <Home size={size} color={color} />
           ),
         }}
@@ -38,7 +38,7 @@ export default function DriverTabLayout() {
         name="trips"
         options={{
           title: 'My Trips',
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
             <Clock size={size} color={color} />
           ),
         }}
@@ -48,7 +48,7 @@ export default function DriverTabLayout() {
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
             <User size={size} color={color} />
           ),
         }}
@@ -58,7 +58,7 @@ export default function DriverTabLayout() {
         name="settings"
         options={{
           title: 'Settings',
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
             <Settings size={size} color={color} />
           ),
         }}

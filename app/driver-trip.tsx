@@ -36,7 +36,7 @@ export default function DriverTripScreen() {
       { status: 'in_progress' as const, delay: 15000 },
     ];
     
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
     
     statusTimeline.forEach((item, index) => {
       timeoutId = setTimeout(() => {

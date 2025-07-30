@@ -3,7 +3,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { Location } from '@/types';
 import { MapPin, Search } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { GlassCard } from './GlassCard';
 
 interface LocationInputProps {
@@ -53,6 +53,12 @@ export const LocationInput: React.FC<LocationInputProps> = ({
   const handleTextChange = (text: string) => {
     setSearchText(text);
     setShowSuggestions(text.length > 0);
+    
+    // Auto-select first suggestion if text matches exactly
+    const exactMatch = suggestions.find(s => s.name.toLowerCase() === text.toLowerCase());
+    if (exactMatch && !value) {
+      onSelect(exactMatch);
+    }
   };
   
   const handleLocationSelect = (location: Location) => {
@@ -63,6 +69,7 @@ export const LocationInput: React.FC<LocationInputProps> = ({
   
   const renderSuggestion = ({ item }: { item: Location }) => (
     <TouchableOpacity
+      key={item.id}
       style={styles.suggestionItem}
       onPress={() => handleLocationSelect(item)}
     >
@@ -96,14 +103,11 @@ export const LocationInput: React.FC<LocationInputProps> = ({
         />
       </View>
       
-      {showSuggestions && (
+      {(showSuggestions || !value) && (
         <GlassCard style={styles.suggestionsContainer}>
-          <FlatList
-            data={suggestions}
-            renderItem={renderSuggestion}
-            keyExtractor={(item) => item.id}
-            style={styles.suggestionsList}
-          />
+          <ScrollView style={styles.suggestionsList} nestedScrollEnabled={true}>
+            {suggestions.map((item) => renderSuggestion({ item }))}
+          </ScrollView>
         </GlassCard>
       )}
     </View>

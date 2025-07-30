@@ -39,7 +39,7 @@ export default function CarSelectionScreen() {
     router.push('/payment');
   };
   
-  if (!currentRide || !currentRide.pickup || !currentRide.dropoff) {
+  if (!currentRide) {
     return (
       <View style={[styles.container, { backgroundColor: colorScheme.background }]}>
         <Text style={[styles.errorText, { color: colorScheme.text }]}>
@@ -78,14 +78,14 @@ export default function CarSelectionScreen() {
           <View style={styles.summaryItem}>
             <MapPin size={16} color={colorScheme.success} />
             <Text style={[styles.summaryText, { color: colorScheme.text }]}>
-              {currentRide.pickup.name}
+              {currentRide.pickup?.name || 'Pickup Location'}
             </Text>
           </View>
           
           <View style={styles.summaryItem}>
             <MapPin size={16} color={colorScheme.error} />
             <Text style={[styles.summaryText, { color: colorScheme.text }]}>
-              {currentRide.dropoff.name}
+              {currentRide.dropoff?.name || 'Destination'}
             </Text>
           </View>
           
@@ -93,21 +93,25 @@ export default function CarSelectionScreen() {
             <View style={styles.summaryItem}>
               <Calendar size={16} color={colorScheme.primary} />
               <Text style={[styles.summaryText, { color: colorScheme.text }]}>
-                {currentRide.date}
+                {currentRide.date ? new Date(currentRide.date).toLocaleDateString('en-US', {
+                  weekday: 'short',
+                  month: 'short',
+                  day: 'numeric'
+                }) : 'Today'}
               </Text>
             </View>
             
             <View style={styles.summaryItem}>
               <Clock size={16} color={colorScheme.primary} />
               <Text style={[styles.summaryText, { color: colorScheme.text }]}>
-                {currentRide.time}
+                {currentRide.time || 'Now'}
               </Text>
             </View>
             
             <View style={styles.summaryItem}>
               <Users size={16} color={colorScheme.primary} />
               <Text style={[styles.summaryText, { color: colorScheme.text }]}>
-                {currentRide.passengers} {currentRide.passengers === 1 ? 'person' : 'people'}
+                {currentRide.passengers || 1} {(currentRide.passengers || 1) === 1 ? 'person' : 'people'}
               </Text>
             </View>
           </View>

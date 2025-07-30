@@ -45,7 +45,7 @@ export default function TrackingScreen() {
       { status: 'in_progress', delay: 15000 },
     ];
     
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
     
     statusTimeline.forEach((item, index) => {
       timeoutId = setTimeout(() => {
