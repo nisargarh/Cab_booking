@@ -3,6 +3,7 @@ import { create } from 'zustand';
 
 type RideState = {
   currentRide: Partial<Ride> | null;
+  rides: Ride[];
   pastRides: Ride[];
   setBookingType: (type: BookingType) => void;
   setTripType: (type: TripType) => void;
@@ -10,15 +11,17 @@ type RideState = {
   setDropoff: (location: Location) => void;
   setDateTime: (date: string, time: string) => void;
   setPassengers: (count: number) => void;
-
   setVehicle: (vehicle: Vehicle) => void;
   setPaymentMethod: (method: 'card' | 'upi') => void;
+  confirmBooking: (rating?: number, review?: string) => void;
   completeRide: (rating?: number, review?: string) => void;
+  updateRideStatus: (rideId: string, status: string) => void;
   resetRide: () => void;
 };
 
 export const useRideStore = create<RideState>((set) => ({
   currentRide: null,
+  rides: [],
   pastRides: [],
   
   setBookingType: (bookingType) => 
@@ -90,26 +93,57 @@ export const useRideStore = create<RideState>((set) => ({
       currentRide: { ...state.currentRide, paymentMethod } 
     })),
   
+  confirmBooking: (rating, review) => 
+    set((state) => {
+      if (!state.currentRide) return state;
+      
+      const confirmedRide = {
+        ...state.currentRide,
+        id: Date.now().toString(),
+        riderId: 'user1',
+        status: 'active' as const,
+        paymentStatus: 'partial' as const,
+        passengerInfo: [],
+        rating,
+        review,
+      } as Ride;
+      
+      return {
+        rides: [...state.rides, confirmedRide],
+        currentRide: confirmedRide,
+      };
+    }),
+
   completeRide: (rating, review) => 
     set((state) => {
       if (!state.currentRide) return state;
       
       const completedRide = {
         ...state.currentRide,
-        id: Date.now().toString(),
+        id: state.currentRide.id || Date.now().toString(),
         riderId: 'user1',
         status: 'completed' as const,
         paymentStatus: 'completed' as const,
-        passengerInfo: [], // Empty array since we removed passenger info collection
+        passengerInfo: [],
         rating,
         review,
       } as Ride;
       
       return {
+        rides: state.rides.map(ride => 
+          ride.id === completedRide.id ? completedRide : ride
+        ),
         pastRides: [...state.pastRides, completedRide],
         currentRide: null,
       };
     }),
+
+  updateRideStatus: (rideId, status) =>
+    set((state) => ({
+      rides: state.rides.map(ride =>
+        ride.id === rideId ? { ...ride, status } : ride
+      ),
+    })),
   
   resetRide: () => set({ currentRide: null }),
 }));

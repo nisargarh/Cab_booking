@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/Button';
-import { CustomDateTimePicker } from '@/components/ui/DateTimePicker';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { LocationInput } from '@/components/ui/LocationInput';
+import { SchedulePicker } from '@/components/ui/SchedulePicker';
 import colors from '@/constants/colors';
 import { useRides } from '@/hooks/useRides';
 import { useTheme } from '@/hooks/useTheme';
@@ -9,9 +9,14 @@ import { Location, TripType } from '@/types';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Stack, useRouter } from 'expo-router';
-import { Users } from 'lucide-react-native';
+import { Luggage, Minus, Plus, Users, X } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Modal, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+interface PassengerInfo {
+  passengers: number;
+  suitcases: number;
+}
 
 export default function BookingDetailsScreen() {
   const router = useRouter();
@@ -28,10 +33,13 @@ export default function BookingDetailsScreen() {
   
   const [pickup, setPickupLocal] = useState<Location | null>(null);
   const [dropoff, setDropoffLocal] = useState<Location | null>(null);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [selectedTime, setSelectedTime] = useState<Date | null>(null);
-  const [passengers, setPassengersLocal] = useState(1);
+  const [selectedDateTime, setSelectedDateTime] = useState<Date | null>(null);
+  const [passengerInfo, setPassengerInfo] = useState<PassengerInfo>({
+    passengers: 1,
+    suitcases: 2,
+  });
   const [selectedTripType, setSelectedTripType] = useState<TripType>('one-way');
+  const [showPassengerModal, setShowPassengerModal] = useState(false);
   
   const handlePickupSelect = (location: Location) => {
     setPickupLocal(location);
@@ -41,12 +49,8 @@ export default function BookingDetailsScreen() {
     setDropoffLocal(location);
   };
   
-  const handleDateSelect = (date: Date) => {
-    setSelectedDate(date);
-  };
-  
-  const handleTimeSelect = (time: Date) => {
-    setSelectedTime(time);
+  const handleDateTimeSelect = (dateTime: Date) => {
+    setSelectedDateTime(dateTime);
   };
   
   const handleTripTypeSelect = (type: TripType) => {
@@ -56,22 +60,11 @@ export default function BookingDetailsScreen() {
     setSelectedTripType(type);
   };
   
-  const handlePassengerIncrease = () => {
-    if (passengers < 10) {
-      if (Platform.OS !== 'web') {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      }
-      setPassengersLocal(passengers + 1);
-    }
-  };
-  
-  const handlePassengerDecrease = () => {
-    if (passengers > 1) {
-      if (Platform.OS !== 'web') {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      }
-      setPassengersLocal(passengers - 1);
-    }
+  const updatePassengerInfo = (field: keyof PassengerInfo, value: number) => {
+    setPassengerInfo(prev => ({
+      ...prev,
+      [field]: Math.max(1, value),
+    }));
   };
   
 
@@ -94,16 +87,15 @@ export default function BookingDetailsScreen() {
       longitude: -122.4094,
     };
     
-    const finalDate = selectedDate || new Date();
-    const finalTime = selectedTime || new Date();
+    const finalDateTime = selectedDateTime || new Date();
     
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
     
     // Format date and time for storage
-    const dateString = finalDate.toISOString().split('T')[0];
-    const timeString = finalTime.toLocaleTimeString('en-US', { 
+    const dateString = finalDateTime.toISOString().split('T')[0];
+    const timeString = finalDateTime.toLocaleTimeString('en-US', { 
       hour12: false, 
       hour: '2-digit', 
       minute: '2-digit' 
@@ -112,13 +104,13 @@ export default function BookingDetailsScreen() {
     setPickup(finalPickup);
     setDropoff(finalDropoff);
     setDateTime(dateString, timeString);
-    setPassengers(passengers);
+    setPassengers(passengerInfo.passengers);
     setTripType(selectedTripType);
     
     router.push('/cars');
   };
   
-  const isFormValid = pickup && dropoff && selectedDate && selectedTime;
+  const isFormValid = pickup && dropoff && selectedDateTime;
   
   const getBookingTypeTitle = () => {
     switch (currentRide?.bookingType) {
@@ -259,72 +251,32 @@ export default function BookingDetailsScreen() {
             </TouchableOpacity>
           </View>
           
-          <View style={styles.dateTimeContainer}>
-            <CustomDateTimePicker
-              date={selectedDate || undefined}
-              onDateChange={handleDateSelect}
-              mode="date"
-              placeholder="Select Date"
+          {/* Schedule Section */}
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: colorScheme.text }]}>
+              Schedule
+            </Text>
+            <SchedulePicker
+              date={selectedDateTime || undefined}
+              onDateTimeChange={handleDateTimeSelect}
+              placeholder="Select Date & Time"
               minimumDate={new Date()}
-            />
-            
-            <CustomDateTimePicker
-              date={selectedTime || undefined}
-              onDateChange={handleTimeSelect}
-              mode="time"
-              placeholder="Select Time"
             />
           </View>
           
-          <View style={styles.passengersContainer}>
-            <Text style={[styles.passengersLabel, { color: colorScheme.text }]}>
-              Number of Passengers
-            </Text>
-            
-            <View style={styles.passengersControls}>
-              <TouchableOpacity
-                style={[
-                  styles.passengerButton,
-                  { borderColor: colorScheme.border }
-                ]}
-                onPress={handlePassengerDecrease}
-                disabled={passengers <= 1}
-              >
-                <Text style={[
-                  styles.passengerButtonText, 
-                  { 
-                    color: passengers <= 1 ? colorScheme.subtext : colorScheme.text 
-                  }
-                ]}>
-                  -
-                </Text>
-              </TouchableOpacity>
-              
-              <View style={styles.passengerCountContainer}>
-                <Users size={16} color={colorScheme.primary} />
-                <Text style={[styles.passengerCount, { color: colorScheme.text }]}>
-                  {passengers}
-                </Text>
-              </View>
-              
-              <TouchableOpacity
-                style={[
-                  styles.passengerButton,
-                  { borderColor: colorScheme.border }
-                ]}
-                onPress={handlePassengerIncrease}
-                disabled={passengers >= 10}
-              >
-                <Text style={[
-                  styles.passengerButtonText, 
-                  { 
-                    color: passengers >= 10 ? colorScheme.subtext : colorScheme.text 
-                  }
-                ]}>
-                  +
-                </Text>
-              </TouchableOpacity>
-            </View>
+          {/* Passenger Info */}
+          <View style={styles.passengerContainer}>
+            <TouchableOpacity
+              style={[
+                styles.passengerInfoButton,
+                { borderColor: colorScheme.border },
+              ]}
+              onPress={() => setShowPassengerModal(true)}
+            >
+              <Text style={[styles.passengerInfoButtonText, { color: colorScheme.text }]}>
+                {passengerInfo.passengers} Passengers
+              </Text>
+            </TouchableOpacity>
           </View>
           
 
@@ -363,21 +315,100 @@ export default function BookingDetailsScreen() {
             </GlassCard>
           )}
         </GlassCard>
-        
-        {/* Debug info */}
-        <View style={styles.debugContainer}>
-          <Text style={[styles.debugText, { color: colorScheme.subtext }]}>
-            Form Status: {pickup ? '✓' : '✗'} Pickup | {dropoff ? '✓' : '✗'} Dropoff | {selectedDate ? '✓' : '✗'} Date | {selectedTime ? '✓' : '✗'} Time
-          </Text>
-        </View>
 
         <Button
           title="Continue to Select Car"
           onPress={handleContinue}
-          disabled={false}
+          disabled={!isFormValid}
           style={styles.continueButton}
         />
       </ScrollView>
+
+      {/* Passenger Modal */}
+      <Modal
+        visible={showPassengerModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowPassengerModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.passengerModalContent, { backgroundColor: colorScheme.background }]}>
+            <View style={styles.modalHeader}>
+              <Text style={[styles.modalTitle, { color: colorScheme.text }]}>
+                Passenger Info
+              </Text>
+              <TouchableOpacity
+                onPress={() => setShowPassengerModal(false)}
+                style={styles.closeButton}
+              >
+                <X size={24} color={colorScheme.text} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.passengerRow}>
+              <View style={styles.passengerIconContainer}>
+                <Users size={20} color={colorScheme.text} />
+                <Text style={[styles.passengerLabel, { color: colorScheme.text }]}>
+                  Passengers
+                </Text>
+              </View>
+              <View style={styles.counterContainer}>
+                <TouchableOpacity
+                  style={[styles.counterButton, { borderColor: colorScheme.border }]}
+                  onPress={() => updatePassengerInfo('passengers', passengerInfo.passengers - 1)}
+                >
+                  <Minus size={16} color={colorScheme.text} />
+                </TouchableOpacity>
+                <Text style={[styles.counterText, { color: colorScheme.text }]}>
+                  {passengerInfo.passengers}
+                </Text>
+                <TouchableOpacity
+                  style={[styles.counterButton, { borderColor: colorScheme.border }]}
+                  onPress={() => updatePassengerInfo('passengers', passengerInfo.passengers + 1)}
+                >
+                  <Plus size={16} color={colorScheme.text} />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <View style={styles.passengerRow}>
+              <View style={styles.passengerIconContainer}>
+                <Luggage size={20} color={colorScheme.text} />
+                <Text style={[styles.passengerLabel, { color: colorScheme.text }]}>
+                  Suitcases
+                </Text>
+              </View>
+              <View style={styles.counterContainer}>
+                <TouchableOpacity
+                  style={[styles.counterButton, { borderColor: colorScheme.border }]}
+                  onPress={() => updatePassengerInfo('suitcases', passengerInfo.suitcases - 1)}
+                >
+                  <Minus size={16} color={colorScheme.text} />
+                </TouchableOpacity>
+                <Text style={[styles.counterText, { color: colorScheme.text }]}>
+                  {passengerInfo.suitcases}
+                </Text>
+                <TouchableOpacity
+                  style={[styles.counterButton, { borderColor: colorScheme.border }]}
+                  onPress={() => updatePassengerInfo('suitcases', passengerInfo.suitcases + 1)}
+                >
+                  <Plus size={16} color={colorScheme.text} />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <Text style={[styles.passengerNote, { color: colorScheme.subtext }]}>
+              Our vehicles accommodate different group sizes. Sharing this info helps us send the right car for your trip.
+            </Text>
+
+            <Button
+              title="Submit"
+              onPress={() => setShowPassengerModal(false)}
+              style={styles.confirmButton}
+            />
+          </View>
+        </View>
+      </Modal>
     </LinearGradient>
   );
 }
@@ -402,8 +433,11 @@ const styles = StyleSheet.create({
   locationContainer: {
     marginBottom: 24,
   },
+  section: {
+    marginBottom: 24,
+  },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600',
     marginBottom: 12,
   },
@@ -425,58 +459,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
   },
-  dateTimeContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  passengerContainer: {
+    alignItems: 'center',
     marginBottom: 24,
   },
-  dateTimeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '48%',
-    height: 50,
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-  },
-  dateTimeText: {
-    marginLeft: 8,
-    fontSize: 16,
-  },
-  passengersContainer: {
-    marginBottom: 24,
-  },
-  passengersLabel: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 12,
-  },
-  passengersControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  passengerButton: {
-    width: 40,
+  passengerInfoButton: {
     height: 40,
-    borderWidth: 1,
+    paddingHorizontal: 20,
     borderRadius: 20,
+    borderWidth: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  passengerButtonText: {
-    fontSize: 20,
-    fontWeight: '600',
-  },
-  passengerCountContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  passengerCount: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginLeft: 8,
+  passengerInfoButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
   },
   infoCard: {
     padding: 16,
@@ -494,14 +491,76 @@ const styles = StyleSheet.create({
   continueButton: {
     marginTop: 8,
   },
-  debugContainer: {
-    padding: 12,
-    marginBottom: 16,
-    borderRadius: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
   },
-  debugText: {
-    fontSize: 12,
+  passengerModalContent: {
+    width: '100%',
+    maxWidth: 400,
+    borderRadius: 16,
+    padding: 24,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+  },
+  closeButton: {
+    padding: 4,
+  },
+  passengerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
+    paddingHorizontal: 4,
+  },
+  passengerIconContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  passengerLabel: {
+    fontSize: 16,
+    fontWeight: '500',
+    marginLeft: 12,
+  },
+  counterContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  counterButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 6,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  counterText: {
+    fontSize: 18,
+    fontWeight: '600',
+    minWidth: 20,
     textAlign: 'center',
+  },
+  passengerNote: {
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 24,
+    textAlign: 'left',
+  },
+  confirmButton: {
+    marginTop: 8,
   },
 });

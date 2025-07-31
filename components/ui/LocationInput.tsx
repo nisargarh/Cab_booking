@@ -103,7 +103,7 @@ export const LocationInput: React.FC<LocationInputProps> = ({
         />
       </View>
       
-      {(showSuggestions || !value) && (
+      {showSuggestions && (
         <GlassCard style={styles.suggestionsContainer}>
           <ScrollView style={styles.suggestionsList} nestedScrollEnabled={true}>
             {suggestions.map((item) => renderSuggestion({ item }))}

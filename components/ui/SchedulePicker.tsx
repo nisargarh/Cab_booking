@@ -42,6 +42,14 @@ export const SchedulePicker: React.FC<SchedulePickerProps> = ({
     });
   };
 
+  const formatDateOnly = (date: Date) => {
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
   const handleConfirm = () => {
     // Combine selected date and time
     const combinedDateTime = new Date(selectedDate);
@@ -160,7 +168,7 @@ export const SchedulePicker: React.FC<SchedulePickerProps> = ({
           {/* Header */}
           <View style={styles.modalHeader}>
             <Text style={[styles.modalTitle, { color: colorScheme.text }]}>
-              Schedule Shoffr
+              Schedule
             </Text>
             <TouchableOpacity
               onPress={() => setShowPicker(false)}
@@ -310,7 +318,7 @@ export const SchedulePicker: React.FC<SchedulePickerProps> = ({
                       <Text style={[styles.arrowText, { color: colorScheme.primary }]}>▲</Text>
                     </TouchableOpacity>
                     <View style={[styles.timeDisplay, { backgroundColor: colorScheme.primary }]}>
-                      <Text style={styles.timeDisplayText}>
+                      <Text style={[styles.timeDisplayText, { color: '#fff' }]}>
                         {(selectedTime.getHours() % 12 || 12).toString().padStart(2, '0')}
                       </Text>
                     </View>
@@ -369,7 +377,7 @@ export const SchedulePicker: React.FC<SchedulePickerProps> = ({
 
             {/* Confirm Button */}
             <Button
-              title="Select The Date"
+              title={formatDateOnly(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), selectedTime.getHours(), selectedTime.getMinutes()))}
               onPress={handleConfirm}
               style={styles.confirmButton}
             />
@@ -504,14 +512,15 @@ const styles = StyleSheet.create({
   calendarGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    marginTop: 8,
   },
   calendarDay: {
     width: '14.28%',
-    aspectRatio: 1,
+    height: 40,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 8,
-    margin: 1,
+    marginVertical: 2,
   },
   calendarDayText: {
     fontSize: 14,

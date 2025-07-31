@@ -7,17 +7,29 @@ import { useTheme } from '@/hooks/useTheme';
 import { Ride } from '@/types';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
 import { ChevronRight, Clock, MapPin, Star } from 'lucide-react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FlatList, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function TripsScreen() {
   const { theme } = useTheme();
-  const { pastRides } = useRides();
+  const { pastRides, rides: allRides } = useRides();
+  const router = useRouter();
   const colorScheme = theme === 'dark' ? colors.dark : colors.light;
   
-  const [activeTab, setActiveTab] = useState<'upcoming' | 'completed'>('completed');
+  const [activeTab, setActiveTab] = useState<'upcoming' | 'completed'>('upcoming');
   const [drawerVisible, setDrawerVisible] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    // Update current time every minute to check for status changes
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleMenuPress = () => {
     if (Platform.OS !== 'web') {
@@ -26,8 +38,98 @@ export default function TripsScreen() {
     setDrawerVisible(true);
   };
   
-  // Mock data for demonstration
-  const mockRides: Ride[] = [
+  // Mock upcoming trips
+  const upcomingTrips: Ride[] = [
+    {
+      id: 'upcoming1',
+      riderId: 'rider1',
+      bookingType: 'airport',
+      tripType: 'one-way',
+      pickup: {
+        id: '1',
+        name: 'Home',
+        address: '123 Main St, Bangalore',
+        latitude: 12.9716,
+        longitude: 77.5946,
+      },
+      dropoff: {
+        id: '2',
+        name: 'Kempegowda International Airport',
+        address: 'Terminal 1, Bengaluru Airport',
+        latitude: 13.1986,
+        longitude: 77.7066,
+      },
+      date: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString().split('T')[0], // 2 hours from now
+      time: new Date(Date.now() + 2 * 60 * 60 * 1000).toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
+      passengers: 2,
+      status: 'active',
+      vehicle: {
+        id: 'v1',
+        brand: 'Toyota',
+        model: 'Innova Crysta',
+        type: 'SUV',
+        seats: 7,
+        features: ['AC', 'GPS', 'Music System'],
+        pricePerKm: 12,
+        image: 'https://example.com/innova.jpg',
+      },
+      fare: {
+        base: 300,
+        distance: 35,
+        time: 45,
+        surge: 50,
+        tax: 35,
+        total: 420,
+        advancePayment: 105,
+        remainingPayment: 315,
+      },
+      paymentMethod: 'card',
+      paymentStatus: 'partial',
+      distance: 35,
+      duration: 45,
+    },
+    {
+      id: 'upcoming2',
+      riderId: 'rider1',
+      bookingType: 'hourly',
+      tripType: 'one-way',
+      pickup: {
+        id: '3',
+        name: 'Office',
+        address: 'IT Park, Whitefield',
+        latitude: 12.9698,
+        longitude: 77.7500,
+      },
+      dropoff: {
+        id: '4',
+        name: 'Multiple Stops',
+        address: 'Various locations',
+        latitude: 12.9716,
+        longitude: 77.5946,
+      },
+      date: new Date(Date.now() + 8 * 60 * 1000).toISOString().split('T')[0], // 8 minutes from now
+      time: new Date(Date.now() + 8 * 60 * 1000).toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
+      passengers: 1,
+      status: 'active',
+      fare: {
+        base: 250,
+        distance: 0,
+        time: 180, // 3 hours
+        surge: 0,
+        tax: 25,
+        total: 275,
+        advancePayment: 68.75,
+        remainingPayment: 206.25,
+      },
+      paymentMethod: 'upi',
+      paymentStatus: 'partial',
+      distance: 0,
+      duration: 180,
+    },
+  ];
+
+  // Mock completed trips data
+  const completedTrips: Ride[] = [
     {
       id: '1',
       riderId: 'rider1',
@@ -123,9 +225,44 @@ export default function TripsScreen() {
       rating: 4.5,
     },
   ];
+
+  // Helper function to get trip status based on time
+  const getTripStatus = (trip: Ride) => {
+    if (!trip.date || !trip.time) return 'active';
+    
+    const tripDateTime = new Date(`${trip.date} ${trip.time}`);
+    const timeDiff = tripDateTime.getTime() - currentTime.getTime();
+    const minutesDiff = Math.floor(timeDiff / (1000 * 60));
+    
+    if (minutesDiff <= 15 && minutesDiff > 0) {
+      return 'in progress';
+    } else if (minutesDiff <= 0) {
+      return 'in progress';
+    }
+    return 'active';
+  };
+
+  const handleTripPress = (trip: Ride) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    
+    const status = getTripStatus(trip);
+    if (status === 'in progress' && activeTab === 'upcoming') {
+      router.push(`/live-tracking?id=${trip.id}`);
+    } else {
+      router.push(`/trip-details?id=${trip.id}`);
+    }
+  };
   
-  const renderTripCard = (ride: Ride) => (
-    <TouchableOpacity style={styles.tripCardContainer}>
+  const renderTripCard = (ride: Ride) => {
+    const tripStatus = activeTab === 'upcoming' ? getTripStatus(ride) : 'completed';
+    
+    return (
+      <TouchableOpacity 
+        style={styles.tripCardContainer}
+        onPress={() => handleTripPress(ride)}
+      >
       <GlassCard style={styles.tripCard}>
         <View style={styles.tripHeader}>
           <View style={styles.tripTypeContainer}>
@@ -135,13 +272,16 @@ export default function TripsScreen() {
             <View style={[
               styles.statusBadge, 
               { 
-                backgroundColor: ride.status === 'completed' 
-                  ? colorScheme.success 
-                  : colorScheme.warning 
+                backgroundColor: tripStatus === 'completed' 
+                  ? '#4CAF50' 
+                  : tripStatus === 'in progress'
+                  ? '#2196F3'
+                  : '#FF9800'
               }
             ]}>
               <Text style={styles.statusText}>
-                {ride.status === 'completed' ? 'Completed' : 'Upcoming'}
+                {tripStatus === 'completed' ? 'Completed' : 
+                 tripStatus === 'in progress' ? 'In Progress' : 'Active'}
               </Text>
             </View>
           </View>
@@ -259,8 +399,8 @@ export default function TripsScreen() {
       
       <FlatList
         data={activeTab === 'completed' 
-          ? mockRides.filter(ride => ride.status === 'completed')
-          : mockRides.filter(ride => ride.status !== 'completed')
+          ? [...completedTrips, ...pastRides] 
+          : [...upcomingTrips, ...allRides.filter(ride => ride.status !== 'completed')]
         }
         renderItem={({ item }) => renderTripCard(item)}
         keyExtractor={(item) => item.id}

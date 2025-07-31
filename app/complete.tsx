@@ -97,7 +97,7 @@ export default function CompleteScreen() {
               Total Fare
             </Text>
             <Text style={[styles.fareValue, { color: colorScheme.text }]}>
-              ${currentRide.fare?.total.toFixed(2)}
+              ₹{currentRide.fare?.total.toFixed(2)}
             </Text>
           </View>
           
@@ -106,7 +106,7 @@ export default function CompleteScreen() {
               Advance Paid
             </Text>
             <Text style={[styles.fareValue, { color: colorScheme.text }]}>
-              ${currentRide.fare?.advancePayment.toFixed(2)}
+              ₹{currentRide.fare?.advancePayment.toFixed(2)}
             </Text>
           </View>
           
@@ -117,7 +117,7 @@ export default function CompleteScreen() {
               Remaining Payment
             </Text>
             <Text style={[styles.remainingValue, { color: colorScheme.text }]}>
-              ${currentRide.fare?.remainingPayment.toFixed(2)}
+              ₹{currentRide.fare?.remainingPayment.toFixed(2)}
             </Text>
           </View>
           

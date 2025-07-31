@@ -69,7 +69,7 @@ export const RequestCard: React.FC<RequestCardProps> = ({
         <View style={styles.detailItem}>
           <DollarSign size={16} color={colorScheme.subtext} />
           <Text style={[styles.detailText, { color: colorScheme.subtext }]}>
-            ${ride.fare.total.toFixed(2)}
+            ₹{ride.fare.total.toFixed(2)}
           </Text>
         </View>
       </View>

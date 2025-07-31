@@ -1,3 +1,4 @@
+import { BookingSuccess } from '@/components/ui/BookingSuccess';
 import { Button } from '@/components/ui/Button';
 import { GlassCard } from '@/components/ui/GlassCard';
 import colors from '@/constants/colors';
@@ -16,7 +17,7 @@ type UPIMethod = 'gpay' | 'phonepe' | 'paypal' | 'paytm';
 export default function PaymentScreen() {
   const router = useRouter();
   const { theme } = useTheme();
-  const { currentRide, setPaymentMethod, completeRide } = useRides();
+  const { currentRide, setPaymentMethod, confirmBooking } = useRides();
   const colorScheme = theme === 'dark' ? colors.dark : colors.light;
   
   const [selectedPayment, setSelectedPayment] = useState<PaymentMethod>('card');
@@ -25,6 +26,7 @@ export default function PaymentScreen() {
   const [showUPIOptions, setShowUPIOptions] = useState(false);
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [paymentCompleted, setPaymentCompleted] = useState(false);
+  const [showBookingSuccess, setShowBookingSuccess] = useState(false);
   
   // Card form state
   const [cardNumber, setCardNumber] = useState('');
@@ -126,9 +128,9 @@ export default function PaymentScreen() {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
       
-      // Set the payment method and complete the ride
+      // Set the payment method and show booking success
       setPaymentMethod(selectedPayment);
-      completeRide(5, 'Payment completed successfully');
+      setShowBookingSuccess(true);
     }, 2000);
   };
   
@@ -203,7 +205,7 @@ export default function PaymentScreen() {
               Total Fare
             </Text>
             <Text style={[styles.totalValue, { color: colorScheme.text }]}>
-              ${currentRide.fare.total.toFixed(2)}
+              ₹{currentRide.fare.total.toFixed(2)}
             </Text>
           </View>
         </GlassCard>
@@ -487,7 +489,7 @@ export default function PaymentScreen() {
             </GlassCard>
             
             <Button
-              title={paymentProcessing ? 'Processing Payment...' : `Pay $${advancePayment.toFixed(2)} & Confirm Booking`}
+              title={paymentProcessing ? 'Processing Payment...' : `Pay ₹${advancePayment.toFixed(2)} & Confirm Booking`}
               onPress={processPayment}
               disabled={paymentProcessing || (selectedPayment === 'card' && !showCardForm) || (selectedPayment === 'upi' && !showUPIOptions)}
               style={styles.confirmButton}
@@ -495,6 +497,16 @@ export default function PaymentScreen() {
           </>
         )}
       </ScrollView>
+
+      <BookingSuccess 
+        visible={showBookingSuccess}
+        onClose={() => setShowBookingSuccess(false)}
+        ride={currentRide}
+        onViewDetails={() => {
+          confirmBooking(5, 'Booking confirmed successfully');
+          setShowBookingSuccess(false);
+        }}
+      />
     </LinearGradient>
   );
 }

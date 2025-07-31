@@ -148,25 +148,14 @@ export default function AirportTransferScreen() {
     });
   };
 
+  const isFormValid = pickup && dropoff && selectedDate;
+  
   const handleSelectCars = () => {
-    // Use defaults if fields are missing
-    const finalPickup = pickup || {
-      id: '1',
-      name: 'Default Pickup',
-      address: 'Default pickup location',
-      latitude: 13.0827,
-      longitude: 80.2707,
-    };
+    if (!isFormValid) return;
     
-    const finalDropoff = dropoff || {
-      id: '2',
-      name: 'Default Airport',
-      address: 'Kempegowda International Airport',
-      latitude: 13.1986,
-      longitude: 77.7066,
-    };
-    
-    const finalDateTime = selectedDate || new Date();
+    const finalPickup = pickup;
+    const finalDropoff = dropoff;
+    const finalDateTime = selectedDate;
     
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -343,11 +332,6 @@ export default function AirportTransferScreen() {
             <Text style={[styles.sectionTitle, { color: colorScheme.text }]}>
               Location
             </Text>
-            <View style={styles.addStopContainer}>
-              <Text style={[styles.addStopText, { color: colorScheme.primary }]}>
-                + Add Stop
-              </Text>
-            </View>
             
             <View style={styles.locationContainer}>
               <LocationInput
@@ -539,6 +523,7 @@ export default function AirportTransferScreen() {
         <Button
           title="Select Cars"
           onPress={handleSelectCars}
+          disabled={!isFormValid}
           style={styles.selectCarsButton}
         />
       </ScrollView>
@@ -588,14 +573,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 12,
   },
-  addStopContainer: {
-    alignItems: 'flex-end',
-    marginBottom: 12,
-  },
-  addStopText: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
+
   locationContainer: {
     gap: 12,
   },

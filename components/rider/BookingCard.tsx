@@ -48,9 +48,13 @@ export const BookingCard: React.FC<BookingCardProps> = ({
     
     setBookingType(type);
     
-    // Navigate to specialized screen for airport transfers
+    // Navigate to specialized screens
     if (type === 'airport') {
       router.push('/airport-transfer');
+    } else if (type === 'outstation') {
+      router.push('/outstation');
+    } else if (type === 'hourly') {
+      router.push('/hourly-rental');
     } else {
       router.push('/booking');
     }

@@ -149,7 +149,7 @@ export default function BillingHistoryScreen() {
               
               <View style={styles.itemAmount}>
                 <Text style={[styles.amount, { color: colorScheme.text }]}>
-                  ${item.amount.toFixed(2)}
+                  ₹{item.amount.toFixed(2)}
                 </Text>
                 <View style={[
                   styles.statusBadge,
