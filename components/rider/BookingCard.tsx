@@ -4,7 +4,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { BookingType } from '@/types';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import { Car, Clock, MapPin, Plane } from 'lucide-react-native';
+import { Car, Clock, MapPin, Plane, Share2 } from 'lucide-react-native';
 import React from 'react';
 import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { GlassCard } from '../ui/GlassCard';
@@ -33,6 +33,8 @@ export const BookingCard: React.FC<BookingCardProps> = ({
         return <Clock size={24} color={colorScheme.primary} />;
       case 'outstation':
         return <MapPin size={24} color={colorScheme.primary} />;
+      case 'shared':
+        return <Share2 size={24} color={colorScheme.primary} />;
       case 'city':
       default:
         return <Car size={24} color={colorScheme.primary} />;
@@ -45,7 +47,13 @@ export const BookingCard: React.FC<BookingCardProps> = ({
     }
     
     setBookingType(type);
-    router.push('/booking');
+    
+    // Navigate to specialized screen for airport transfers
+    if (type === 'airport') {
+      router.push('/airport-transfer');
+    } else {
+      router.push('/booking');
+    }
   };
   
   return (

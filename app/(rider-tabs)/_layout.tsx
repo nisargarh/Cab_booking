@@ -1,7 +1,7 @@
 import colors from '@/constants/colors';
 import { useTheme } from '@/hooks/useTheme';
 import { Tabs } from 'expo-router';
-import { Clock, Home, Settings, User } from 'lucide-react-native';
+import { Clock, Grid3X3, Home, User } from 'lucide-react-native';
 import React from 'react';
 
 export default function RiderTabLayout() {
@@ -27,9 +27,21 @@ export default function RiderTabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Book',
+          title: 'Home',
+          headerShown: false,
           tabBarIcon: ({ color, size }: { color: string; size: number }) => (
             <Home size={size} color={color} />
+          ),
+        }}
+      />
+      
+      <Tabs.Screen
+        name="services"
+        options={{
+          title: 'Services',
+          headerShown: false,
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
+            <Grid3X3 size={size} color={color} />
           ),
         }}
       />
@@ -38,6 +50,7 @@ export default function RiderTabLayout() {
         name="trips"
         options={{
           title: 'My Trips',
+          headerShown: false,
           tabBarIcon: ({ color, size }: { color: string; size: number }) => (
             <Clock size={size} color={color} />
           ),
@@ -48,18 +61,9 @@ export default function RiderTabLayout() {
         name="profile"
         options={{
           title: 'Profile',
+          headerShown: false,
           tabBarIcon: ({ color, size }: { color: string; size: number }) => (
             <User size={size} color={color} />
-          ),
-        }}
-      />
-      
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: 'Settings',
-          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
-            <Settings size={size} color={color} />
           ),
         }}
       />

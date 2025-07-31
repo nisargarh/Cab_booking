@@ -1,4 +1,6 @@
+import { AppHeader } from '@/components/ui/AppHeader';
 import { Button } from '@/components/ui/Button';
+import { DrawerMenu } from '@/components/ui/DrawerMenu';
 import { GlassCard } from '@/components/ui/GlassCard';
 import colors from '@/constants/colors';
 import { useAuth } from '@/hooks/useAuth';
@@ -19,6 +21,14 @@ export default function ProfileScreen() {
   
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [drawerVisible, setDrawerVisible] = useState(false);
+
+  const handleMenuPress = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setDrawerVisible(true);
+  };
   const [editedName, setEditedName] = useState(user?.name || 'John Doe');
   const [editedEmail, setEditedEmail] = useState(user?.email || 'john.doe@example.com');
   const [editedPhone, setEditedPhone] = useState(user?.phone || '+1 234 567 8900');
@@ -147,14 +157,21 @@ export default function ProfileScreen() {
   };
   
   return (
-    <LinearGradient
-      colors={[
-        theme === 'dark' ? '#1a1a1a' : '#f0f0f0',
-        theme === 'dark' ? '#121212' : '#ffffff',
-      ]}
-      style={styles.container}
-    >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+    <>
+      <View style={[styles.container, { backgroundColor: colorScheme.background }]}>
+        <AppHeader 
+          title="Profile" 
+          onMenuPress={handleMenuPress}
+        />
+        
+        <LinearGradient
+          colors={[
+            theme === 'dark' ? '#1a1a1a' : '#f0f0f0',
+            theme === 'dark' ? '#121212' : '#ffffff',
+          ]}
+          style={styles.gradientContainer}
+        >
+          <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.profileHeader}>
           <View style={styles.profileImageContainer}>
             {profileImage ? (
@@ -411,13 +428,23 @@ export default function ProfileScreen() {
           variant="outlined"
           style={styles.logoutButton}
         />
-      </ScrollView>
-    </LinearGradient>
+          </ScrollView>
+        </LinearGradient>
+      </View>
+
+      <DrawerMenu 
+        visible={drawerVisible} 
+        onClose={() => setDrawerVisible(false)} 
+      />
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  gradientContainer: {
     flex: 1,
   },
   scrollContent: {

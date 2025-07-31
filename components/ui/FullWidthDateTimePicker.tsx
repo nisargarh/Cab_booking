@@ -7,7 +7,7 @@ import { Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react
 import { Button } from './Button';
 import { GlassCard } from './GlassCard';
 
-interface DateTimePickerProps {
+interface FullWidthDateTimePickerProps {
   date?: Date;
   onDateChange: (date: Date) => void;
   mode: 'date' | 'time' | 'datetime';
@@ -15,7 +15,7 @@ interface DateTimePickerProps {
   minimumDate?: Date;
 }
 
-export const CustomDateTimePicker: React.FC<DateTimePickerProps> = ({
+export const FullWidthDateTimePicker: React.FC<FullWidthDateTimePickerProps> = ({
   date,
   onDateChange,
   mode,
@@ -139,7 +139,10 @@ export const CustomDateTimePicker: React.FC<DateTimePickerProps> = ({
       <TouchableOpacity
         style={[
           styles.dateTimeButton,
-          { borderColor: colorScheme.border }
+          { 
+            borderColor: colorScheme.border,
+            backgroundColor: colorScheme.surface
+          }
         ]}
         onPress={() => setShowPicker(true)}
       >
@@ -167,7 +170,7 @@ const styles = StyleSheet.create({
   dateTimeButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    width: '48%',
+    width: '100%',
     height: 50,
     borderWidth: 1,
     borderRadius: 12,
@@ -175,7 +178,7 @@ const styles = StyleSheet.create({
   },
   dateTimeText: {
     marginLeft: 8,
-    fontSize: 14,
+    fontSize: 16,
     flex: 1,
   },
   modalOverlay: {

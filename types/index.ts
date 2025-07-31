@@ -19,7 +19,7 @@ export type SavedAddress = {
   longitude: number;
 };
 
-export type BookingType = 'airport' | 'outstation' | 'hourly' | 'city';
+export type BookingType = 'airport' | 'outstation' | 'hourly' | 'city' | 'shared';
 export type TripType = 'one-way' | 'round-trip' | 'shared';
 
 export type Location = {
@@ -94,7 +94,7 @@ export type Ride = {
     advancePayment: number;
     remainingPayment: number;
   };
-  paymentMethod?: 'cash' | 'online' | 'card';
+  paymentMethod?: 'card' | 'upi';
   paymentStatus: 'pending' | 'partial' | 'completed';
   distance: number;
   duration: number;

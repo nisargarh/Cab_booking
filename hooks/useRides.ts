@@ -12,7 +12,7 @@ type RideState = {
   setPassengers: (count: number) => void;
 
   setVehicle: (vehicle: Vehicle) => void;
-  setPaymentMethod: (method: 'cash' | 'online' | 'card') => void;
+  setPaymentMethod: (method: 'card' | 'upi') => void;
   completeRide: (rating?: number, review?: string) => void;
   resetRide: () => void;
 };

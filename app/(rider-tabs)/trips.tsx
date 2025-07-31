@@ -1,12 +1,15 @@
+import { AppHeader } from '@/components/ui/AppHeader';
+import { DrawerMenu } from '@/components/ui/DrawerMenu';
 import { GlassCard } from '@/components/ui/GlassCard';
 import colors from '@/constants/colors';
 import { useRides } from '@/hooks/useRides';
 import { useTheme } from '@/hooks/useTheme';
 import { Ride } from '@/types';
+import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ChevronRight, Clock, MapPin, Star } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function TripsScreen() {
   const { theme } = useTheme();
@@ -14,6 +17,14 @@ export default function TripsScreen() {
   const colorScheme = theme === 'dark' ? colors.dark : colors.light;
   
   const [activeTab, setActiveTab] = useState<'upcoming' | 'completed'>('completed');
+  const [drawerVisible, setDrawerVisible] = useState(false);
+
+  const handleMenuPress = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setDrawerVisible(true);
+  };
   
   // Mock data for demonstration
   const mockRides: Ride[] = [
@@ -105,7 +116,7 @@ export default function TripsScreen() {
         advancePayment: 6.88,
         remainingPayment: 20.62,
       },
-      paymentMethod: 'cash',
+      paymentMethod: 'upi',
       paymentStatus: 'completed',
       distance: 8.2,
       duration: 15,
@@ -190,19 +201,22 @@ export default function TripsScreen() {
   );
   
   return (
-    <LinearGradient
-      colors={[
-        theme === 'dark' ? '#1a1a1a' : '#f0f0f0',
-        theme === 'dark' ? '#121212' : '#ffffff',
-      ]}
-      style={styles.container}
-    >
-      <View style={styles.header}>
-        <Text style={[styles.title, { color: colorScheme.text }]}>
-          My Trips
-        </Text>
+    <>
+      <View style={[styles.container, { backgroundColor: colorScheme.background }]}>
+        <AppHeader 
+          title="My Trips" 
+          onMenuPress={handleMenuPress}
+        />
         
-        <View style={styles.tabContainer}>
+        <LinearGradient
+          colors={[
+            theme === 'dark' ? '#1a1a1a' : '#f0f0f0',
+            theme === 'dark' ? '#121212' : '#ffffff',
+          ]}
+          style={styles.gradientContainer}
+        >
+          <View style={styles.tabsSection}>
+            <View style={styles.tabContainer}>
           <TouchableOpacity
             style={[
               styles.tab,
@@ -240,8 +254,8 @@ export default function TripsScreen() {
               Upcoming
             </Text>
           </TouchableOpacity>
-        </View>
-      </View>
+            </View>
+          </View>
       
       <FlatList
         data={activeTab === 'completed' 
@@ -265,8 +279,15 @@ export default function TripsScreen() {
             </Text>
           </GlassCard>
         )}
+          />
+        </LinearGradient>
+      </View>
+
+      <DrawerMenu 
+        visible={drawerVisible} 
+        onClose={() => setDrawerVisible(false)} 
       />
-    </LinearGradient>
+    </>
   );
 }
 
@@ -274,14 +295,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  header: {
+  gradientContainer: {
+    flex: 1,
+  },
+  tabsSection: {
     padding: 20,
     paddingBottom: 10,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 20,
   },
   tabContainer: {
     flexDirection: 'row',

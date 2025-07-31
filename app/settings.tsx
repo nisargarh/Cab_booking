@@ -6,6 +6,7 @@ import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import {
+    ArrowLeft,
     Bell,
     ChevronRight,
     CreditCard,
@@ -103,11 +104,17 @@ export default function SettingsScreen() {
       ]}
       style={styles.container}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={[styles.title, { color: colorScheme.text }]}>
+      <View style={[styles.header, { backgroundColor: colorScheme.background }]}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <ArrowLeft size={24} color={colorScheme.text} />
+        </TouchableOpacity>
+        <Text style={[styles.headerTitle, { color: colorScheme.text }]}>
           Settings
         </Text>
-        
+        <View style={styles.headerRight} />
+      </View>
+
+      <ScrollView contentContainerStyle={styles.scrollContent}>
         <GlassCard style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colorScheme.text }]}>
             Appearance
@@ -204,7 +211,7 @@ export default function SettingsScreen() {
             icon={<HelpCircle size={24} color={colorScheme.primary} />}
             title="Help Center"
             subtitle="Get help and support"
-            onPress={() => handleNavigation('/help-center')}
+            onPress={() => handleNavigation('/support')}
           />
           
           <SettingItem
@@ -236,14 +243,29 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.1)',
+  },
+  backButton: {
+    padding: 4,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  headerRight: {
+    width: 32,
+  },
   scrollContent: {
     padding: 20,
     paddingBottom: 40,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 24,
   },
   section: {
     padding: 16,
