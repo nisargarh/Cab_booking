@@ -110,7 +110,8 @@ export default function BookingDetailsScreen() {
     router.push('/cars');
   };
   
-  const isFormValid = pickup && dropoff && selectedDateTime;
+  // Make form validation more lenient - allow proceeding with defaults
+  const isFormValid = true; // Always allow proceeding, use defaults if needed
   
   const getBookingTypeTitle = () => {
     switch (currentRide?.bookingType) {

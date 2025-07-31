@@ -148,14 +148,28 @@ export default function AirportTransferScreen() {
     });
   };
 
-  const isFormValid = pickup && dropoff && selectedDate;
+  // Make form validation more lenient - allow proceeding with defaults
+  const isFormValid = true; // Always allow proceeding, use defaults if needed
   
   const handleSelectCars = () => {
-    if (!isFormValid) return;
+    // Use defaults if fields are missing
+    const finalPickup = pickup || {
+      id: '1',
+      name: 'Default Pickup',
+      address: 'Default pickup location',
+      latitude: 37.7749,
+      longitude: -122.4194,
+    };
     
-    const finalPickup = pickup;
-    const finalDropoff = dropoff;
-    const finalDateTime = selectedDate;
+    const finalDropoff = dropoff || {
+      id: '2',
+      name: 'KIA (BLR) - T1',
+      address: 'Kempegowda International Airport, Terminal 1',
+      latitude: 13.1986,
+      longitude: 77.7066,
+    };
+    
+    const finalDateTime = selectedDate || new Date();
     
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);

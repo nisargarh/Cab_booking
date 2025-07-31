@@ -37,8 +37,66 @@ export const BookingSuccess: React.FC<BookingSuccessProps> = ({
   };
 
   const handleDownloadReceipt = () => {
-    // TODO: Implement receipt download functionality
-    console.log('Downloading receipt...');
+    if (!ride) return;
+    
+    // Generate receipt content
+    const receiptContent = `
+RIDE RECEIPT
+============
+
+Booking ID: ${ride.id || 'N/A'}
+Date: ${new Date().toLocaleDateString()}
+
+TRIP DETAILS
+------------
+From: ${ride.pickup?.name || 'N/A'}
+To: ${ride.dropoff?.name || 'N/A'}
+Date: ${ride.date || 'N/A'}
+Time: ${ride.time || 'N/A'}
+Passengers: ${ride.passengers || 1}
+
+VEHICLE DETAILS
+---------------
+Vehicle: ${ride.vehicle?.name || 'N/A'} (${ride.vehicle?.type || 'N/A'})
+Rating: ${ride.vehicle?.rating || 'N/A'} stars
+
+PAYMENT DETAILS
+---------------
+Base Fare: $${ride.fare?.base?.toFixed(2) || '0.00'}
+Distance Fare: $${ride.fare?.distance?.toFixed(2) || '0.00'}
+Time Fare: $${ride.fare?.time?.toFixed(2) || '0.00'}
+GST & Platform Fees: $${ride.fare?.tax?.toFixed(2) || '0.00'}
+Total Amount: $${ride.fare?.total?.toFixed(2) || '0.00'}
+
+Advance Paid: $${ride.fare?.advancePayment?.toFixed(2) || '0.00'}
+Remaining Amount: $${ride.fare?.remainingPayment?.toFixed(2) || '0.00'}
+
+IMPORTANT NOTES
+---------------
+• Driver details will be shared 15 minutes before pickup
+• Please be ready 5 minutes before scheduled time
+• Remaining amount will be collected after the trip
+• Cancellation charges may apply as per policy
+
+Thank you for choosing our service!
+    `;
+    
+    // For web, create a downloadable file
+    if (typeof window !== 'undefined') {
+      const blob = new Blob([receiptContent], { type: 'text/plain' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `receipt-${ride.id}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } else {
+      // For mobile, you could use expo-sharing or similar
+      console.log('Receipt content:', receiptContent);
+      alert('Receipt generated! (In a real app, this would be saved to device)');
+    }
   };
 
   if (!ride) return null;
@@ -58,11 +116,11 @@ export const BookingSuccess: React.FC<BookingSuccessProps> = ({
           </View>
 
           <Text style={[styles.title, { color: colorScheme.text }]}>
-            Booking Successful!
+            Payment Successful!
           </Text>
 
           <Text style={[styles.subtitle, { color: colorScheme.subtext }]}>
-            Your ride has been booked successfully. You'll receive driver details 15 minutes before your scheduled time.
+            Your booking has been confirmed. You'll receive driver details 15 minutes before your scheduled time.
           </Text>
 
           {/* Trip Summary */}
@@ -111,7 +169,7 @@ export const BookingSuccess: React.FC<BookingSuccessProps> = ({
                     Vehicle
                   </Text>
                   <Text style={[styles.summaryValue, { color: colorScheme.text }]}>
-                    {ride.vehicle.brand} {ride.vehicle.model}
+                    {ride.vehicle.name} ({ride.vehicle.type})
                   </Text>
                 </View>
               </View>
@@ -124,7 +182,7 @@ export const BookingSuccess: React.FC<BookingSuccessProps> = ({
                 Total Fare
               </Text>
               <Text style={[styles.totalValue, { color: colorScheme.primary }]}>
-                ₹{ride.fare?.total.toFixed(2)}
+                ${ride.fare?.total.toFixed(2)}
               </Text>
             </View>
 
@@ -133,9 +191,46 @@ export const BookingSuccess: React.FC<BookingSuccessProps> = ({
                 Advance Paid (25%)
               </Text>
               <Text style={[styles.paidValue, { color: '#00C853' }]}>
-                ₹{ride.fare?.advancePayment.toFixed(2)}
+                ${ride.fare?.advancePayment.toFixed(2)}
               </Text>
             </View>
+            
+            <View style={styles.summaryRow}>
+              <Text style={[styles.paidLabel, { color: colorScheme.subtext }]}>
+                Remaining Amount
+              </Text>
+              <Text style={[styles.paidValue, { color: colorScheme.warning }]}>
+                ${ride.fare?.remainingPayment.toFixed(2)}
+              </Text>
+            </View>
+            
+            <View style={styles.summaryRow}>
+              <Text style={[styles.paidLabel, { color: colorScheme.subtext }]}>
+                GST & Platform Fees
+              </Text>
+              <Text style={[styles.paidValue, { color: colorScheme.text }]}>
+                ${ride.fare?.tax.toFixed(2)}
+              </Text>
+            </View>
+          </View>
+
+          {/* Important Notes */}
+          <View style={[styles.notesContainer, { backgroundColor: colorScheme.surface }]}>
+            <Text style={[styles.notesTitle, { color: colorScheme.text }]}>
+              Important Notes:
+            </Text>
+            <Text style={[styles.notesText, { color: colorScheme.subtext }]}>
+              • Driver details will be shared 15 minutes before pickup
+            </Text>
+            <Text style={[styles.notesText, { color: colorScheme.subtext }]}>
+              • Please be ready 5 minutes before scheduled time
+            </Text>
+            <Text style={[styles.notesText, { color: colorScheme.subtext }]}>
+              • Remaining amount will be collected after the trip
+            </Text>
+            <Text style={[styles.notesText, { color: colorScheme.subtext }]}>
+              • Cancellation charges may apply as per policy
+            </Text>
           </View>
 
           {/* Action Buttons */}
@@ -146,27 +241,21 @@ export const BookingSuccess: React.FC<BookingSuccessProps> = ({
               style={[styles.primaryButton, { backgroundColor: colorScheme.primary }]}
             />
 
-            <View style={styles.secondaryButtons}>
-              <TouchableOpacity
-                style={[styles.secondaryButton, { borderColor: colorScheme.border }]}
-                onPress={handleDownloadReceipt}
-              >
-                <Download size={18} color={colorScheme.text} />
-                <Text style={[styles.secondaryButtonText, { color: colorScheme.text }]}>
-                  Receipt
-                </Text>
-              </TouchableOpacity>
+            <Button
+              title="Book a Ride"
+              onPress={handleBookRide}
+              style={[styles.primaryButton, { backgroundColor: colorScheme.secondary }]}
+            />
 
-              <TouchableOpacity
-                style={[styles.secondaryButton, { borderColor: colorScheme.border }]}
-                onPress={handleBookRide}
-              >
-                <Car size={18} color={colorScheme.text} />
-                <Text style={[styles.secondaryButtonText, { color: colorScheme.text }]}>
-                  Book Again
-                </Text>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity
+              style={[styles.downloadButton, { borderColor: colorScheme.primary }]}
+              onPress={handleDownloadReceipt}
+            >
+              <Download size={20} color={colorScheme.primary} />
+              <Text style={[styles.downloadButtonText, { color: colorScheme.primary }]}>
+                Download Receipt
+              </Text>
+            </TouchableOpacity>
           </View>
         </GlassCard>
       </View>
@@ -247,29 +336,41 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
   },
+  notesContainer: {
+    width: '100%',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 24,
+  },
+  notesTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  notesText: {
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 4,
+  },
   buttonContainer: {
     width: '100%',
     gap: 12,
   },
   primaryButton: {
-    marginBottom: 8,
+    marginBottom: 4,
   },
-  secondaryButtons: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  secondaryButton: {
-    flex: 1,
+  downloadButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    height: 44,
-    borderWidth: 1,
+    height: 48,
+    borderWidth: 2,
     borderRadius: 12,
     gap: 8,
+    marginTop: 8,
   },
-  secondaryButtonText: {
-    fontSize: 14,
-    fontWeight: '500',
+  downloadButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

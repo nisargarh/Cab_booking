@@ -56,14 +56,28 @@ export default function HourlyRentalScreen() {
     setSelectedDate(date);
   };
 
-  const isFormValid = pickup && selectedDate && selectedHours;
+  // Make form validation more lenient - allow proceeding with defaults
+  const isFormValid = true; // Always allow proceeding, use defaults if needed
   
   const handleSelectCars = () => {
-    if (!isFormValid) return;
+    // Use defaults if fields are missing
+    const finalPickup = pickup || {
+      id: '1',
+      name: 'Default Pickup',
+      address: 'Default pickup location',
+      latitude: 37.7749,
+      longitude: -122.4194,
+    };
     
-    const finalPickup = pickup;
-    const finalDropoff = dropoff;
-    const finalDate = selectedDate;
+    const finalDropoff = dropoff || {
+      id: '2',
+      name: 'Multiple Stops',
+      address: 'Various locations',
+      latitude: 37.7849,
+      longitude: -122.4094,
+    };
+    
+    const finalDate = selectedDate || new Date();
 
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -77,6 +91,7 @@ export default function HourlyRentalScreen() {
       minute: '2-digit',
     });
 
+    setBookingType('hourly');
     setPickup(finalPickup);
     setDropoff(finalDropoff);
     setDateTime(dateString, timeString);

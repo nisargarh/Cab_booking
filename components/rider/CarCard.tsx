@@ -2,7 +2,7 @@ import colors from '@/constants/colors';
 import { useTheme } from '@/hooks/useTheme';
 import { Vehicle } from '@/types';
 import { Image } from 'expo-image';
-import { Star, Users } from 'lucide-react-native';
+import { CheckCircle, Star, Users } from 'lucide-react-native';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { GlassCard } from '../ui/GlassCard';
@@ -21,9 +21,14 @@ export const CarCard: React.FC<CarCardProps> = ({
   const { theme } = useTheme();
   const colorScheme = theme === 'dark' ? colors.dark : colors.light;
   
+  const handlePress = () => {
+    console.log('CarCard pressed:', vehicle.name);
+    onSelect(vehicle);
+  };
+
   return (
     <TouchableOpacity
-      onPress={() => onSelect(vehicle)}
+      onPress={handlePress}
       activeOpacity={0.8}
       style={styles.container}
     >
@@ -32,11 +37,16 @@ export const CarCard: React.FC<CarCardProps> = ({
           styles.card,
           isSelected && { 
             borderColor: colorScheme.primary, 
-            borderWidth: 2,
-            backgroundColor: 'rgba(0, 255, 0, 0.1)'
+            borderWidth: 3,
+            backgroundColor: theme === 'dark' ? 'rgba(0, 255, 0, 0.15)' : 'rgba(0, 255, 0, 0.1)',
+            shadowColor: colorScheme.primary,
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.3,
+            shadowRadius: 4,
+            elevation: 8,
           }
         ]}
-        intensity={isSelected ? 80 : 50}
+        intensity={isSelected ? 90 : 50}
       >
         <Image
           source={{ uri: vehicle.image }}
@@ -49,9 +59,19 @@ export const CarCard: React.FC<CarCardProps> = ({
             <Text style={[styles.carName, { color: colorScheme.text }]}>
               {vehicle.name}
             </Text>
-            <Text style={[styles.carPrice, { color: colorScheme.primary }]}>
-              ${vehicle.price}
-            </Text>
+            <View style={styles.priceContainer}>
+              <Text style={[styles.carPrice, { color: colorScheme.primary }]}>
+                ${vehicle.price}
+              </Text>
+              {isSelected && (
+                <CheckCircle 
+                  size={20} 
+                  color={colorScheme.primary} 
+                  fill={colorScheme.primary}
+                  style={styles.selectedIcon}
+                />
+              )}
+            </View>
           </View>
           
           <Text style={[styles.carType, { color: colorScheme.subtext }]}>
@@ -119,9 +139,16 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
   },
+  priceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   carPrice: {
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  selectedIcon: {
+    marginLeft: 8,
   },
   carType: {
     fontSize: 14,

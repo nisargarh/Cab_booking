@@ -38,8 +38,13 @@ export default function TripsScreen() {
     setDrawerVisible(true);
   };
   
-  // Mock upcoming trips
-  const upcomingTrips: Ride[] = [
+  // Get actual upcoming trips from store
+  const upcomingTrips: Ride[] = allRides.filter(ride => 
+    ride.status === 'pending' || ride.status === 'accepted' || ride.status === 'arriving' || ride.status === 'arrived' || ride.status === 'in_progress'
+  );
+  
+  // Mock upcoming trips (fallback for demo)
+  const mockUpcomingTrips: Ride[] = [
     {
       id: 'upcoming1',
       riderId: 'rider1',
@@ -128,8 +133,8 @@ export default function TripsScreen() {
     },
   ];
 
-  // Mock completed trips data
-  const completedTrips: Ride[] = [
+  // Mock completed trips data (fallback for demo)
+  const mockCompletedTrips: Ride[] = [
     {
       id: '1',
       riderId: 'rider1',
@@ -339,6 +344,7 @@ export default function TripsScreen() {
       </GlassCard>
     </TouchableOpacity>
   );
+  };
   
   return (
     <>
@@ -396,29 +402,29 @@ export default function TripsScreen() {
           </TouchableOpacity>
             </View>
           </View>
-      
-      <FlatList
-        data={activeTab === 'completed' 
-          ? [...completedTrips, ...pastRides] 
-          : [...upcomingTrips, ...allRides.filter(ride => ride.status !== 'completed')]
-        }
-        renderItem={({ item }) => renderTripCard(item)}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={() => (
-          <GlassCard style={styles.emptyCard}>
-            <Text style={[styles.emptyTitle, { color: colorScheme.text }]}>
-              {activeTab === 'completed' ? 'No completed trips' : 'No upcoming trips'}
-            </Text>
-            <Text style={[styles.emptyText, { color: colorScheme.subtext }]}>
-              {activeTab === 'completed' 
-                ? 'Your completed trips will appear here'
-                : 'Book a ride to see your upcoming trips'
-              }
-            </Text>
-          </GlassCard>
-        )}
+          
+          <FlatList
+            data={activeTab === 'completed' 
+              ? [...pastRides, ...mockCompletedTrips] 
+              : [...upcomingTrips, ...mockUpcomingTrips]
+            }
+            renderItem={({ item }) => renderTripCard(item)}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={() => (
+              <GlassCard style={styles.emptyCard}>
+                <Text style={[styles.emptyTitle, { color: colorScheme.text }]}>
+                  {activeTab === 'completed' ? 'No completed trips' : 'No upcoming trips'}
+                </Text>
+                <Text style={[styles.emptyText, { color: colorScheme.subtext }]}>
+                  {activeTab === 'completed' 
+                    ? 'Your completed trips will appear here'
+                    : 'Book a ride to see your upcoming trips'
+                  }
+                </Text>
+              </GlassCard>
+            )}
           />
         </LinearGradient>
       </View>

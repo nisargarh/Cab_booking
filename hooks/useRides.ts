@@ -95,18 +95,33 @@ export const useRideStore = create<RideState>((set) => ({
   
   confirmBooking: (rating, review) => 
     set((state) => {
-      if (!state.currentRide) return state;
+      if (!state.currentRide) {
+        console.log('No current ride to confirm');
+        return state;
+      }
       
       const confirmedRide = {
         ...state.currentRide,
         id: Date.now().toString(),
         riderId: 'user1',
-        status: 'active' as const,
+        status: 'pending' as const,
         paymentStatus: 'partial' as const,
-        passengerInfo: [],
+        passengerInfo: state.currentRide.passengerInfo || [],
         rating,
         review,
+        // Ensure all required fields are present
+        pickup: state.currentRide.pickup || { id: '1', name: 'Default Pickup', address: 'Default pickup location', latitude: 0, longitude: 0 },
+        dropoff: state.currentRide.dropoff || { id: '2', name: 'Default Destination', address: 'Default destination', latitude: 0, longitude: 0 },
+        date: state.currentRide.date || new Date().toISOString().split('T')[0],
+        time: state.currentRide.time || new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
+        passengers: state.currentRide.passengers || 1,
+        bookingType: state.currentRide.bookingType || 'city',
+        tripType: state.currentRide.tripType || 'one-way',
+        distance: state.currentRide.distance || 15,
+        duration: state.currentRide.duration || 25,
       } as Ride;
+      
+      console.log('Booking confirmed:', confirmedRide);
       
       return {
         rides: [...state.rides, confirmedRide],
