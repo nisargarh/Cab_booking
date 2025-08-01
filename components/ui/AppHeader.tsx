@@ -1,7 +1,7 @@
 import colors from '@/constants/colors';
 import { useTheme } from '@/hooks/useTheme';
 import * as Haptics from 'expo-haptics';
-import { Menu } from 'lucide-react-native';
+import { Menu, Moon, Sun } from 'lucide-react-native';
 import React from 'react';
 import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -12,7 +12,7 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({ title, onMenuPress, showMenu = true }: AppHeaderProps) {
-  const { theme } = useTheme();
+  const { theme, toggleTheme } = useTheme();
   const colorScheme = theme === 'dark' ? colors.dark : colors.light;
 
   const handleMenuPress = () => {
@@ -20,6 +20,13 @@ export function AppHeader({ title, onMenuPress, showMenu = true }: AppHeaderProp
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     onMenuPress();
+  };
+
+  const handleThemeToggle = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    toggleTheme();
   };
 
   return (
@@ -36,7 +43,13 @@ export function AppHeader({ title, onMenuPress, showMenu = true }: AppHeaderProp
         {title}
       </Text>
       
-      <View style={styles.headerRight} />
+      <TouchableOpacity onPress={handleThemeToggle} style={styles.themeButton}>
+        {theme === 'dark' ? (
+          <Sun size={24} color={colorScheme.text} />
+        ) : (
+          <Moon size={24} color={colorScheme.text} />
+        )}
+      </TouchableOpacity>
     </View>
   );
 }
@@ -60,7 +73,9 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
   },
-  headerRight: {
+  themeButton: {
+    padding: 4,
     width: 32,
+    alignItems: 'center',
   },
 });

@@ -2,10 +2,9 @@ import colors from '@/constants/colors';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
 import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
+
 import { useRouter } from 'expo-router';
 import {
-    CreditCard,
     HelpCircle,
     History,
     Home,
@@ -15,7 +14,6 @@ import {
     Shield,
     Star,
     User,
-    Wallet,
     X
 } from 'lucide-react-native';
 import React from 'react';
@@ -126,15 +124,9 @@ export function DrawerMenu({ visible, onClose }: DrawerMenuProps) {
     >
       <View style={styles.overlay}>
         <View style={[styles.drawer, { backgroundColor: colorScheme.background }]}>
-          <LinearGradient
-            colors={[
-              theme === 'dark' ? '#2a2a2a' : '#f8f9fa',
-              theme === 'dark' ? '#1a1a1a' : '#ffffff',
-            ]}
-            style={styles.drawerContent}
-          >
+          <View style={[styles.drawerContent, { backgroundColor: colorScheme.background }]}>
             {/* Header */}
-            <View style={styles.header}>
+            <View style={[styles.header, { backgroundColor: colorScheme.background }]}>
               <View style={styles.headerTop}>
                 <Text style={[styles.menuText, { color: colorScheme.subtext }]}>
                   Menu
@@ -145,7 +137,10 @@ export function DrawerMenu({ visible, onClose }: DrawerMenuProps) {
               </View>
               
               {/* User Profile Section */}
-              <View style={styles.userSection}>
+              <TouchableOpacity 
+                style={styles.userSection}
+                onPress={() => handleNavigation('/(rider-tabs)/profile')}
+              >
                 <View style={[styles.avatar, { backgroundColor: colorScheme.primary }]}>
                   <User size={24} color={theme === 'dark' ? colors.dark.background : colors.light.background} />
                 </View>
@@ -163,26 +158,23 @@ export function DrawerMenu({ visible, onClose }: DrawerMenuProps) {
                     </Text>
                   </View>
                 </View>
-              </View>
+              </TouchableOpacity>
             </View>
 
-            <ScrollView style={styles.menuContainer} showsVerticalScrollIndicator={false}>
+            <ScrollView 
+              style={[styles.menuContainer, { backgroundColor: colorScheme.background }]} 
+              showsVerticalScrollIndicator={false}
+            >
               <MenuItem
                 icon={<Home size={20} color={colorScheme.text} />}
                 title="Home"
-                onPress={() => handleNavigation('/(rider-tabs)/')}
+                onPress={() => handleNavigation('/(rider-tabs)')}
               />
 
               <MenuItem
                 icon={<History size={20} color={colorScheme.text} />}
                 title="Your Rides"
                 onPress={() => handleNavigation('/(rider-tabs)/trips')}
-              />
-
-              <MenuItem
-                icon={<Wallet size={20} color={colorScheme.text} />}
-                title="Wallet"
-                onPress={() => handleNavigation('/payment-methods')}
               />
 
               <MenuItem
@@ -217,12 +209,6 @@ export function DrawerMenu({ visible, onClose }: DrawerMenuProps) {
                 onPress={() => handleNavigation('/safety')}
               />
 
-              <MenuItem
-                icon={<CreditCard size={20} color={colorScheme.text} />}
-                title="Payment Methods"
-                onPress={() => handleNavigation('/payment-methods')}
-              />
-
               <View style={[styles.divider, { backgroundColor: colorScheme.border }]} />
 
               <MenuItem
@@ -232,7 +218,7 @@ export function DrawerMenu({ visible, onClose }: DrawerMenuProps) {
                 isLogout={true}
               />
             </ScrollView>
-          </LinearGradient>
+          </View>
         </View>
         
         <TouchableOpacity 
@@ -269,9 +255,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+    opacity: 1,
   },
   drawerContent: {
     flex: 1,
+    opacity: 1,
   },
   header: {
     paddingTop: 50,

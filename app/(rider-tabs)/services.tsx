@@ -68,12 +68,6 @@ export default function ServicesScreen() {
                 title="Hourly Rental"
                 description="Rent a car with driver by the hour for multiple stops"
               />
-              
-              <BookingCard
-                type="shared"
-                title="Shared Ride"
-                description="Share your ride with others and save money"
-              />
             </View>
           </ScrollView>
         </LinearGradient>

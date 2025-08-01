@@ -3,12 +3,12 @@ import colors from '@/constants/colors';
 import { useTheme } from '@/hooks/useTheme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, MapPin, Phone, Shield, Users } from 'lucide-react-native';
+import { ArrowLeft, MapPin, Moon, Phone, Shield, Sun, Users } from 'lucide-react-native';
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function SafetyScreen() {
-  const { theme } = useTheme();
+  const { theme, toggleTheme } = useTheme();
   const router = useRouter();
   const colorScheme = theme === 'dark' ? colors.dark : colors.light;
 
@@ -72,7 +72,13 @@ export default function SafetyScreen() {
         <Text style={[styles.headerTitle, { color: colorScheme.text }]}>
           Safety
         </Text>
-        <View style={styles.headerRight} />
+        <TouchableOpacity onPress={toggleTheme} style={styles.themeButton}>
+          {theme === 'dark' ? (
+            <Sun size={24} color={colorScheme.text} />
+          ) : (
+            <Moon size={24} color={colorScheme.text} />
+          )}
+        </TouchableOpacity>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -156,8 +162,10 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
   },
-  headerRight: {
+  themeButton: {
+    padding: 4,
     width: 32,
+    alignItems: 'center',
   },
   scrollContent: {
     padding: 20,

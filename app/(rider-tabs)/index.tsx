@@ -11,7 +11,6 @@ import {
     CreditCard,
     MapPin,
     Plane,
-    Share2,
     Shield
 } from 'lucide-react-native';
 import React, { useState } from 'react';
@@ -104,17 +103,10 @@ export default function HomeScreen() {
                 title="Hourly"
                 onPress={() => handleServicePress('hourly')}
               />
-            </View>
-            <View style={styles.servicesRow}>
               <ServiceIcon
                 icon={<MapPin size={24} color={colorScheme.primary} />}
                 title="Outstation"
                 onPress={() => handleServicePress('outstation')}
-              />
-              <ServiceIcon
-                icon={<Share2 size={24} color={colorScheme.primary} />}
-                title="Shared"
-                onPress={() => handleServicePress('shared')}
               />
             </View>
           </View>
