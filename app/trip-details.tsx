@@ -46,7 +46,7 @@ export default function TripDetailsScreen() {
     }, 60000);
 
     return () => clearInterval(interval);
-  }, [params.id, rides]);
+  }, [params.id, rides, pastRides]);
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -114,7 +114,7 @@ export default function TripDetailsScreen() {
         </Text>
         <Button
           title="Go Back"
-          onPress={() => router.back()}
+          onPress={() => {}}
           style={styles.backButton}
         />
       </LinearGradient>

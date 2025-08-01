@@ -73,6 +73,9 @@ export const Button: React.FC<ButtonProps> = ({
       ...textSizeStyles[size],
     };
 
+    // Check if custom backgroundColor is provided in style
+    const customBgColor = style && typeof style === 'object' && 'backgroundColor' in style ? style.backgroundColor : null;
+
     switch (variant) {
       case 'outlined':
       case 'ghost':
@@ -81,6 +84,13 @@ export const Button: React.FC<ButtonProps> = ({
           color: colorScheme.primary,
         };
       default:
+        // Use white text for custom dark backgrounds, otherwise use theme default
+        if (customBgColor === '#000000' || customBgColor === 'black') {
+          return {
+            ...baseStyle,
+            color: '#FFFFFF',
+          };
+        }
         return {
           ...baseStyle,
           color: theme === 'dark' ? colors.dark.background : colors.light.background,
@@ -107,11 +117,29 @@ export const Button: React.FC<ButtonProps> = ({
   );
 
   if (variant === 'filled') {
+    // Check if custom backgroundColor is provided in style
+    const customBgColor = style && typeof style === 'object' && 'backgroundColor' in style ? style.backgroundColor : null;
+    
+    if (customBgColor) {
+      // Use solid color background instead of gradient
+      return (
+        <TouchableOpacity
+          onPress={onPress}
+          disabled={disabled || loading}
+          style={[getContainerStyle(), style]}
+          activeOpacity={0.8}
+          {...props}
+        >
+          {renderContent()}
+        </TouchableOpacity>
+      );
+    }
+    
     return (
       <TouchableOpacity
         onPress={onPress}
         disabled={disabled || loading}
-        style={[getContainerStyle(), style]}
+        style={[getContainerStyle(), { backgroundColor: 'transparent' }, style && Object.fromEntries(Object.entries(style).filter(([key]) => key !== 'backgroundColor'))]}
         activeOpacity={0.8}
         {...props}
       >

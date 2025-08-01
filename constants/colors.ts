@@ -1,4 +1,4 @@
-export const colors = {
+const colors = {
   light: {
     background: '#FFFFFF',
     card: 'rgba(255, 255, 255, 0.9)',
@@ -12,6 +12,7 @@ export const colors = {
     error: '#EF4444',
     warning: '#F59E0B',
     info: '#3B82F6',
+    surface: '#F5F5F5',
   },
   dark: {
     background: '#000000',
@@ -26,6 +27,7 @@ export const colors = {
     error: '#EF4444',
     warning: '#F59E0B',
     info: '#3B82F6',
+    surface: '#1A1A1A',
   }
 };
 

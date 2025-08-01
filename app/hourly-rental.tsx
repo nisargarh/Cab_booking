@@ -374,7 +374,7 @@ export default function HourlyRentalScreen() {
               </View>
               <TouchableOpacity onPress={() => setIsWorkTravel(!isWorkTravel)}>
                 <Text style={[styles.workTravelText, { color: colorScheme.text }]}>
-                  Bill to my company - I'm travelling for work
+                  Bill to my company - I&apos;m travelling for work
                 </Text>
               </TouchableOpacity>
             </View>

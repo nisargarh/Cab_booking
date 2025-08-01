@@ -1,28 +1,23 @@
 import { Button } from '@/components/ui/Button';
-import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import colors from '@/constants/colors';
-import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, Car, MapPin, Shield } from 'lucide-react-native';
+import { Car, MapPin, Shield } from 'lucide-react-native';
 import React from 'react';
 import {
     StyleSheet,
     Text,
-    TouchableOpacity,
     View
 } from 'react-native';
 
 export default function AuthSelectionScreen() {
   const router = useRouter();
   const { theme } = useTheme();
-  const { selectedRole } = useAuth();
+  // const { } = useAuth();
   const colorScheme = theme === 'dark' ? colors.dark : colors.light;
 
-  const handleBack = () => {
-    router.back();
-  };
+
 
   const handleSignUp = () => {
     router.push('(auth)/signup');
@@ -40,17 +35,6 @@ export default function AuthSelectionScreen() {
       ]}
       style={styles.container}
     >
-      <View style={styles.header}>
-        <TouchableOpacity
-          onPress={handleBack}
-          style={styles.backButton}
-        >
-          <ArrowLeft size={24} color={colorScheme.primary} />
-        </TouchableOpacity>
-        
-        <ThemeToggle />
-      </View>
-
       <View style={styles.content}>
         {/* Cityscape illustration */}
         <View style={styles.illustrationContainer}>

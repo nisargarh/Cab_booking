@@ -3,9 +3,9 @@ import colors from '@/constants/colors';
 import { useTheme } from '@/hooks/useTheme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, Gift, Moon, Sun, Tag } from 'lucide-react-native';
+import { Gift, Tag } from 'lucide-react-native';
 import React from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function OffersScreen() {
   const { theme, toggleTheme } = useTheme();
@@ -85,21 +85,7 @@ export default function OffersScreen() {
       ]}
       style={styles.container}
     >
-      <View style={[styles.header, { backgroundColor: colorScheme.background }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <ArrowLeft size={24} color={colorScheme.text} />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colorScheme.text }]}>
-          Offers
-        </Text>
-        <TouchableOpacity onPress={toggleTheme} style={styles.themeButton}>
-          {theme === 'dark' ? (
-            <Sun size={24} color={colorScheme.text} />
-          ) : (
-            <Moon size={24} color={colorScheme.text} />
-          )}
-        </TouchableOpacity>
-      </View>
+      
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text style={[styles.title, { color: colorScheme.text }]}>
@@ -145,6 +131,8 @@ const styles = StyleSheet.create({
     padding: 4,
     width: 32,
     alignItems: 'center',
+    position: 'absolute',
+    right: 20,
   },
   scrollContent: {
     padding: 20,

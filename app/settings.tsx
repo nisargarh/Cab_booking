@@ -1,21 +1,19 @@
 import { GlassCard } from '@/components/ui/GlassCard';
-import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import colors from '@/constants/colors';
 import { useTheme } from '@/hooks/useTheme';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import {
-    ArrowLeft,
-    Bell,
-    ChevronRight,
-    CreditCard,
-    FileText,
-    Globe,
-    HelpCircle,
-    Shield,
-    Star,
-    Volume2
+  Bell,
+  ChevronRight,
+  CreditCard,
+  FileText,
+  Globe,
+  HelpCircle,
+  Shield,
+  Star,
+  Volume2
 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Platform, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
@@ -104,15 +102,7 @@ export default function SettingsScreen() {
       ]}
       style={styles.container}
     >
-      <View style={[styles.header, { backgroundColor: colorScheme.background }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <ArrowLeft size={24} color={colorScheme.text} />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colorScheme.text }]}>
-          Settings
-        </Text>
-        <View style={styles.headerRight} />
-      </View>
+      
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <GlassCard style={styles.section}>
@@ -132,7 +122,7 @@ export default function SettingsScreen() {
                 Switch between light and dark theme
               </Text>
             </View>
-            <ThemeToggle />
+
           </View>
         </GlassCard>
         

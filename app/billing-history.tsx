@@ -2,7 +2,7 @@ import { GlassCard } from '@/components/ui/GlassCard';
 import colors from '@/constants/colors';
 import { useTheme } from '@/hooks/useTheme';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Stack, useRouter } from 'expo-router';
+import { Stack } from 'expo-router';
 import { Calendar, CreditCard, Download, Filter } from 'lucide-react-native';
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -60,7 +60,7 @@ const mockBillingHistory: BillingItem[] = [
 ];
 
 export default function BillingHistoryScreen() {
-  const router = useRouter();
+  // const router = useRouter();
   const { theme } = useTheme();
   const colorScheme = theme === 'dark' ? colors.dark : colors.light;
   

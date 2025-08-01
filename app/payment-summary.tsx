@@ -99,7 +99,7 @@ export default function PaymentSummaryScreen() {
         </Text>
         <Button
           title="Go Back"
-          onPress={() => router.back()}
+          onPress={() => {}}
           style={styles.backButton}
         />
       </LinearGradient>

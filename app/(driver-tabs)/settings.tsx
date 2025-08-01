@@ -1,6 +1,5 @@
 import { Button } from '@/components/ui/Button';
 import { GlassCard } from '@/components/ui/GlassCard';
-import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import colors from '@/constants/colors';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
@@ -138,7 +137,7 @@ export default function DriverSettingsScreen() {
                 Switch between light and dark theme
               </Text>
             </View>
-            <ThemeToggle />
+
           </View>
         </GlassCard>
         

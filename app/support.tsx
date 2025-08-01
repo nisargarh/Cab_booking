@@ -4,29 +4,26 @@ import { useTheme } from '@/hooks/useTheme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import {
-    ArrowLeft,
-    ChevronRight,
-    CreditCard,
-    Mail,
-    MessageCircle,
-    Moon,
-    Phone,
-    Search,
-    Shield,
-    Sun,
-    User
+  ChevronRight,
+  CreditCard,
+  Mail,
+  MessageCircle,
+  Phone,
+  Search,
+  Shield,
+  User
 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
-    Alert,
-    Dimensions,
-    Linking,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Alert,
+  Dimensions,
+  Linking,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -250,21 +247,7 @@ export default function SupportScreen() {
       style={styles.container}
     >
       {/* Header */}
-      <View style={[styles.header, { backgroundColor: colorScheme.background }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <ArrowLeft size={24} color={colorScheme.text} />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colorScheme.text }]}>
-          Help & Support
-        </Text>
-        <TouchableOpacity onPress={toggleTheme} style={styles.themeButton}>
-          {theme === 'dark' ? (
-            <Sun size={24} color={colorScheme.text} />
-          ) : (
-            <Moon size={24} color={colorScheme.text} />
-          )}
-        </TouchableOpacity>
-      </View>
+     
 
       <ScrollView 
         contentContainerStyle={styles.scrollContent}
@@ -318,7 +301,7 @@ export default function SupportScreen() {
           ) : (
             <View style={styles.noResultsContainer}>
               <Text style={[styles.noResultsText, { color: colorScheme.subtext }]}>
-                No results found for "{searchQuery}"
+                No results found for &quot;{searchQuery}&quot;
               </Text>
             </View>
           )}
@@ -360,6 +343,17 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0,0,0,0.1)',
   },
+  headerSimple: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.1)',
+    position: 'relative',
+  },
   backButton: {
     padding: 4,
   },
@@ -371,6 +365,8 @@ const styles = StyleSheet.create({
     padding: 4,
     width: 32,
     alignItems: 'center',
+    position: 'absolute',
+    right: 20,
   },
   scrollContent: {
     padding: 20,

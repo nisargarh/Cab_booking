@@ -17,24 +17,24 @@ import {
     User
 } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
-import { Alert, Dimensions, Linking, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Linking, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 type TripStatus = 'driver_assigned' | 'driver_arriving' | 'driver_arrived' | 'trip_started' | 'trip_completed';
 
-const { width, height } = Dimensions.get('window');
+// const { width, height } = Dimensions.get('window');
 
 export default function LiveTrackingScreen() {
   const router = useRouter();
   const { theme } = useTheme();
-  const { rides, pastRides, completeRide } = useRides();
+  const { rides, pastRides } = useRides();
   const params = useLocalSearchParams();
   const colorScheme = theme === 'dark' ? colors.dark : colors.light;
   
   const [trip, setTrip] = useState<Ride | null>(null);
   const [tripStatus, setTripStatus] = useState<TripStatus>('driver_assigned');
-  const [estimatedArrival, setEstimatedArrival] = useState('8 min');
+  const [estimatedArrival] = useState('8 min');
   const [showOTP, setShowOTP] = useState(false);
-  const [otp, setOtp] = useState('4521');
+  const [otp] = useState('4521');
 
   useEffect(() => {
     // Find the specific trip
@@ -75,7 +75,7 @@ export default function LiveTrackingScreen() {
     }, 15000); // Change status every 15 seconds for demo
 
     return () => clearInterval(interval);
-  }, [params.id, rides]);
+  }, [params.id, rides, pastRides]);
 
   const getStatusMessage = () => {
     switch (tripStatus) {
@@ -146,7 +146,7 @@ export default function LiveTrackingScreen() {
         </Text>
         <Button
           title="Go Back"
-          onPress={() => router.back()}
+          onPress={() => {}}
           style={styles.backButton}
         />
       </LinearGradient>
@@ -271,7 +271,7 @@ export default function LiveTrackingScreen() {
               {otp}
             </Text>
             <Text style={[styles.otpSubtext, { color: colorScheme.subtext }]}>
-              Don't share this OTP until the driver arrives
+              Don&apos;t share this OTP until the driver arrives
             </Text>
           </GlassCard>
         )}

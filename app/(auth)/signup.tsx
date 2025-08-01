@@ -1,6 +1,5 @@
 import { Button } from '@/components/ui/Button';
 import { GlassCard } from '@/components/ui/GlassCard';
-import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import colors from '@/constants/colors';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
@@ -8,7 +7,7 @@ import { UserRole } from '@/types';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, Eye, EyeOff, Lock, Mail } from 'lucide-react-native';
+import { Eye, EyeOff, Lock, Mail } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
     KeyboardAvoidingView,
@@ -35,9 +34,7 @@ export default function SignUpScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [agreeToTerms, setAgreeToTerms] = useState(false);
 
-  const handleBack = () => {
-    router.back();
-  };
+
 
   const handleSignUp = () => {
     if (!agreeToTerms) {
@@ -123,17 +120,6 @@ export default function SignUpScreen() {
         keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          <View style={styles.header}>
-            <TouchableOpacity
-              onPress={handleBack}
-              style={styles.backButton}
-            >
-              <ArrowLeft size={24} color={colorScheme.primary} />
-            </TouchableOpacity>
-            
-            <ThemeToggle />
-          </View>
-          
           <View style={styles.content}>
             <Text style={[styles.title, { color: colorScheme.text }]}>
               Sign up

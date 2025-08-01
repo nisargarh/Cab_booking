@@ -143,7 +143,7 @@ export default function DriverDashboardScreen() {
               Waiting for ride requests...
             </Text>
             <Text style={[styles.waitingText, { color: colorScheme.subtext }]}>
-              You'll be notified when a new request comes in
+              You&apos;ll be notified when a new request comes in
             </Text>
           </GlassCard>
         )}
@@ -151,7 +151,7 @@ export default function DriverDashboardScreen() {
         {!isOnline && (
           <GlassCard style={styles.offlineCard}>
             <Text style={[styles.offlineTitle, { color: colorScheme.text }]}>
-              You're offline
+              You&apos;re offline
             </Text>
             <Text style={[styles.offlineText, { color: colorScheme.subtext }]}>
               Go online to start receiving ride requests

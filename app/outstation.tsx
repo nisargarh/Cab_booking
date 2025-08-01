@@ -45,7 +45,6 @@ export default function OutstationScreen() {
   const [pickup, setPickupLocal] = useState<Location | null>(null);
   const [dropoff, setDropoffLocal] = useState<Location | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [selectedTime, setSelectedTime] = useState<Date | null>(null);
   
   // Passenger info modal state
   const [passengerModalVisible, setPassengerModalVisible] = useState(false);
@@ -91,7 +90,6 @@ export default function OutstationScreen() {
 
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
-    setSelectedTime(date);
   };
 
   const handleReturnDateSelect = (date: Date) => {
@@ -421,7 +419,7 @@ export default function OutstationScreen() {
                 { borderColor: colorScheme.border }
               ]} />
               <Text style={[styles.workTravelText, { color: colorScheme.text }]}>
-                Bill to my company - I'm travelling for work
+                Bill to my company - I&apos;m travelling for work
               </Text>
             </View>
           </View>

@@ -44,7 +44,7 @@ export default function DriverOTPScreen() {
     
     // Auto-focus next input
     if (value && index < 3) {
-      const nextInput = `otp-${index + 1}`;
+      // const nextInput = `otp-${index + 1}`;
       // In a real app, you'd focus the next input
     }
     

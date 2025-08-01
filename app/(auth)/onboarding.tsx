@@ -14,14 +14,13 @@ import {
 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
-    Dimensions,
     StyleSheet,
     Text,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
 
-const { width } = Dimensions.get('window');
+// const { width } = Dimensions.get('window');
 
 const onboardingData = [
   {

@@ -68,11 +68,11 @@ export const SchedulePicker: React.FC<SchedulePickerProps> = ({
     setSelectedDate(newDate);
   };
 
-  const handleTimeSelect = (hour: number, minute: number) => {
-    const newTime = new Date();
-    newTime.setHours(hour, minute, 0, 0);
-    setSelectedTime(newTime);
-  };
+  // const handleTimeSelect = (hour: number, minute: number) => {
+  //   const newTime = new Date();
+  //   newTime.setHours(hour, minute, 0, 0);
+  //   setSelectedTime(newTime);
+  // };
 
   const adjustTime = (type: 'hour' | 'minute' | 'ampm', direction: 'up' | 'down') => {
     const newTime = new Date(selectedTime);
@@ -107,7 +107,7 @@ export const SchedulePicker: React.FC<SchedulePickerProps> = ({
     const year = selectedDate.getFullYear();
     const month = selectedDate.getMonth();
     const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
+    // const lastDay = new Date(year, month + 1, 0);
     const startDate = new Date(firstDay);
     startDate.setDate(startDate.getDate() - firstDay.getDay());
     
@@ -146,15 +146,15 @@ export const SchedulePicker: React.FC<SchedulePickerProps> = ({
     setSelectedDate(newDate);
   };
 
-  const timeSlots = [
-    { hour: 6, minute: 0, label: '06' },
-    { hour: 7, minute: 0, label: '07' },
-    { hour: 8, minute: 0, label: '08' },
-    { hour: 9, minute: 0, label: '09' },
-    { hour: 10, minute: 0, label: '10' },
-    { hour: 15, minute: 0, label: '15' },
-    { hour: 20, minute: 0, label: '20' },
-  ];
+  // const timeSlots = [
+  //   { hour: 6, minute: 0, label: '06' },
+  //   { hour: 7, minute: 0, label: '07' },
+  //   { hour: 8, minute: 0, label: '08' },
+  //   { hour: 9, minute: 0, label: '09' },
+  //   { hour: 10, minute: 0, label: '10' },
+  //   { hour: 15, minute: 0, label: '15' },
+  //   { hour: 20, minute: 0, label: '20' },
+  // ];
 
   const ScheduleModal = () => (
     <Modal

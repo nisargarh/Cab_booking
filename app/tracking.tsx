@@ -79,7 +79,7 @@ export default function TrackingScreen() {
     });
     
     return () => clearTimeout(timeoutId);
-  }, []);
+  }, [router]);
   
   const handleCall = () => {
     if (Platform.OS !== 'web') {

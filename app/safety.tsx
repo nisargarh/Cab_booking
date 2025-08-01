@@ -3,7 +3,7 @@ import colors from '@/constants/colors';
 import { useTheme } from '@/hooks/useTheme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, MapPin, Moon, Phone, Shield, Sun, Users } from 'lucide-react-native';
+import { MapPin, Phone, Shield, Users } from 'lucide-react-native';
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -65,21 +65,7 @@ export default function SafetyScreen() {
       ]}
       style={styles.container}
     >
-      <View style={[styles.header, { backgroundColor: colorScheme.background }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <ArrowLeft size={24} color={colorScheme.text} />
-        </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colorScheme.text }]}>
-          Safety
-        </Text>
-        <TouchableOpacity onPress={toggleTheme} style={styles.themeButton}>
-          {theme === 'dark' ? (
-            <Sun size={24} color={colorScheme.text} />
-          ) : (
-            <Moon size={24} color={colorScheme.text} />
-          )}
-        </TouchableOpacity>
-      </View>
+      
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.heroSection}>
@@ -90,7 +76,7 @@ export default function SafetyScreen() {
             Your Safety is Our Priority
           </Text>
           <Text style={[styles.subtitle, { color: colorScheme.subtext }]}>
-            We've built multiple safety features to ensure you have a secure and comfortable ride experience.
+            We&apos;ve built multiple safety features to ensure you have a secure and comfortable ride experience.
           </Text>
         </View>
 
@@ -155,6 +141,17 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0,0,0,0.1)',
   },
+  headerSimple: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.1)',
+    position: 'relative',
+  },
   backButton: {
     padding: 4,
   },
@@ -166,6 +163,8 @@ const styles = StyleSheet.create({
     padding: 4,
     width: 32,
     alignItems: 'center',
+    position: 'absolute',
+    right: 20,
   },
   scrollContent: {
     padding: 20,

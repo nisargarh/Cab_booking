@@ -5,7 +5,7 @@ import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Stack, useRouter } from 'expo-router';
+import { Stack } from 'expo-router';
 import { Camera, Car, Edit, Save } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -22,7 +22,7 @@ interface VehicleInfo {
 }
 
 export default function VehicleInfoScreen() {
-  const router = useRouter();
+  // const router = useRouter();
   const { theme } = useTheme();
   const colorScheme = theme === 'dark' ? colors.dark : colors.light;
   

@@ -120,7 +120,7 @@ Thank you for choosing our service!
           </Text>
 
           <Text style={[styles.subtitle, { color: colorScheme.subtext }]}>
-            Your booking has been confirmed. You'll receive driver details 15 minutes before your scheduled time.
+            Your booking has been confirmed. You&apos;ll receive driver details 15 minutes before your scheduled time.
           </Text>
 
           {/* Trip Summary */}

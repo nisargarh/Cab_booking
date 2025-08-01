@@ -1,6 +1,5 @@
 import { Button } from '@/components/ui/Button';
 import { GlassCard } from '@/components/ui/GlassCard';
-import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import colors from '@/constants/colors';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
@@ -8,7 +7,7 @@ import { UserRole } from '@/types';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, Mail, Phone } from 'lucide-react-native';
+import { Mail, Phone } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
     KeyboardAvoidingView,
@@ -38,13 +37,7 @@ export default function LoginScreen() {
   const [otp, setOtp] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleBack = () => {
-    if (currentStep === 'otp') {
-      setCurrentStep('login');
-    } else {
-      router.back();
-    }
-  };
+
 
   const handleEmailLogin = () => {
     if (Platform.OS !== 'web') {
@@ -160,7 +153,7 @@ export default function LoginScreen() {
       
       <View style={styles.signUpRedirect}>
         <Text style={[styles.signUpText, { color: colorScheme.subtext }]}>
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
         </Text>
         <TouchableOpacity onPress={handleSignUpRedirect}>
           <Text style={[styles.signUpLink, { color: colorScheme.primary }]}>
@@ -286,7 +279,7 @@ export default function LoginScreen() {
                 />
               </View>
               <Text style={[styles.phoneNote, { color: colorScheme.subtext }]}>
-                We'll send you a 6-digit verification code
+                We&apos;ll send you a 6-digit verification code
               </Text>
             </View>
             
@@ -332,7 +325,7 @@ export default function LoginScreen() {
       
       <View style={styles.signUpRedirect}>
         <Text style={[styles.signUpText, { color: colorScheme.subtext }]}>
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
         </Text>
         <TouchableOpacity onPress={handleSignUpRedirect}>
           <Text style={[styles.signUpLink, { color: colorScheme.primary }]}>
@@ -441,17 +434,6 @@ export default function LoginScreen() {
         keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          <View style={styles.header}>
-            <TouchableOpacity
-              onPress={handleBack}
-              style={styles.backButton}
-            >
-              <ArrowLeft size={24} color={colorScheme.primary} />
-            </TouchableOpacity>
-            
-            <ThemeToggle />
-          </View>
-          
           <View style={styles.content}>
             {currentStep === 'login' ? renderLogin() : renderOtpVerification()}
           </View>

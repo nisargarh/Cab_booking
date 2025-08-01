@@ -1,18 +1,17 @@
-import React, { useEffect } from 'react';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { useTheme } from '@/hooks/useTheme';
-import { useAuth } from '@/hooks/useAuth';
-import * as SplashScreen from 'expo-splash-screen';
-import { View, StyleSheet } from 'react-native';
 import colors from '@/constants/colors';
+import { useTheme } from '@/hooks/useTheme';
+import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
+import React, { useEffect } from 'react';
+import { StyleSheet, View } from 'react-native';
 
 // Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const { theme } = useTheme();
-  const { isAuthenticated, selectedRole } = useAuth();
+  // const { isAuthenticated, selectedRole } = useAuth();
   
   useEffect(() => {
     // Hide splash screen after a delay
@@ -37,7 +36,7 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const { theme } = useTheme();
-  const { isAuthenticated, selectedRole } = useAuth();
+  // const { isAuthenticated, selectedRole } = useAuth();
   const colorScheme = theme === 'dark' ? colors.dark : colors.light;
   
   return (

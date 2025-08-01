@@ -10,6 +10,19 @@ export const ThemeToggle: React.FC = () => {
   const isDark = theme === 'dark';
   const colorScheme = isDark ? colors.dark : colors.light;
   
+  // Initialize hooks at top level for all platforms
+  const offset = useSharedValue(isDark ? 22 : 0);
+  
+  React.useEffect(() => {
+    offset.value = withSpring(isDark ? 22 : 0);
+  }, [isDark, offset]);
+  
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: offset.value }],
+    };
+  });
+
   // Use regular animation for web to avoid layout animation issues
   if (Platform.OS === 'web') {
     return (
@@ -37,19 +50,6 @@ export const ThemeToggle: React.FC = () => {
       </TouchableOpacity>
     );
   }
-  
-  // Use Reanimated for native platforms
-  const offset = useSharedValue(isDark ? 22 : 0);
-  
-  React.useEffect(() => {
-    offset.value = withSpring(isDark ? 22 : 0);
-  }, [isDark, offset]);
-  
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ translateX: offset.value }],
-    };
-  });
   
   return (
     <TouchableOpacity

@@ -2,36 +2,37 @@ import { AppHeader } from '@/components/ui/AppHeader';
 import { DrawerMenu } from '@/components/ui/DrawerMenu';
 import { GlassCard } from '@/components/ui/GlassCard';
 import colors from '@/constants/colors';
+import { useRides } from '@/hooks/useRides';
 import { useTheme } from '@/hooks/useTheme';
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import {
-    Car,
-    Clock,
-    CreditCard,
-    MapPin,
-    Plane,
-    Shield
+  Car,
+  Clock,
+  CreditCard,
+  MapPin,
+  Plane,
+  Shield
 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
-    Dimensions,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
-const { width: screenWidth } = Dimensions.get('window');
+// const { width: screenWidth } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const { theme } = useTheme();
   const router = useRouter();
+  const { setBookingType } = useRides();
   const colorScheme = theme === 'dark' ? colors.dark : colors.light;
   const [drawerVisible, setDrawerVisible] = useState(false);
-  const [searchText, setSearchText] = useState('');
+  // const [searchText, setSearchText] = useState('');
 
   const handleMenuPress = () => {
     if (Platform.OS !== 'web') {
@@ -44,7 +45,27 @@ export default function HomeScreen() {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    router.push('/(rider-tabs)/services');
+    
+    switch (service) {
+      case 'airport':
+        setBookingType('airport');
+        router.push('/airport-transfer');
+        break;
+      case 'city':
+        setBookingType('city');
+        router.push('/booking');
+        break;
+      case 'hourly':
+        setBookingType('hourly');
+        router.push('/hourly-rental');
+        break;
+      case 'outstation':
+        setBookingType('outstation');
+        router.push('/outstation');
+        break;
+      default:
+        router.push('/(rider-tabs)/services');
+    }
   };
 
   const ServiceIcon = ({ 

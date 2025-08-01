@@ -12,14 +12,14 @@ import { Stack, useRouter } from 'expo-router';
 import { Minus, Plus, Users, X } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
-    Modal,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 type AirportTransferType = 'drop' | 'pickup';
@@ -46,7 +46,6 @@ export default function AirportTransferScreen() {
   const [pickup, setPickupLocal] = useState<Location | null>(null);
   const [dropoff, setDropoffLocal] = useState<Location | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [selectedTime, setSelectedTime] = useState<Date | null>(null);
   const [flightNumber, setFlightNumber] = useState('');
   const [selectedTerminal, setSelectedTerminal] = useState<'T1' | 'T2' | null>(null);
   
@@ -107,7 +106,7 @@ export default function AirportTransferScreen() {
 
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
-    setSelectedTime(date); // Since SchedulePicker combines date and time
+    // SchedulePicker combines date and time, so no separate time state needed
   };
 
   const handleGuestInfoChange = (field: keyof GuestInfo, increment: boolean) => {

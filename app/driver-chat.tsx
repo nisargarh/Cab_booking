@@ -4,7 +4,7 @@ import { useTheme } from '@/hooks/useTheme';
 import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Stack, useRouter } from 'expo-router';
+import { Stack } from 'expo-router';
 import { Phone, Send } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -38,7 +38,7 @@ const mockMessages: Message[] = [
 ];
 
 export default function DriverChatScreen() {
-  const router = useRouter();
+  // const router = useRouter();
   const { theme } = useTheme();
   const colorScheme = theme === 'dark' ? colors.dark : colors.light;
   
