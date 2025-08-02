@@ -244,7 +244,7 @@ Thank you for choosing our service!
             <Button
               title="Book a Ride"
               onPress={handleBookRide}
-              style={[styles.primaryButton, { backgroundColor: colorScheme.secondary }]}
+              style={[styles.primaryButton, { backgroundColor: colorScheme.accent }]}
             />
 
             <TouchableOpacity

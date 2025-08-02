@@ -184,7 +184,7 @@ export default function CarSelectionScreen() {
           disabled={!selectedVehicle}
           style={[
             styles.continueButton,
-            selectedVehicle && { backgroundColor: colorScheme.primary }
+            ...(selectedVehicle ? [{ backgroundColor: colorScheme.primary }] : [])
           ]}
         />
       </ScrollView>

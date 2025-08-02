@@ -19,7 +19,7 @@ interface ButtonProps extends TouchableOpacityProps {
   size?: 'small' | 'medium' | 'large';
   loading?: boolean;
   disabled?: boolean;
-  style?: ViewStyle;
+  style?: ViewStyle | ViewStyle[];
   textStyle?: TextStyle;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
@@ -200,7 +200,7 @@ const textSizeStyles = {
 
 const styles = StyleSheet.create({
   button: {
-    borderRadius: 12,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
@@ -213,6 +213,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
+    borderRadius: 16,
   },
   text: {
     fontWeight: '600',

@@ -237,7 +237,7 @@ export default function LiveTrackingScreen() {
                 <View style={styles.vehicleInfo}>
                   <Car size={14} color={colorScheme.subtext} />
                   <Text style={[styles.vehicleText, { color: colorScheme.subtext }]}>
-                    {trip.vehicle?.brand} {trip.vehicle?.model}
+                    {trip.vehicle?.name}
                   </Text>
                 </View>
               </View>

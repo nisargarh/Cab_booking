@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
   input: {
     height: 50,
     borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: 16,
     paddingHorizontal: 40,
     fontSize: 16,
   },
@@ -376,7 +376,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     height: 50,
     borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: 16,
     marginBottom: 24,
   },
   googleIcon: {

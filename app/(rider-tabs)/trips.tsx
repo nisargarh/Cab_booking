@@ -67,16 +67,21 @@ export default function TripsScreen() {
       date: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString().split('T')[0], // 2 hours from now
       time: new Date(Date.now() + 2 * 60 * 60 * 1000).toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
       passengers: 2,
-      status: 'active',
+      passengerInfo: [
+        { name: 'John Doe', age: 30, phone: '1234567890' },
+        { name: 'Jane Doe', age: 28, phone: '0987654321' }
+      ],
+      status: 'pending',
       vehicle: {
         id: 'v1',
-        brand: 'Toyota',
-        model: 'Innova Crysta',
+        name: 'Toyota Innova Crysta',
         type: 'SUV',
-        seats: 7,
-        features: ['AC', 'GPS', 'Music System'],
-        pricePerKm: 12,
         image: 'https://example.com/innova.jpg',
+        capacity: 7,
+        price: 12,
+        rating: 4.5,
+        seatingCapacity: 7,
+        features: ['AC', 'GPS', 'Music System'],
       },
       fare: {
         base: 300,
@@ -115,7 +120,10 @@ export default function TripsScreen() {
       date: new Date(Date.now() + 8 * 60 * 1000).toISOString().split('T')[0], // 8 minutes from now
       time: new Date(Date.now() + 8 * 60 * 1000).toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
       passengers: 1,
-      status: 'active',
+      passengerInfo: [
+        { name: 'John Doe', age: 30, phone: '1234567890' }
+      ],
+      status: 'accepted',
       fare: {
         base: 250,
         distance: 0,

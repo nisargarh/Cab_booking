@@ -6,9 +6,9 @@ import { useRouter } from 'expo-router';
 import { Car, MapPin, Shield } from 'lucide-react-native';
 import React from 'react';
 import {
-    StyleSheet,
-    Text,
-    View
+  StyleSheet,
+  Text,
+  View
 } from 'react-native';
 
 export default function AuthSelectionScreen() {
@@ -70,13 +70,14 @@ export default function AuthSelectionScreen() {
             style={[styles.primaryButton, { backgroundColor: colorScheme.primary }]}
             textStyle={{ color: theme === 'dark' ? '#000000' : '#FFFFFF' }}
           />
-          
+
+      
           <Button
             title="Login"
             onPress={handleLogin}
             style={[styles.secondaryButton, { borderColor: colorScheme.border }]}
             textStyle={{ color: colorScheme.text }}
-            variant="outline"
+            variant="outlined"
           />
         </View>
 

@@ -245,10 +245,10 @@ export default function TripDetailsScreen() {
               <Car size={24} color={colorScheme.primary} />
               <View style={styles.vehicleDetails}>
                 <Text style={[styles.vehicleName, { color: colorScheme.text }]}>
-                  {trip.vehicle.brand} {trip.vehicle.model}
+                  {trip.vehicle.name}
                 </Text>
                 <Text style={[styles.vehicleType, { color: colorScheme.subtext }]}>
-                  {trip.vehicle.type} • {trip.vehicle.seats} seats
+                  {trip.vehicle.type} • {trip.vehicle.seatingCapacity} seats
                 </Text>
                 <Text style={[styles.vehicleFeatures, { color: colorScheme.subtext }]}>
                   {trip.vehicle.features?.join(' • ')}

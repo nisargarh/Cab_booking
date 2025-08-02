@@ -53,7 +53,7 @@ export default function RoleSelectionScreen() {
                 Rider
               </Text>
               <Text style={[styles.roleDescription, { color: colorScheme.subtext }]}>
-                Book rides and travel with comfort
+                Book{'\n'}rides and{'\n'}travel with
               </Text>
             </GlassCard>
           </TouchableOpacity>
@@ -69,7 +69,7 @@ export default function RoleSelectionScreen() {
                 Driver
               </Text>
               <Text style={[styles.roleDescription, { color: colorScheme.subtext }]}>
-                Accept ride requests and earn
+                Accept ride{'\n'}requests{'\n'}and earn
               </Text>
             </GlassCard>
           </TouchableOpacity>
@@ -119,10 +119,12 @@ const styles = StyleSheet.create({
     minWidth: 150,
   },
   roleCard: {
-    padding: 24,
+    padding: 32,
     alignItems: 'center',
     justifyContent: 'center',
-    aspectRatio: 0.8,
+    aspectRatio: 0.85,
+    borderRadius: 20,
+    minHeight: 200,
   },
   roleTitle: {
     fontSize: 20,
@@ -133,6 +135,7 @@ const styles = StyleSheet.create({
   roleDescription: {
     fontSize: 14,
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: 18,
+    marginTop: 4,
   },
 });

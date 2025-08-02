@@ -5,19 +5,19 @@ import { useTheme } from '@/hooks/useTheme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import {
-    Car,
-    Clock,
-    MapPin,
-    Plane,
-    Shield,
-    Users
+  Car,
+  Clock,
+  MapPin,
+  Plane,
+  Shield,
+  Users
 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 // const { width } = Dimensions.get('window');
@@ -356,7 +356,7 @@ const styles = StyleSheet.create({
   backButton: {
     paddingVertical: 12,
     paddingHorizontal: 24,
-    borderRadius: 12,
+    borderRadius: 16,
     borderWidth: 1,
     minWidth: 80,
     alignItems: 'center',

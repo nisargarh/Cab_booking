@@ -1,3 +1,4 @@
+import colors from '@/constants/colors';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
 import * as Haptics from 'expo-haptics';
@@ -39,6 +40,7 @@ export function DrawerMenu({ visible, onClose }: DrawerMenuProps) {
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
   const router = useRouter();
+  const colorScheme = theme === 'dark' ? colors.dark : colors.light;
 
   const handleNavigation = (route: string) => {
     console.log('🚀 Attempting navigation to:', route);
@@ -127,7 +129,7 @@ export function DrawerMenu({ visible, onClose }: DrawerMenuProps) {
     isLogout?: boolean;
   }) => (
     <TouchableOpacity 
-      style={[styles.menuItem, { backgroundColor: '#FFFFFF' }]} 
+      style={[styles.menuItem, { backgroundColor: colorScheme.background }]} 
       onPress={() => {
         console.log('🔘 Menu item pressed:', title);
         onPress?.();
@@ -142,7 +144,7 @@ export function DrawerMenu({ visible, onClose }: DrawerMenuProps) {
       <Text style={[
         styles.menuTitle, 
         { 
-          color: isLogout ? '#EF4444' : '#000000',
+          color: isLogout ? '#EF4444' : colorScheme.text,
           flex: 1,
           backgroundColor: 'transparent'
         }
@@ -181,16 +183,16 @@ export function DrawerMenu({ visible, onClose }: DrawerMenuProps) {
         />
         
         {/* Drawer */}
-        <View style={[styles.drawer, { backgroundColor: '#FFFFFF' }]}>
-          <View style={[styles.drawerContent, { backgroundColor: '#FFFFFF' }]}>
+        <View style={[styles.drawer, { backgroundColor: colorScheme.background }]}>
+          <View style={[styles.drawerContent, { backgroundColor: colorScheme.background }]}>
             {/* Header */}
-            <View style={[styles.header, { backgroundColor: '#FFFFFF' }]}>
+            <View style={[styles.header, { backgroundColor: colorScheme.background }]}>
               <View style={[styles.headerTop, { backgroundColor: 'transparent' }]}>
-                <Text style={[styles.menuText, { color: '#666666', backgroundColor: 'transparent' }]}>
+                <Text style={[styles.menuText, { color: colorScheme.subtext, backgroundColor: 'transparent' }]}>
                   Menu
                 </Text>
                 <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                  <X size={24} color="#000000" />
+                  <X size={24} color={colorScheme.text} />
                 </TouchableOpacity>
               </View>
               
@@ -203,19 +205,19 @@ export function DrawerMenu({ visible, onClose }: DrawerMenuProps) {
                 }}
                 activeOpacity={0.7}
               >
-                <View style={[styles.avatar, { backgroundColor: '#000000' }]}>
-                  <User size={24} color="#FFFFFF" />
+                <View style={[styles.avatar, { backgroundColor: colorScheme.primary }]}>
+                  <User size={24} color={theme === 'dark' ? '#000000' : '#FFFFFF'} />
                 </View>
                 <View style={[styles.userInfo, { backgroundColor: 'transparent' }]}>
-                  <Text style={[styles.userName, { color: '#000000', backgroundColor: 'transparent' }]}>
+                  <Text style={[styles.userName, { color: colorScheme.text, backgroundColor: 'transparent' }]}>
                     {user?.name || 'John Doe'}
                   </Text>
-                  <Text style={[styles.userEmail, { color: '#666666', backgroundColor: 'transparent' }]}>
+                  <Text style={[styles.userEmail, { color: colorScheme.subtext, backgroundColor: 'transparent' }]}>
                     {user?.email || 'john.doe@example.com'}
                   </Text>
                   <View style={[styles.ratingContainer, { backgroundColor: 'transparent' }]}>
                     <Star size={12} color="#F59E0B" fill="#F59E0B" />
-                    <Text style={[styles.ratingText, { color: '#666666', backgroundColor: 'transparent' }]}>
+                    <Text style={[styles.ratingText, { color: colorScheme.subtext, backgroundColor: 'transparent' }]}>
                       4.8 • 24 trips
                     </Text>
                   </View>
@@ -224,55 +226,55 @@ export function DrawerMenu({ visible, onClose }: DrawerMenuProps) {
             </View>
 
             <ScrollView 
-              style={[styles.menuContainer, { backgroundColor: '#FFFFFF' }]} 
+              style={[styles.menuContainer, { backgroundColor: colorScheme.background }]} 
               showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ backgroundColor: '#FFFFFF' }}
+              contentContainerStyle={{ backgroundColor: colorScheme.background }}
             >
               <MenuItem
-                icon={<Home size={20} color="#000000" />}
+                icon={<Home size={20} color={colorScheme.text} />}
                 title="Home"
                 onPress={() => handleNavigation('/(rider-tabs)')}
               />
 
               <MenuItem
-                icon={<History size={20} color="#000000" />}
+                icon={<History size={20} color={colorScheme.text} />}
                 title="Your Rides"
                 onPress={() => handleNavigation('/(rider-tabs)/trips')}
               />
 
               <MenuItem
-                icon={<Star size={20} color="#000000" />}
+                icon={<Star size={20} color={colorScheme.text} />}
                 title="Offers"
                 onPress={() => handleNavigation('/offers')}
               />
 
               <MenuItem
-                icon={<HelpCircle size={20} color="#000000" />}
+                icon={<HelpCircle size={20} color={colorScheme.text} />}
                 title="Support"
                 onPress={() => handleNavigation('/support')}
               />
 
               <MenuItem
-                icon={<Moon size={20} color="#000000" />}
-                title="Dark Mode"
+                icon={<Moon size={20} color={colorScheme.text} />}
+                title={theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
                 showToggle={true}
                 toggleValue={theme === 'dark'}
                 onToggle={handleToggleDarkMode}
               />
 
               <MenuItem
-                icon={<Settings size={20} color="#000000" />}
+                icon={<Settings size={20} color={colorScheme.text} />}
                 title="Settings"
                 onPress={() => handleNavigation('/settings')}
               />
 
               <MenuItem
-                icon={<Shield size={20} color="#000000" />}
+                icon={<Shield size={20} color={colorScheme.text} />}
                 title="Safety"
                 onPress={() => handleNavigation('/safety')}
               />
 
-              <View style={[styles.divider, { backgroundColor: 'rgba(0, 0, 0, 0.15)' }]} />
+              <View style={[styles.divider, { backgroundColor: colorScheme.border }]} />
 
               <MenuItem
                 icon={<LogOut size={20} color="#EF4444" />}
@@ -282,7 +284,7 @@ export function DrawerMenu({ visible, onClose }: DrawerMenuProps) {
               />
               
               {/* Extra spacing at bottom */}
-              <View style={{ height: 50, backgroundColor: '#FFFFFF' }} />
+              <View style={{ height: 50, backgroundColor: colorScheme.background }} />
             </ScrollView>
           </View>
         </View>

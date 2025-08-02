@@ -10,14 +10,14 @@ import { useRouter } from 'expo-router';
 import { Mail, Phone } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 type LoginMethod = 'email' | 'phone';
@@ -499,7 +499,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 12,
     paddingHorizontal: 16,
-    borderRadius: 12,
+    borderRadius: 16,
     borderWidth: 1,
     marginHorizontal: 4,
   },
@@ -525,7 +525,7 @@ const styles = StyleSheet.create({
   input: {
     height: 50,
     borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: 16,
     paddingHorizontal: 16,
     fontSize: 16,
   },
@@ -543,7 +543,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 50,
     borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: 16,
     paddingHorizontal: 16,
     fontSize: 16,
   },
@@ -573,7 +573,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     height: 50,
     borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: 16,
     marginBottom: 24,
   },
   googleIcon: {
@@ -608,7 +608,7 @@ const styles = StyleSheet.create({
   otpInput: {
     height: 50,
     borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: 16,
     paddingHorizontal: 16,
     fontSize: 18,
     textAlign: 'center',

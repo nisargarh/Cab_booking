@@ -1,6 +1,6 @@
-import React from "react";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Link, Tabs } from "expo-router";
+import React from "react";
 import { Pressable } from "react-native";
 
 import Colors from "@/constants/colors";
@@ -16,7 +16,7 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors.light.tint,
+        tabBarActiveTintColor: Colors.light.primary,
         headerShown: true,
       }}
     >
@@ -24,7 +24,7 @@ export default function TabLayout() {
         name="index"
         options={{
           title: "Tab One",
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          tabBarIcon: ({ color }: { color: string }) => <TabBarIcon name="code" color={color} />,
           headerRight: () => (
             <Link href="/modal" asChild>
               <Pressable>

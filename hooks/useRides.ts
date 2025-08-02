@@ -1,4 +1,4 @@
-import { BookingType, Location, Ride, TripType, Vehicle } from '@/types';
+import { BookingType, Location, Ride, RideStatus, TripType, Vehicle } from '@/types';
 import { create } from 'zustand';
 
 type RideState = {
@@ -156,7 +156,7 @@ export const useRideStore = create<RideState>((set) => ({
   updateRideStatus: (rideId, status) =>
     set((state) => ({
       rides: state.rides.map(ride =>
-        ride.id === rideId ? { ...ride, status } : ride
+        ride.id === rideId ? { ...ride, status: status as RideStatus } : ride
       ),
     })),
   

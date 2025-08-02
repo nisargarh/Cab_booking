@@ -12,13 +12,13 @@ import { Stack, useRouter } from 'expo-router';
 import { Minus, Plus, Users, X } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
-    Modal,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 type OutstationType = 'oneway' | 'roundtrip';
@@ -520,7 +520,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   selectCarsButton: {
-    marginTop: 8,
+    marginTop: 4,
   },
   // Modal styles
   modalOverlay: {

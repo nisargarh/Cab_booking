@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
   badge: {
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 16,
   },
   badgeText: {
     fontSize: 12,
@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
   },
   mapPreview: {
     height: 80,
-    borderRadius: 12,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,

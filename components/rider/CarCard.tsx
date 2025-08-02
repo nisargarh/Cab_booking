@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
   featureTag: {
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 16,
     marginRight: 8,
     marginBottom: 4,
   },

@@ -12,13 +12,13 @@ import { Stack, useRouter } from 'expo-router';
 import { Clock, Luggage, Minus, Plus, Users, X } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
-    Modal,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Modal,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 interface PassengerInfo {
@@ -29,7 +29,7 @@ interface PassengerInfo {
 export default function HourlyRentalScreen() {
   const router = useRouter();
   const { theme } = useTheme();
-  const { setPickup, setDropoff, setDateTime, setPassengers } = useRides();
+  const { setPickup, setDropoff, setDateTime, setPassengers, setBookingType } = useRides();
   const colorScheme = theme === 'dark' ? colors.dark : colors.light;
 
   const [pickup, setPickupLocal] = useState<Location | null>(null);
