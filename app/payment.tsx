@@ -7,24 +7,24 @@ import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Stack, useRouter } from 'expo-router';
 import {
-    CheckCircle,
-    Clock,
-    CreditCard,
-    MapPin,
-    Smartphone,
-    User,
-    Users
+  CheckCircle,
+  Clock,
+  CreditCard,
+  MapPin,
+  Smartphone,
+  User,
+  Users
 } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-    Alert,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Alert,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 type PaymentMethod = 'card' | 'upi';
@@ -348,31 +348,32 @@ export default function PaymentScreen() {
           
           {/* Action Buttons */}
           <View style={styles.actionButtons}>
-            <Button
-              title="View Trip Details"
-              onPress={handleViewTripDetails}
-              size="large"
-              style={[styles.primaryButton, { backgroundColor: '#000000' }]}
-            />
+            <View style={styles.topButtonContainer}>
+              <Button
+                title="View Trip Details"
+                onPress={handleViewTripDetails}
+                style={[styles.secondaryButton, { borderColor: colorScheme.border, backgroundColor: 'transparent' }]}
+                textStyle={{ color: colorScheme.text }}
+                variant="outlined"
+              />
+            </View>
             
             <View style={styles.secondaryButtons}>
-              <TouchableOpacity 
-                style={[styles.secondaryButton, { borderColor: colorScheme.border }]}
+              <Button
+                title="Book Another Ride"
                 onPress={handleBookAnotherRide}
-              >
-                <Text style={[styles.secondaryButtonText, { color: colorScheme.text }]}>
-                  Book Another Ride
-                </Text>
-              </TouchableOpacity>
+                style={[styles.secondaryButton, { borderColor: colorScheme.border, backgroundColor: 'transparent' }]}
+                textStyle={{ color: colorScheme.text }}
+                variant="outlined"
+              />
               
-              <TouchableOpacity 
-                style={[styles.secondaryButton, { borderColor: colorScheme.border }]}
+              <Button
+                title="Download Receipt"
                 onPress={handleDownloadReceipt}
-              >
-                <Text style={[styles.secondaryButtonText, { color: colorScheme.text }]}>
-                  Download Receipt
-                </Text>
-              </TouchableOpacity>
+                style={[styles.secondaryButton, { borderColor: colorScheme.border, backgroundColor: 'transparent' }]}
+                textStyle={{ color: colorScheme.text }}
+                variant="outlined"
+              />
             </View>
           </View>
           
@@ -1132,6 +1133,10 @@ const styles = StyleSheet.create({
   // Action Buttons
   actionButtons: {
     marginBottom: 20,
+  },
+  topButtonContainer: {
+    flexDirection: 'row',
+    marginBottom: 12,
   },
   primaryButton: {
     paddingVertical: 16,

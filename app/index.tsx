@@ -52,9 +52,6 @@ export default function RoleSelectionScreen() {
               <Text style={[styles.roleTitle, { color: colorScheme.text }]}>
                 Rider
               </Text>
-              <Text style={[styles.roleDescription, { color: colorScheme.subtext }]}>
-                Book{'\n'}rides and{'\n'}travel with
-              </Text>
             </GlassCard>
           </TouchableOpacity>
           
@@ -67,9 +64,6 @@ export default function RoleSelectionScreen() {
               <Car size={40} color={colorScheme.primary} />
               <Text style={[styles.roleTitle, { color: colorScheme.text }]}>
                 Driver
-              </Text>
-              <Text style={[styles.roleDescription, { color: colorScheme.subtext }]}>
-                Accept ride{'\n'}requests{'\n'}and earn
               </Text>
             </GlassCard>
           </TouchableOpacity>
@@ -109,33 +103,26 @@ const styles = StyleSheet.create({
   },
   cardsContainer: {
     width: '100%',
-    maxWidth: 500,
+    maxWidth: 400,
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 12, // Small gap between rider and driver cards
   },
   cardWrapper: {
-    width: '48%',
-    minWidth: 150,
+    flex: 1, // Equal width for both cards
+    maxWidth: 180, // Prevent cards from getting too wide
   },
   roleCard: {
-    padding: 32,
+    padding: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    aspectRatio: 0.85,
+    aspectRatio: 1, // Make cards square
     borderRadius: 20,
-    minHeight: 200,
+    minHeight: 160,
   },
   roleTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '600',
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  roleDescription: {
-    fontSize: 14,
-    textAlign: 'center',
-    lineHeight: 18,
-    marginTop: 4,
+    marginTop: 12,
   },
 });

@@ -4,7 +4,7 @@ import { Ride } from '@/types';
 import { useRouter } from 'expo-router';
 import { Calendar, Car, CheckCircle, Download, MapPin, Users } from 'lucide-react-native';
 import React from 'react';
-import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Modal, StyleSheet, Text, View } from 'react-native';
 import { Button } from './Button';
 import { GlassCard } from './GlassCard';
 
@@ -238,24 +238,27 @@ Thank you for choosing our service!
             <Button
               title="View Details"
               onPress={handleViewDetails}
-              style={[styles.primaryButton, { backgroundColor: colorScheme.primary }]}
+              style={[styles.primaryButton, { borderColor: colorScheme.primary, backgroundColor: 'transparent' }]}
+              textStyle={{ color: colorScheme.primary }}
+              variant="outlined"
             />
 
             <Button
               title="Book a Ride"
               onPress={handleBookRide}
-              style={[styles.primaryButton, { backgroundColor: colorScheme.accent }]}
+              style={[styles.primaryButton, { borderColor: colorScheme.primary, backgroundColor: 'transparent' }]}
+              textStyle={{ color: colorScheme.primary }}
+              variant="outlined"
             />
 
-            <TouchableOpacity
-              style={[styles.downloadButton, { borderColor: colorScheme.primary }]}
+            <Button
+              title="Download Receipt"
               onPress={handleDownloadReceipt}
-            >
-              <Download size={20} color={colorScheme.primary} />
-              <Text style={[styles.downloadButtonText, { color: colorScheme.primary }]}>
-                Download Receipt
-              </Text>
-            </TouchableOpacity>
+              style={[styles.primaryButton, { borderColor: colorScheme.primary, backgroundColor: 'transparent' }]}
+              textStyle={{ color: colorScheme.primary }}
+              leftIcon={<Download size={20} color={colorScheme.primary} />}
+              variant="outlined"
+            />
           </View>
         </GlassCard>
       </View>
@@ -358,19 +361,5 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     marginBottom: 4,
-  },
-  downloadButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 48,
-    borderWidth: 2,
-    borderRadius: 12,
-    gap: 8,
-    marginTop: 8,
-  },
-  downloadButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
   },
 });

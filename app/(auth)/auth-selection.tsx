@@ -67,15 +67,22 @@ export default function AuthSelectionScreen() {
           <Button
             title="Sign Up"
             onPress={handleSignUp}
-            style={[styles.primaryButton, { backgroundColor: colorScheme.primary }]}
+            style={[
+              styles.buttonBase,
+              styles.primaryButton, 
+              { backgroundColor: colorScheme.primary }
+            ]}
             textStyle={{ color: theme === 'dark' ? '#000000' : '#FFFFFF' }}
           />
-
-      
+          
           <Button
             title="Login"
             onPress={handleLogin}
-            style={[styles.secondaryButton, { borderColor: colorScheme.border }]}
+            style={[
+              styles.buttonBase,
+              styles.secondaryButton, 
+              { borderColor: colorScheme.border }
+            ]}
             textStyle={{ color: colorScheme.text }}
             variant="outlined"
           />
@@ -83,13 +90,19 @@ export default function AuthSelectionScreen() {
 
         {/* Service icons */}
         <View style={styles.servicesContainer}>
-          <View style={[styles.serviceIcon, { backgroundColor: colorScheme.card }]}>
+          <View style={[styles.serviceIcon, { 
+            backgroundColor: theme === 'dark' ? colorScheme.card : 'rgba(0, 0, 0, 0.05)' 
+          }]}>
             <Car size={20} color={colorScheme.primary} />
           </View>
-          <View style={[styles.serviceIcon, { backgroundColor: colorScheme.card }]}>
+          <View style={[styles.serviceIcon, { 
+            backgroundColor: theme === 'dark' ? colorScheme.card : 'rgba(0, 0, 0, 0.05)' 
+          }]}>
             <MapPin size={20} color={colorScheme.primary} />
           </View>
-          <View style={[styles.serviceIcon, { backgroundColor: colorScheme.card }]}>
+          <View style={[styles.serviceIcon, { 
+            backgroundColor: theme === 'dark' ? colorScheme.card : 'rgba(0, 0, 0, 0.05)' 
+          }]}>
             <Shield size={20} color={colorScheme.primary} />
           </View>
         </View>
@@ -191,7 +204,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: 'rgba(128, 128, 128, 0.2)',
+    backgroundColor: 'rgba(128, 128, 128, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -220,9 +233,18 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 300,
     marginBottom: 40,
+    flexDirection: 'column',
+    alignItems: 'center', // Center align the buttons
+    gap: 16, // Add gap between buttons
+  },
+  buttonBase: {
+    width: 280, // Fixed width for both buttons
+    height: 48, // Fixed height for both buttons
+    paddingHorizontal: 0, // Override any internal padding
+    minWidth: 280, // Ensure minimum width
+    maxWidth: 280, // Ensure maximum width
   },
   primaryButton: {
-    marginBottom: 16,
     backgroundColor: '#00CED1',
   },
   secondaryButton: {
@@ -233,7 +255,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
   },
   serviceIcon: {
     width: 44,
@@ -241,7 +263,7 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
-    marginHorizontal: 16,
+    marginHorizontal: 12,
   },
   serviceLabels: {
     flexDirection: 'row',
@@ -251,7 +273,7 @@ const styles = StyleSheet.create({
   serviceLabel: {
     fontSize: 12,
     textAlign: 'center',
-    marginHorizontal: 16,
+    marginHorizontal: 10,
     width: 60,
   },
 });
