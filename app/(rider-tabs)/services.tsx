@@ -1,4 +1,5 @@
-import { BookingCard } from '@/components/rider/BookingCard';
+import { ServiceCard } from '@/components/rider/ServiceCard';
+import { StatsBar } from '@/components/rider/StatsBar';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { DrawerMenu } from '@/components/ui/DrawerMenu';
 import colors from '@/constants/colors';
@@ -35,38 +36,60 @@ export default function ServicesScreen() {
           ]}
           style={styles.gradientContainer}
         >
-          <ScrollView contentContainerStyle={styles.scrollContent}>
+          {/* Fixed header section */}
+          <View style={[styles.headerSection, { backgroundColor: theme === 'dark' ? '#121212' : '#f0f0f0' }]}>
             <Text style={[styles.title, { color: colorScheme.text }]}>
-              Book Your Ride
+              Choose Your Ride
             </Text>
             
             <Text style={[styles.subtitle, { color: colorScheme.subtext }]}>
-              Choose your ride type
+              Premium services tailored for your needs
             </Text>
             
-            <View style={styles.bookingTypesContainer}>
-              <BookingCard
+            <StatsBar />
+          </View>
+          
+          {/* Scrollable services section */}
+          <ScrollView 
+            style={styles.scrollView}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.servicesContainer}>
+              <ServiceCard
                 type="city"
                 title="City Ride"
-                description="Travel within the city with comfort and convenience"
+                description="Quick and safe rides within the city with GPS tracking"
+                price="8/km"
+                duration="30 min"
+                features={["Instant Booking", "GPS Tracking", "Safe & Secure"]}
               />
               
-              <BookingCard
+              <ServiceCard
                 type="airport"
                 title="Airport Taxi"
-                description="Hassle-free airport transfers with fixed prices"
+                description="Comfortable rides to and from the airport with flight tracking"
+                price="299"
+                duration="45 min"
+                features={["24/7 Available", "Flight Tracking", "Meet & Greet"]}
               />
               
-              <BookingCard
+              <ServiceCard
                 type="outstation"
                 title="Outstation"
-                description="Travel between cities with reliable drivers"
+                description="Long distance travel made comfortable with experienced drivers"
+                price="12/km"
+                duration="Full Day"
+                features={["AC Vehicle", "Experienced Driver", "Fuel Included"]}
               />
               
-              <BookingCard
+              <ServiceCard
                 type="hourly"
                 title="Hourly Rental"
-                description="Rent a car with driver by the hour for multiple stops"
+                description="Rent a car by the hour for multiple stops with flexible timing"
+                price="150/hr"
+                duration="Flexible"
+                features={["Multiple Stops", "Wait Time Included", "Flexible Hours"]}
               />
             </View>
           </ScrollView>
@@ -88,21 +111,37 @@ const styles = StyleSheet.create({
   gradientContainer: {
     flex: 1,
   },
+  headerSection: {
+    paddingHorizontal: 20,
+    paddingTop: 5,
+    paddingBottom: 0,
+    backgroundColor: 'transparent',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0, 0, 0, 0.05)',
+  },
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 10,
     paddingBottom: 40,
   },
   title: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: 'bold',
     marginBottom: 8,
+    textAlign: 'center',
   },
   subtitle: {
-    fontSize: 18,
-    fontWeight: '500',
-    marginBottom: 24,
+    fontSize: 16,
+    fontWeight: '400',
+    marginBottom: 8,
+    textAlign: 'center',
+    opacity: 0.8,
   },
-  bookingTypesContainer: {
+  servicesContainer: {
+    marginTop: 0,
     marginBottom: 16,
   },
 });

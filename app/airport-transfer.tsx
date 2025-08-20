@@ -12,14 +12,14 @@ import { Stack, useRouter } from 'expo-router';
 import { Minus, Plus, Users, X } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
-  Modal,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    Modal,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from 'react-native';
 
 type AirportTransferType = 'drop' | 'pickup';
@@ -285,7 +285,7 @@ export default function AirportTransferScreen() {
       <Stack.Screen 
         options={{
           title: 'Airport Transfers',
-          headerBackTitle: 'Back',
+          headerBackTitle: '',
         }}
       />
       

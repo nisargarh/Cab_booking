@@ -12,13 +12,13 @@ import { Stack, useRouter } from 'expo-router';
 import { Minus, Plus, Users, X } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
-  Modal,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
+    Modal,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native';
 
 type OutstationType = 'oneway' | 'roundtrip';
@@ -293,7 +293,7 @@ export default function OutstationScreen() {
       <Stack.Screen 
         options={{
           title: 'Outstation',
-          headerBackTitle: 'Back',
+          headerBackTitle: '',
         }}
       />
       

@@ -97,14 +97,28 @@ export default function HomeScreen() {
 
         <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
           {/* Heading Suggestion */}
-          <View style={styles.headingSection}>
+          {/* <View style={styles.headingSection}>
             <Text style={[styles.title, { color: colorScheme.text }]}>
               Where would you like to go?
             </Text>
             <Text style={[styles.subtitle, { color: colorScheme.subtext }]}>
               Choose from our available services
             </Text>
-          </View>
+          </View> */}
+
+          {/* Map Placeholder */}
+          <GlassCard style={styles.mapCard}>
+            <View style={styles.mapPlaceholder}>
+              <MapPin size={40} color={colorScheme.primary} />
+              <Text style={[styles.mapText, { color: colorScheme.text }]}>
+                Map View
+              </Text>
+              <Text style={[styles.mapSubtext, { color: colorScheme.subtext }]}>
+                Track your rides in real-time
+              </Text>
+            </View>
+          </GlassCard>
+    
 
           {/* Service Icons */}
           <View style={styles.servicesContainer}>
@@ -153,7 +167,7 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* Map Placeholder */}
+          {/* Map Placeholder
           <GlassCard style={styles.mapCard}>
             <View style={styles.mapPlaceholder}>
               <MapPin size={40} color={colorScheme.primary} />
@@ -164,7 +178,7 @@ export default function HomeScreen() {
                 Track your rides in real-time
               </Text>
             </View>
-          </GlassCard>
+          </GlassCard> */}
 
           {/* Safety First Section */}
           <GlassCard style={styles.featureCard}>
@@ -271,7 +285,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 20,
     marginBottom: 24,
-    gap: 12,
+    gap: 12, 
   },
   actionButton: {
     flex: 1,

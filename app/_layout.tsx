@@ -47,7 +47,7 @@ function RootLayoutNav() {
         },
         headerTintColor: colorScheme.text,
         headerShadowVisible: false,
-        headerBackTitle: 'Back',
+        headerBackTitle: '',
         contentStyle: {
           backgroundColor: colorScheme.background,
         },

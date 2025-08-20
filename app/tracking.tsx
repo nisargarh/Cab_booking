@@ -141,7 +141,7 @@ export default function TrackingScreen() {
       <Stack.Screen 
         options={{
           title: 'Track Ride',
-          headerBackTitle: 'Back',
+          headerBackTitle: '',
         }}
       />
       

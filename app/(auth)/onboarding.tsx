@@ -5,19 +5,20 @@ import { useTheme } from '@/hooks/useTheme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import {
-  Car,
-  Clock,
-  MapPin,
-  Plane,
-  Shield,
-  Users
+    Car,
+    ChevronLeft,
+    Clock,
+    MapPin,
+    Plane,
+    Shield,
+    Users
 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native';
 
 // const { width } = Dimensions.get('window');
@@ -157,15 +158,11 @@ export default function OnboardingScreen() {
             ]}
             disabled={currentPage === 0}
           >
-            <Text style={[
-              styles.backButtonText, 
-              { 
-                color: currentPage === 0 ? colorScheme.subtext : colorScheme.text,
-                opacity: currentPage === 0 ? 0.5 : 1 
-              }
-            ]}>
-              Back
-            </Text>
+            <ChevronLeft 
+              size={20} 
+              color={currentPage === 0 ? colorScheme.subtext : colorScheme.text}
+              style={{ opacity: currentPage === 0 ? 0.5 : 1 }}
+            />
           </TouchableOpacity>
 
           <Button

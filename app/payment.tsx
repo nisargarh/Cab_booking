@@ -7,24 +7,24 @@ import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Stack, useRouter } from 'expo-router';
 import {
-  CheckCircle,
-  Clock,
-  CreditCard,
-  MapPin,
-  Smartphone,
-  User,
-  Users
+    CheckCircle,
+    Clock,
+    CreditCard,
+    MapPin,
+    Smartphone,
+    User,
+    Users
 } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  Alert,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    Alert,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from 'react-native';
 
 type PaymentMethod = 'card' | 'upi';
@@ -187,7 +187,7 @@ export default function PaymentScreen() {
         <Stack.Screen 
           options={{
             title: 'Payment Successful',
-            headerBackTitle: 'Back',
+            headerBackTitle: '',
           }}
         />
         
@@ -405,7 +405,7 @@ export default function PaymentScreen() {
       <Stack.Screen 
         options={{
           title: 'Payment',
-          headerBackTitle: 'Back',
+          headerBackTitle: '',
         }}
       />
       

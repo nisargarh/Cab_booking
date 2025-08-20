@@ -91,7 +91,7 @@ export default function DriverOTPScreen() {
       <Stack.Screen 
         options={{
           title: 'Verify OTP',
-          headerBackTitle: 'Back',
+          headerBackTitle: '',
         }}
       />
       

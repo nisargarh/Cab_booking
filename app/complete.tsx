@@ -68,7 +68,7 @@ export default function CompleteScreen() {
       <Stack.Screen 
         options={{
           title: 'Ride Complete',
-          headerBackTitle: 'Back',
+          headerBackTitle: '',
         }}
       />
       

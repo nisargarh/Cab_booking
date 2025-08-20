@@ -150,7 +150,7 @@ export default function DriverTripScreen() {
       <Stack.Screen 
         options={{
           title: 'Active Trip',
-          headerBackTitle: 'Back',
+          headerBackTitle: '',
         }}
       />
       

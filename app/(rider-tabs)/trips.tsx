@@ -1,6 +1,10 @@
 import { AppHeader } from '@/components/ui/AppHeader';
 import { DrawerMenu } from '@/components/ui/DrawerMenu';
 import { GlassCard } from '@/components/ui/GlassCard';
+import { LiveTrackingModal } from '@/components/ui/LiveTrackingModal';
+import { PaymentSummaryModal } from '@/components/ui/PaymentSummaryModal';
+import { RatingModal } from '@/components/ui/RatingModal';
+import { TripDetailsModal } from '@/components/ui/TripDetailsModal';
 import colors from '@/constants/colors';
 import { useRides } from '@/hooks/useRides';
 import { useTheme } from '@/hooks/useTheme';
@@ -8,9 +12,9 @@ import { Ride } from '@/types';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { ChevronRight, Clock, MapPin, Star } from 'lucide-react-native';
+import { ChevronDown, Filter } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
-import { FlatList, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function TripsScreen() {
   const { theme } = useTheme();
@@ -18,9 +22,16 @@ export default function TripsScreen() {
   const router = useRouter();
   const colorScheme = theme === 'dark' ? colors.dark : colors.light;
   
-  const [activeTab, setActiveTab] = useState<'upcoming' | 'completed'>('upcoming');
+  const [activeFilter, setActiveFilter] = useState<'all' | 'active' | 'completed' | 'cancelled'>('completed');
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [dateModalVisible, setDateModalVisible] = useState(false);
+  const [selectedDateRange, setSelectedDateRange] = useState<'daily' | 'weekly' | 'monthly' | 'yearly' | 'custom'>('yearly');
+  const [tripDetailsModalVisible, setTripDetailsModalVisible] = useState(false);
+  const [liveTrackingModalVisible, setLiveTrackingModalVisible] = useState(false);
+  const [paymentSummaryModalVisible, setPaymentSummaryModalVisible] = useState(false);
+  const [ratingModalVisible, setRatingModalVisible] = useState(false);
+  const [selectedTrip, setSelectedTrip] = useState<Ride | null>(null);
 
   useEffect(() => {
     // Update current time every minute to check for status changes
@@ -37,11 +48,18 @@ export default function TripsScreen() {
     }
     setDrawerVisible(true);
   };
-  
-  // Get actual upcoming trips from store
-  const upcomingTrips: Ride[] = allRides.filter(ride => 
-    ride.status === 'pending' || ride.status === 'accepted' || ride.status === 'arriving' || ride.status === 'arrived' || ride.status === 'in_progress'
-  );
+
+  const handleDateFilterPress = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    setDateModalVisible(true);
+  };
+
+  const handleDateRangeSelect = (range: 'daily' | 'weekly' | 'monthly' | 'yearly' | 'custom') => {
+    setSelectedDateRange(range);
+    setDateModalVisible(false);
+  };
   
   // Mock upcoming trips (fallback for demo)
   const mockUpcomingTrips: Ride[] = [
@@ -237,7 +255,169 @@ export default function TripsScreen() {
       duration: 15,
       rating: 4.5,
     },
+    // Additional mock trips to match screenshot
+    {
+      id: '3',
+      riderId: 'rider1',
+      bookingType: 'city',
+      tripType: 'one-way',
+      pickup: {
+        id: '5',
+        name: 'Home Street',
+        address: '123 Home Street, Hometown',
+        latitude: 37.7749,
+        longitude: -122.4194,
+      },
+      dropoff: {
+        id: '6',
+        name: 'Office Avenue',
+        address: '456 Office Avenue, Business District',
+        latitude: 37.6213,
+        longitude: -122.3790,
+      },
+      date: 'Jul 24, 2025',
+      time: '02:00 PM',
+      passengers: 1,
+      passengerInfo: [
+        {
+          name: 'John Doe',
+          age: 30,
+          phone: '555-1234',
+        }
+      ],
+      status: 'completed',
+      fare: {
+        base: 150,
+        distance: 18.5,
+        time: 30,
+        surge: 25,
+        tax: 0,
+        total: 175,
+        advancePayment: 43.75,
+        remainingPayment: 131.25,
+      },
+      paymentMethod: 'card',
+      paymentStatus: 'completed',
+      distance: 18.5,
+      duration: 30,
+      rating: 4.8,
+    },
+    {
+      id: '4',
+      riderId: 'rider1',
+      bookingType: 'shared',
+      tripType: 'one-way',
+      pickup: {
+        id: '7',
+        name: 'Office Avenue',
+        address: '456 Office Avenue, Business District',
+        latitude: 37.6213,
+        longitude: -122.3790,
+      },
+      dropoff: {
+        id: '8',
+        name: 'Home Street',
+        address: '123 Home Street, Hometown',
+        latitude: 37.7749,
+        longitude: -122.4194,
+      },
+      date: 'Jul 23, 2025',
+      time: '12:15 AM',
+      passengers: 1,
+      passengerInfo: [
+        {
+          name: 'John Doe',
+          age: 30,
+          phone: '555-1234',
+        }
+      ],
+      status: 'completed',
+      fare: {
+        base: 100,
+        distance: 18.5,
+        time: 30,
+        surge: 30,
+        tax: 0,
+        total: 130,
+        advancePayment: 32.5,
+        remainingPayment: 97.5,
+      },
+      paymentMethod: 'upi',
+      paymentStatus: 'completed',
+      distance: 18.5,
+      duration: 30,
+      rating: 4.2,
+    },
   ];
+
+  // Mock cancelled trips
+  const mockCancelledTrips: Ride[] = [
+    {
+      id: 'cancelled1',
+      riderId: 'rider1',
+      bookingType: 'city',
+      tripType: 'one-way',
+      pickup: {
+        id: '9',
+        name: 'Mall',
+        address: 'Shopping Mall, Downtown',
+        latitude: 37.7749,
+        longitude: -122.4194,
+      },
+      dropoff: {
+        id: '10',
+        name: 'Airport',
+        address: 'International Airport',
+        latitude: 37.6213,
+        longitude: -122.3790,
+      },
+      date: 'Jul 22, 2025',
+      time: '10:00 AM',
+      passengers: 2,
+      passengerInfo: [
+        {
+          name: 'John Doe',
+          age: 30,
+          phone: '555-1234',
+        }
+      ],
+      status: 'cancelled',
+      fare: {
+        base: 200,
+        distance: 25,
+        time: 45,
+        surge: 0,
+        tax: 20,
+        total: 220,
+        advancePayment: 0,
+        remainingPayment: 0,
+      },
+      paymentMethod: 'card',
+      paymentStatus: 'refunded',
+      distance: 25,
+      duration: 45,
+    },
+  ];
+
+  // Get trips based on active filter
+  const getFilteredTrips = () => {
+    const allTrips = [...pastRides, ...mockCompletedTrips, ...mockUpcomingTrips, ...mockCancelledTrips];
+    
+    switch (activeFilter) {
+      case 'active':
+        return allTrips.filter(ride => 
+          ride.status === 'pending' || ride.status === 'accepted' || ride.status === 'arriving' || ride.status === 'arrived' || ride.status === 'in_progress'
+        );
+      case 'completed':
+        return allTrips.filter(ride => ride.status === 'completed');
+      case 'cancelled':
+        return allTrips.filter(ride => ride.status === 'cancelled');
+      default:
+        return allTrips;
+    }
+  };
+
+  const filteredTrips = getFilteredTrips();
 
   // Helper function to get trip status based on time
   const getTripStatus = (trip: Ride) => {
@@ -260,16 +440,55 @@ export default function TripsScreen() {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
     
+    setSelectedTrip(trip);
+    
     const status = getTripStatus(trip);
-    if (status === 'in progress' && activeTab === 'upcoming') {
-      router.push(`/live-tracking?id=${trip.id}`);
+    if (trip.status === 'completed') {
+      setTripDetailsModalVisible(true);
+    } else if (status === 'in progress' || activeFilter === 'active') {
+      setLiveTrackingModalVisible(true);
     } else {
-      router.push(`/trip-details?id=${trip.id}`);
+      setTripDetailsModalVisible(true);
     }
+  };
+
+  const handleCompleteRide = () => {
+    setLiveTrackingModalVisible(false);
+    // Simulate completing the ride by showing payment summary
+    setTimeout(() => {
+      setPaymentSummaryModalVisible(true);
+    }, 500);
+  };
+
+  const handlePaymentComplete = () => {
+    setPaymentSummaryModalVisible(false);
+    // Show rating modal after payment
+    setTimeout(() => {
+      setRatingModalVisible(true);
+    }, 500);
+  };
+
+  const handleRatingSubmit = (rating: number, review?: string) => {
+    // Update the trip with rating and review
+    if (selectedTrip) {
+      // In a real app, this would be sent to the backend
+      console.log('Rating submitted:', rating, review);
+    }
+    setRatingModalVisible(false);
+    setSelectedTrip(null);
+  };
+
+  const handleModalClose = () => {
+    setTripDetailsModalVisible(false);
+    setLiveTrackingModalVisible(false);
+    setPaymentSummaryModalVisible(false);
+    setRatingModalVisible(false);
+    setSelectedTrip(null);
   };
   
   const renderTripCard = (ride: Ride) => {
-    const tripStatus = activeTab === 'upcoming' ? getTripStatus(ride) : 'completed';
+    const tripStatus = ride.status === 'completed' ? 'completed' : 
+                      ride.status === 'cancelled' ? 'cancelled' : getTripStatus(ride);
     
     return (
       <TouchableOpacity 
@@ -278,76 +497,63 @@ export default function TripsScreen() {
       >
       <GlassCard style={styles.tripCard}>
         <View style={styles.tripHeader}>
-          <View style={styles.tripTypeContainer}>
-            <Text style={[styles.tripType, { color: colorScheme.primary }]}>
-              {ride.bookingType.toUpperCase()}
+          <View style={styles.tripHeaderLeft}>
+            <Text style={[styles.tripType, { color: colorScheme.text }]}>
+              {ride.bookingType === 'city' ? 'City Ride' : 
+               ride.bookingType === 'shared' ? 'Shared Ride' : 
+               ride.bookingType === 'airport' ? 'Airport Transfer' : 
+               ride.bookingType.charAt(0).toUpperCase() + ride.bookingType.slice(1) + ' Ride'}
             </Text>
-            <View style={[
-              styles.statusBadge, 
-              { 
-                backgroundColor: tripStatus === 'completed' 
-                  ? '#4CAF50' 
-                  : tripStatus === 'in progress'
-                  ? '#2196F3'
-                  : '#FF9800'
-              }
-            ]}>
-              <Text style={styles.statusText}>
-                {tripStatus === 'completed' ? 'Completed' : 
-                 tripStatus === 'in progress' ? 'In Progress' : 'Active'}
-              </Text>
-            </View>
           </View>
-          
-          <Text style={[styles.tripDate, { color: colorScheme.subtext }]}>
-            {ride.date} • {ride.time}
-          </Text>
+          <View style={[
+            styles.statusBadge, 
+            { 
+              backgroundColor: tripStatus === 'completed' 
+                ? '#4CAF50' 
+                : tripStatus === 'cancelled'
+                ? '#F44336'
+                : tripStatus === 'in progress'
+                ? '#2196F3'
+                : '#FF9800'
+            }
+          ]}>
+            <Text style={styles.statusText}>
+              {tripStatus === 'completed' ? 'Completed' : 
+               tripStatus === 'cancelled' ? 'Cancelled' :
+               tripStatus === 'in progress' ? 'In Progress' : 'Active'}
+            </Text>
+          </View>
         </View>
         
         <View style={styles.locationContainer}>
-          <View style={styles.locationItem}>
-            <MapPin size={16} color={colorScheme.success} />
+          <View style={styles.locationRow}>
+            <View style={styles.locationDot} />
             <Text style={[styles.locationText, { color: colorScheme.text }]}>
-              {ride.pickup.name}
+              {ride.pickup.address}
             </Text>
           </View>
           
-          <View style={[styles.divider, { backgroundColor: colorScheme.border }]} />
-          
-          <View style={styles.locationItem}>
-            <MapPin size={16} color={colorScheme.error} />
+          <View style={styles.locationRow}>
+            <View style={[styles.locationDot, { backgroundColor: colorScheme.error }]} />
             <Text style={[styles.locationText, { color: colorScheme.text }]}>
-              {ride.dropoff.name}
+              {ride.dropoff.address}
             </Text>
           </View>
         </View>
         
         <View style={styles.tripFooter}>
-          <View style={styles.tripDetails}>
-            <View style={styles.detailItem}>
-              <Clock size={14} color={colorScheme.subtext} />
-              <Text style={[styles.detailText, { color: colorScheme.subtext }]}>
-                {ride.duration} min
-              </Text>
-            </View>
-            
-            <View style={styles.detailItem}>
-              <Text style={[styles.fareText, { color: colorScheme.text }]}>
-                ${ride.fare.total.toFixed(2)}
-              </Text>
-            </View>
-            
-            {ride.rating && (
-              <View style={styles.detailItem}>
-                <Star size={14} color={colorScheme.warning} fill={colorScheme.warning} />
-                <Text style={[styles.detailText, { color: colorScheme.text }]}>
-                  {ride.rating}
-                </Text>
-              </View>
-            )}
+          <View style={styles.tripDateTime}>
+            <Text style={[styles.tripDate, { color: colorScheme.subtext }]}>
+              {ride.date}
+            </Text>
+            <Text style={[styles.tripTime, { color: colorScheme.subtext }]}>
+              {ride.time}
+            </Text>
           </View>
           
-          <ChevronRight size={20} color={colorScheme.subtext} />
+          <Text style={[styles.fareAmount, { color: colorScheme.text }]}>
+            ₹{ride.fare.total.toFixed(0)}
+          </Text>
         </View>
       </GlassCard>
     </TouchableOpacity>
@@ -360,6 +566,7 @@ export default function TripsScreen() {
         <AppHeader 
           title="My Trips" 
           onMenuPress={handleMenuPress}
+          showMenu={false}
         />
         
         <LinearGradient
@@ -369,53 +576,86 @@ export default function TripsScreen() {
           ]}
           style={styles.gradientContainer}
         >
-          <View style={styles.tabsSection}>
-            <View style={styles.tabContainer}>
-          <TouchableOpacity
-            style={[
-              styles.tab,
-              activeTab === 'completed' && { backgroundColor: colorScheme.primary }
-            ]}
-            onPress={() => setActiveTab('completed')}
-          >
-            <Text style={[
-              styles.tabText,
-              { 
-                color: activeTab === 'completed' 
-                  ? (theme === 'dark' ? colors.dark.background : colors.light.background)
-                  : colorScheme.text 
-              }
-            ]}>
-              Completed
+          {/* Statistics Section */}
+          <View style={styles.statsSection}>
+            <Text style={[styles.sectionTitle, { color: colorScheme.text }]}>
+              Your Rides
             </Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            style={[
-              styles.tab,
-              activeTab === 'upcoming' && { backgroundColor: colorScheme.primary }
-            ]}
-            onPress={() => setActiveTab('upcoming')}
-          >
-            <Text style={[
-              styles.tabText,
-              { 
-                color: activeTab === 'upcoming' 
-                  ? (theme === 'dark' ? colors.dark.background : colors.light.background)
-                  : colorScheme.text 
-              }
-            ]}>
-              Upcoming
-            </Text>
-          </TouchableOpacity>
+            <View style={styles.statsContainer}>
+              <View style={styles.statItem}>
+                <Text style={[styles.statValue, { color: colorScheme.text }]}>
+                  {filteredTrips.length}
+                </Text>
+                <Text style={[styles.statLabel, { color: colorScheme.subtext }]}>Total Rides</Text>
+              </View>
+              <View style={styles.statItem}>
+                <Text style={[styles.statValue, { color: colorScheme.text }]}>
+                  ₹{filteredTrips.reduce((sum, trip) => sum + trip.fare.total, 0).toFixed(0)}
+                </Text>
+                <Text style={[styles.statLabel, { color: colorScheme.subtext }]}>Total Spent</Text>
+              </View>
+              <View style={styles.statItem}>
+                <Text style={[styles.statValue, { color: colorScheme.text }]}>
+                  {(filteredTrips.reduce((sum, trip) => sum + (trip.rating || 0), 0) / filteredTrips.filter(t => t.rating).length || 0).toFixed(1)}
+                </Text>
+                <Text style={[styles.statLabel, { color: colorScheme.subtext }]}>Avg. Rating</Text>
+              </View>
             </View>
+          </View>
+
+          {/* Spacer after stats */}
+          <View style={styles.sectionSpacer} />
+
+          {/* Filter Section Header */}
+          <View style={styles.filterHeader}>
+            <View style={styles.filterLeft}>
+              <Filter size={20} color={colorScheme.text} />
+              <Text style={[styles.filterHeaderText, { color: colorScheme.text }]}>
+                Filter & Sort
+              </Text>
+            </View>
+            <TouchableOpacity 
+              style={[styles.dateFilterButton, { backgroundColor: colorScheme.surface, borderColor: colorScheme.border }]}
+              onPress={handleDateFilterPress}
+            >
+              <Text style={[styles.dateFilterText, { color: colorScheme.text }]}>
+                {selectedDateRange === 'yearly' ? 'This Year' : 
+                 selectedDateRange === 'monthly' ? 'This Month' :
+                 selectedDateRange === 'weekly' ? 'This Week' :
+                 selectedDateRange === 'daily' ? 'Today' : 'Custom Range'}
+              </Text>
+              <ChevronDown size={16} color={colorScheme.text} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Status Filter Buttons */}
+          <View style={styles.statusFilterContainer}>
+            {['all', 'active', 'completed', 'cancelled'].map((filter) => (
+              <TouchableOpacity
+                key={filter}
+                style={[
+                  styles.statusFilterButton,
+                  activeFilter === filter && { backgroundColor: colorScheme.primary },
+                  activeFilter !== filter && { backgroundColor: colorScheme.surface, borderColor: colorScheme.border }
+                ]}
+                onPress={() => setActiveFilter(filter as any)}
+              >
+                <Text style={[
+                  styles.statusFilterText,
+                  {
+                    color: activeFilter === filter
+                      ? (theme === 'dark' ? colors.dark.background : colors.light.background)
+                      : colorScheme.text
+                  }
+                ]}>
+                  {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                </Text>
+              </TouchableOpacity>
+            ))}
           </View>
           
           <FlatList
-            data={activeTab === 'completed' 
-              ? [...pastRides, ...mockCompletedTrips] 
-              : [...upcomingTrips, ...mockUpcomingTrips]
-            }
+            data={filteredTrips}
             renderItem={({ item }) => renderTripCard(item)}
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.scrollContent}
@@ -423,13 +663,10 @@ export default function TripsScreen() {
             ListEmptyComponent={() => (
               <GlassCard style={styles.emptyCard}>
                 <Text style={[styles.emptyTitle, { color: colorScheme.text }]}>
-                  {activeTab === 'completed' ? 'No completed trips' : 'No upcoming trips'}
+                  No trips found
                 </Text>
                 <Text style={[styles.emptyText, { color: colorScheme.subtext }]}>
-                  {activeTab === 'completed' 
-                    ? 'Your completed trips will appear here'
-                    : 'Book a ride to see your upcoming trips'
-                  }
+                  Your trips will appear here based on the selected filter
                 </Text>
               </GlassCard>
             )}
@@ -441,6 +678,94 @@ export default function TripsScreen() {
         visible={drawerVisible} 
         onClose={() => setDrawerVisible(false)} 
       />
+
+      {/* Trip Details Modal */}
+      <TripDetailsModal
+        visible={tripDetailsModalVisible}
+        trip={selectedTrip}
+        onClose={handleModalClose}
+      />
+
+      {/* Live Tracking Modal */}
+      <LiveTrackingModal
+        visible={liveTrackingModalVisible}
+        trip={selectedTrip}
+        onClose={handleModalClose}
+        onCompleteRide={handleCompleteRide}
+      />
+
+      {/* Payment Summary Modal */}
+      <PaymentSummaryModal
+        visible={paymentSummaryModalVisible}
+        trip={selectedTrip}
+        onClose={handleModalClose}
+        onPaymentComplete={handlePaymentComplete}
+      />
+
+      {/* Rating Modal */}
+      <RatingModal
+        visible={ratingModalVisible}
+        onClose={() => {
+          setRatingModalVisible(false);
+          setSelectedTrip(null);
+        }}
+        onSubmitRating={handleRatingSubmit}
+      />
+
+      {/* Date Range Modal */}
+      <Modal
+        visible={dateModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setDateModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <TouchableOpacity 
+            style={styles.modalBackdrop}
+            activeOpacity={1}
+            onPress={() => setDateModalVisible(false)}
+          />
+          <View style={styles.modalContainer}>
+            <View style={[styles.modalContent, { backgroundColor: '#FFFFFF' }]}>
+              <Text style={[styles.modalTitle, { color: '#000000' }]}>
+                Select Date Range
+              </Text>
+              
+              {['daily', 'weekly', 'monthly', 'yearly', 'custom'].map((range) => (
+                <TouchableOpacity
+                  key={range}
+                  style={[
+                    styles.modalOption,
+                    selectedDateRange === range && styles.modalOptionSelected
+                  ]}
+                  onPress={() => handleDateRangeSelect(range as any)}
+                >
+                  <Text style={[
+                    styles.modalOptionText,
+                    selectedDateRange === range && styles.modalOptionTextSelected
+                  ]}>
+                    {range === 'daily' ? 'Daily' :
+                     range === 'weekly' ? 'Weekly' :
+                     range === 'monthly' ? 'Monthly' :
+                     range === 'yearly' ? 'Yearly' :
+                     'Custom Range'}
+                  </Text>
+                  {selectedDateRange === range && (
+                    <View style={styles.selectedIndicator} />
+                  )}
+                </TouchableOpacity>
+              ))}
+              
+              <TouchableOpacity
+                style={styles.applyButton}
+                onPress={() => setDateModalVisible(false)}
+              >
+                <Text style={styles.applyButtonText}>Apply Filter</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </>
   );
 }
@@ -452,25 +777,82 @@ const styles = StyleSheet.create({
   gradientContainer: {
     flex: 1,
   },
-  tabsSection: {
+  statsSection: {
     padding: 20,
-    paddingBottom: 10,
+    paddingBottom: 16,
   },
-  tabContainer: {
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 16,
+  },
+  statsContainer: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 12,
-    padding: 4,
+    justifyContent: 'space-around',
   },
-  tab: {
-    flex: 1,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+  statItem: {
     alignItems: 'center',
   },
-  tabText: {
+  statValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 12,
+    textAlign: 'center',
+  },
+  sectionSpacer: {
+    height: 24,
+  },
+  filterHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  filterLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  filterHeaderText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  dateFilterButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    minWidth: 120,
+    justifyContent: 'center',
+  },
+  dateFilterText: {
     fontSize: 14,
+    marginRight: 8,
+  },
+
+  statusFilterContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+    gap: 6,
+    justifyContent: 'space-between',
+  },
+  statusFilterButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 25,
+    borderWidth: 1,
+    flex: 1,
+    alignItems: 'center',
+    marginHorizontal: 2,
+  },
+  statusFilterText: {
+    fontSize: 12,
     fontWeight: '500',
   },
   scrollContent: {
@@ -485,16 +867,16 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   tripHeader: {
-    marginBottom: 16,
-  },
-  tripTypeContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: 16,
+  },
+  tripHeaderLeft: {
+    flex: 1,
   },
   tripType: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '600',
   },
   statusBadge: {
@@ -513,43 +895,40 @@ const styles = StyleSheet.create({
   locationContainer: {
     marginBottom: 16,
   },
-  locationItem: {
+  locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 6,
+    marginVertical: 4,
+  },
+  locationDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#4CAF50',
+    marginRight: 12,
   },
   locationText: {
-    marginLeft: 8,
-    fontSize: 16,
+    fontSize: 14,
     flex: 1,
-  },
-  divider: {
-    height: 1,
-    marginLeft: 24,
-    marginVertical: 4,
   },
   tripFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  tripDetails: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  tripDateTime: {
     flex: 1,
   },
-  detailItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 16,
+  tripDate: {
+    fontSize: 12,
+    marginBottom: 2,
   },
-  detailText: {
-    marginLeft: 4,
-    fontSize: 14,
+  tripTime: {
+    fontSize: 12,
   },
-  fareText: {
-    fontSize: 16,
-    fontWeight: '600',
+  fareAmount: {
+    fontSize: 18,
+    fontWeight: '700',
   },
   emptyCard: {
     padding: 40,
@@ -564,5 +943,78 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 14,
     textAlign: 'center',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalBackdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  modalContainer: {
+    width: '85%',
+    maxWidth: 350,
+  },
+  modalContent: {
+    borderRadius: 16,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  modalOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    marginVertical: 4,
+    borderRadius: 8,
+  },
+  modalOptionSelected: {
+    backgroundColor: '#E8F5E8',
+  },
+  modalOptionText: {
+    fontSize: 16,
+    color: '#333333',
+  },
+  modalOptionTextSelected: {
+    fontWeight: '600',
+    color: '#333333',
+  },
+  selectedIndicator: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#4CAF50',
+  },
+  applyButton: {
+    backgroundColor: '#4CAF50',
+    marginTop: 16,
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  applyButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

@@ -65,7 +65,7 @@ export default function CarSelectionScreen() {
       <Stack.Screen 
         options={{
           title: 'Select Car',
-          headerBackTitle: 'Back',
+          headerBackTitle: '',
         }}
       />
       

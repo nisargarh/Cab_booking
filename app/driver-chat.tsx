@@ -86,7 +86,7 @@ export default function DriverChatScreen() {
       <Stack.Screen 
         options={{
           title: 'Chat with Rider',
-          headerBackTitle: 'Back',
+          headerBackTitle: '',
           headerRight: () => (
             <TouchableOpacity onPress={handleCall} style={styles.callButton}>
               <Phone size={24} color={colorScheme.primary} />

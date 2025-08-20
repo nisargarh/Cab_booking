@@ -107,7 +107,7 @@ export default function RiderOTPScreen() {
       <Stack.Screen 
         options={{
           title: 'Verify Booking',
-          headerBackTitle: 'Back',
+          headerBackTitle: '',
         }}
       />
       

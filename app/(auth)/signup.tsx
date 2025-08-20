@@ -7,7 +7,7 @@ import { UserRole } from '@/types';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { Eye, EyeOff, Lock, Mail } from 'lucide-react-native';
+import { Phone } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
     KeyboardAvoidingView,
@@ -20,42 +20,55 @@ import {
     View,
 } from 'react-native';
 
+type SignupStep = 'signup' | 'otp' | 'google-phone' | 'google-otp';
+
+interface GoogleUser {
+  name: string;
+  email: string;
+}
+
 export default function SignUpScreen() {
   const router = useRouter();
   const { theme } = useTheme();
   const { selectedRole, setUser } = useAuth();
   const colorScheme = theme === 'dark' ? colors.dark : colors.light;
   
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [currentStep, setCurrentStep] = useState<SignupStep>('signup');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [otp, setOtp] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [agreeToTerms, setAgreeToTerms] = useState(false);
+  const [googleUser, setGoogleUser] = useState<GoogleUser | null>(null);
 
-
-
-  const handleSignUp = () => {
-    if (!agreeToTerms) {
-      // Show error message
-      return;
+  const handleSendOtp = () => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
+    
+    setIsLoading(true);
+    
+    setTimeout(() => {
+      if (currentStep === 'signup') {
+        setCurrentStep('otp');
+      } else if (currentStep === 'google-phone') {
+        setCurrentStep('google-otp');
+      }
+      setIsLoading(false);
+    }, 1500);
+  };
 
+  const handleVerifyOtp = () => {
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
     
     setIsLoading(true);
     
-    // Simulate signup
     setTimeout(() => {
-      // Create mock user
       const user = {
         id: '123',
-        name: 'John Doe',
-        phone: '1234567890',
-        email: email || 'user@example.com',
+        name: googleUser?.name || 'John Doe',
+        phone: phoneNumber || '1234567890',
+        email: googleUser?.email || 'user@example.com',
         role: selectedRole as UserRole,
       };
       
@@ -72,11 +85,7 @@ export default function SignUpScreen() {
     }, 1500);
   };
 
-  const handleLoginRedirect = () => {
-    router.push('(auth)/login');
-  };
-
-  const handleGoogleSignUp = () => {
+  const handleGoogleSignup = () => {
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }
@@ -85,179 +94,272 @@ export default function SignUpScreen() {
     
     // Simulate Google signup
     setTimeout(() => {
-      const user = {
-        id: '123',
+      const googleUserData = {
         name: 'John Doe',
-        phone: '1234567890',
-        email: 'user@gmail.com',
-        role: selectedRole as UserRole,
+        email: 'john.doe@gmail.com',
       };
       
-      setUser(user);
-      
-      // Navigate directly to appropriate dashboard
-      if (selectedRole === 'rider') {
-        router.replace('(rider-tabs)');
-      } else {
-        router.replace('(driver-tabs)');
-      }
-      
+      setGoogleUser(googleUserData);
+      setCurrentStep('google-phone');
       setIsLoading(false);
     }, 1500);
+  };
+
+  const handleLoginRedirect = () => {
+    router.push('(auth)/login');
+  };
+
+  const handleChangePhoneNumber = () => {
+    if (currentStep === 'otp') {
+      setCurrentStep('signup');
+    } else if (currentStep === 'google-otp') {
+      setCurrentStep('google-phone');
+    }
+    setOtp('');
+  };
+
+  const handleUseDifferentMethod = () => {
+    setGoogleUser(null);
+    setCurrentStep('signup');
+  };
+
+  const renderSignupScreen = () => (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={[styles.title, { color: colorScheme.text }]}>
+          Welcome
+        </Text>
+        <Text style={[styles.subtitle, { color: colorScheme.subtext }]}>
+          Sign up as {selectedRole === 'rider' ? 'Rider' : 'Driver'}
+        </Text>
+      </View>
+
+      <GlassCard style={[styles.formCard, { 
+        backgroundColor: colorScheme.card,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+      }]}>
+        <View style={styles.inputContainer}>
+          <View style={styles.phoneInputWrapper}>
+            <Phone size={20} color={colorScheme.subtext} style={styles.phoneIcon} />
+            <TextInput
+              style={[
+                styles.phoneInput,
+                { 
+                  color: colorScheme.text,
+                  borderColor: colorScheme.border,
+                }
+              ]}
+              placeholder="Phone Number"
+              placeholderTextColor={colorScheme.subtext}
+              keyboardType="phone-pad"
+              value={phoneNumber}
+              onChangeText={setPhoneNumber}
+            />
+          </View>
+        </View>
+        
+        <Button
+          title="Send OTP"
+          onPress={handleSendOtp}
+          loading={isLoading}
+          style={[styles.primaryButton, { backgroundColor: '#000000' }]}
+          textStyle={{ color: '#FFFFFF' }}
+        />
+        
+        <TouchableOpacity onPress={handleLoginRedirect} style={styles.linkButton}>
+          <Text style={[styles.linkText, { color: colorScheme.text }]}>
+            Already have an account? Login
+          </Text>
+        </TouchableOpacity>
+      </GlassCard>
+
+      <View style={styles.dividerContainer}>
+        <Text style={[styles.dividerText, { color: colorScheme.subtext }]}>
+          Or continue with
+        </Text>
+      </View>
+
+      <TouchableOpacity
+        onPress={handleGoogleSignup}
+        style={[styles.googleButton, { 
+          borderColor: '#e0e0e0',
+          backgroundColor: '#ffffff',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+          elevation: 3,
+        }]}
+        disabled={isLoading}
+      >
+        <Text style={[styles.googleText, { color: '#333333' }]}>
+          Google
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  const renderOtpScreen = () => (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={[styles.title, { color: colorScheme.text }]}>
+          Verify OTP
+        </Text>
+        <Text style={[styles.subtitle, { color: colorScheme.subtext }]}>
+          Enter the OTP sent to your phone
+        </Text>
+      </View>
+
+      <GlassCard style={[styles.formCard, { 
+        backgroundColor: colorScheme.card,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+      }]}>
+        <Text style={[styles.otpMessage, { color: colorScheme.subtext }]}>
+          We've sent a verification code to
+        </Text>
+        
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={[
+              styles.otpInput,
+              { 
+                color: colorScheme.text,
+                borderColor: colorScheme.border,
+              }
+            ]}
+            placeholder="Enter OTP"
+            placeholderTextColor={colorScheme.subtext}
+            keyboardType="number-pad"
+            maxLength={6}
+            value={otp}
+            onChangeText={setOtp}
+            textAlign="center"
+          />
+        </View>
+        
+        <Button
+          title="Verify & Sign Up"
+          onPress={handleVerifyOtp}
+          loading={isLoading}
+          style={[styles.primaryButton, { backgroundColor: '#000000' }]}
+          textStyle={{ color: '#FFFFFF' }}
+        />
+        
+        <TouchableOpacity onPress={handleChangePhoneNumber} style={styles.linkButton}>
+          <Text style={[styles.linkText, { color: colorScheme.text }]}>
+            Change Phone Number
+          </Text>
+        </TouchableOpacity>
+      </GlassCard>
+    </View>
+  );
+
+  const renderGooglePhoneScreen = () => (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={[styles.title, { color: colorScheme.text }]}>
+          Welcome
+        </Text>
+        <Text style={[styles.subtitle, { color: colorScheme.subtext }]}>
+          Complete your profile with phone verification
+        </Text>
+      </View>
+
+      <GlassCard style={[styles.singleCard, { 
+        backgroundColor: colorScheme.card,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+      }]}>
+        <View style={styles.userWelcomeSection}>
+          <Text style={[styles.welcomeUserName, { color: colorScheme.text }]}>
+            Welcome, {googleUser?.name}!
+          </Text>
+          <Text style={[styles.userEmail, { color: colorScheme.subtext }]}>
+            {googleUser?.email}
+          </Text>
+        </View>
+
+        <View style={styles.inputContainer}>
+          <View style={styles.phoneInputWrapper}>
+            <Phone size={20} color={colorScheme.subtext} style={styles.phoneIcon} />
+            <TextInput
+              style={[
+                styles.phoneInput,
+                { 
+                  color: colorScheme.text,
+                  borderColor: colorScheme.border,
+                }
+              ]}
+              placeholder="Phone Number"
+              placeholderTextColor={colorScheme.subtext}
+              keyboardType="phone-pad"
+              value={phoneNumber}
+              onChangeText={setPhoneNumber}
+            />
+          </View>
+        </View>
+        
+        <Button
+          title="Send OTP"
+          onPress={handleSendOtp}
+          loading={isLoading}
+          style={[styles.primaryButton, { backgroundColor: '#000000' }]}
+          textStyle={{ color: '#FFFFFF' }}
+        />
+        
+        <TouchableOpacity onPress={handleUseDifferentMethod} style={styles.centeredLinkButton}>
+          <Text style={[styles.centeredLinkText, { color: colorScheme.text }]}>
+            Use different signin method
+          </Text>
+        </TouchableOpacity>
+      </GlassCard>
+    </View>
+  );
+
+  const renderCurrentScreen = () => {
+    switch (currentStep) {
+      case 'signup':
+        return renderSignupScreen();
+      case 'otp':
+        return renderOtpScreen();
+      case 'google-phone':
+        return renderGooglePhoneScreen();
+      case 'google-otp':
+        return renderOtpScreen();
+      default:
+        return renderSignupScreen();
+    }
   };
 
   return (
     <LinearGradient
       colors={[
-        theme === 'dark' ? '#1a1a1a' : '#f0f0f0',
-        theme === 'dark' ? '#121212' : '#ffffff',
+        theme === 'dark' ? '#1c1c1c' : '#f5f5f5',
+        theme === 'dark' ? '#1c1c1c' : '#f5f5f5'
       ]}
-      style={styles.container}
+      style={styles.gradient}
     >
       <KeyboardAvoidingView
-        style={styles.keyboardAvoid}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+        style={styles.keyboardView}
       >
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <View style={styles.content}>
-            <Text style={[styles.title, { color: colorScheme.text }]}>
-              Sign up
-            </Text>
-            
-            <View style={styles.loginRedirect}>
-              <Text style={[styles.loginText, { color: colorScheme.subtext }]}>
-                Already have an account?{' '}
-              </Text>
-              <TouchableOpacity onPress={handleLoginRedirect}>
-                <Text style={[styles.loginLink, { color: colorScheme.primary }]}>
-                  Login
-                </Text>
-              </TouchableOpacity>
-            </View>
-            
-            <GlassCard style={styles.formCard}>
-              <View style={styles.inputContainer}>
-                <Mail size={20} color={colorScheme.primary} style={styles.inputIcon} />
-                <TextInput
-                  style={[
-                    styles.input,
-                    { 
-                      color: colorScheme.text,
-                      borderColor: colorScheme.border,
-                    }
-                  ]}
-                  placeholder="Enter your email"
-                  placeholderTextColor={colorScheme.subtext}
-                  keyboardType="email-address"
-                  value={email}
-                  onChangeText={setEmail}
-                />
-              </View>
-              
-              <View style={styles.inputContainer}>
-                <Lock size={20} color={colorScheme.primary} style={styles.inputIcon} />
-                <TextInput
-                  style={[
-                    styles.input,
-                    { 
-                      color: colorScheme.text,
-                      borderColor: colorScheme.border,
-                    }
-                  ]}
-                  placeholder="Enter password"
-                  placeholderTextColor={colorScheme.subtext}
-                  secureTextEntry={!showPassword}
-                  value={password}
-                  onChangeText={setPassword}
-                />
-                <TouchableOpacity
-                  style={styles.eyeIcon}
-                  onPress={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff size={20} color={colorScheme.subtext} />
-                  ) : (
-                    <Eye size={20} color={colorScheme.subtext} />
-                  )}
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.inputContainer}>
-                <Lock size={20} color={colorScheme.primary} style={styles.inputIcon} />
-                <TextInput
-                  style={[
-                    styles.input,
-                    { 
-                      color: colorScheme.text,
-                      borderColor: colorScheme.border,
-                    }
-                  ]}
-                  placeholder="Confirm password"
-                  placeholderTextColor={colorScheme.subtext}
-                  secureTextEntry={!showConfirmPassword}
-                  value={confirmPassword}
-                  onChangeText={setConfirmPassword}
-                />
-                <TouchableOpacity
-                  style={styles.eyeIcon}
-                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff size={20} color={colorScheme.subtext} />
-                  ) : (
-                    <Eye size={20} color={colorScheme.subtext} />
-                  )}
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.termsContainer}>
-                <TouchableOpacity
-                  style={styles.checkboxContainer}
-                  onPress={() => setAgreeToTerms(!agreeToTerms)}
-                >
-                  <View style={[
-                    styles.checkbox,
-                    { borderColor: colorScheme.border },
-                    agreeToTerms && { backgroundColor: colorScheme.primary, borderColor: colorScheme.primary }
-                  ]}>
-                    {agreeToTerms && (
-                      <Text style={styles.checkmark}>✓</Text>
-                    )}
-                  </View>
-                  <Text style={[styles.termsText, { color: colorScheme.subtext }]}>
-                    I agree to the{' '}
-                    <Text style={{ color: colorScheme.primary }}>Terms</Text>
-                    {' '}and{' '}
-                    <Text style={{ color: colorScheme.primary }}>Privacy Policy</Text>
-                  </Text>
-                </TouchableOpacity>
-              </View>
-              
-              <Button
-                title="Sign up"
-                onPress={handleSignUp}
-                loading={isLoading}
-                style={[styles.signUpButton, { backgroundColor: '#000000' }]}
-                textStyle={{ color: '#FFFFFF' }}
-                disabled={!agreeToTerms}
-              />
-              
-              <Text style={[styles.orText, { color: colorScheme.subtext }]}>
-                or sign up with
-              </Text>
-              
-              <TouchableOpacity
-                onPress={handleGoogleSignUp}
-                style={[styles.googleButton, { borderColor: colorScheme.border }]}
-              >
-                <Text style={styles.googleIcon}>G</Text>
-                <Text style={[styles.googleText, { color: colorScheme.text }]}>
-                  Continue with Google
-                </Text>
-              </TouchableOpacity>
-            </GlassCard>
-          </View>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          bounces={false}
+        >
+          {renderCurrentScreen()}
         </ScrollView>
       </KeyboardAvoidingView>
     </LinearGradient>
@@ -265,133 +367,133 @@ export default function SignUpScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  gradient: {
     flex: 1,
   },
-  keyboardAvoid: {
+  keyboardView: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
-    padding: 20,
+    paddingHorizontal: 24,
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    paddingBottom: 40,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 40,
-    marginBottom: 20,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  content: {
+  container: {
     flex: 1,
     justifyContent: 'center',
+  },
+  header: {
+    marginBottom: 40,
+    alignItems: 'center',
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
     marginBottom: 8,
+    textAlign: 'center',
   },
-  loginRedirect: {
-    flexDirection: 'row',
-    marginBottom: 32,
-  },
-  loginText: {
+  subtitle: {
     fontSize: 16,
-  },
-  loginLink: {
-    fontSize: 16,
-    fontWeight: '600',
+    textAlign: 'center',
+    lineHeight: 22,
   },
   formCard: {
     padding: 24,
-  },
-  inputContainer: {
-    marginBottom: 16,
-    position: 'relative',
-  },
-  inputIcon: {
-    position: 'absolute',
-    left: 12,
-    top: 13,
-    zIndex: 1,
-  },
-  input: {
-    height: 50,
-    borderWidth: 1,
+    marginBottom: 24,
     borderRadius: 16,
-    paddingHorizontal: 40,
-    fontSize: 16,
   },
-  eyeIcon: {
-    position: 'absolute',
-    right: 12,
-    top: 13,
-    zIndex: 1,
-  },
-  termsContainer: {
+  singleCard: {
+    padding: 24,
     marginBottom: 24,
+    borderRadius: 16,
   },
-  checkboxContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderWidth: 2,
-    borderRadius: 4,
-    marginRight: 12,
-    marginTop: 2,
-    justifyContent: 'center',
+  userWelcomeSection: {
     alignItems: 'center',
+    marginBottom: 30,
+    paddingTop: 10,
   },
-  checkmark: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: 'bold',
+  welcomeUserName: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 6,
+    textAlign: 'center',
   },
-  termsText: {
-    fontSize: 14,
-    lineHeight: 20,
-    flex: 1,
-  },
-  signUpButton: {
-    marginBottom: 24,
-  },
-  orText: {
+  userEmail: {
     fontSize: 14,
     textAlign: 'center',
-    marginBottom: 16,
   },
-  googleButton: {
+  centeredLinkButton: {
+    alignItems: 'center',
+    paddingVertical: 12,
+    marginTop: 8,
+  },
+  centeredLinkText: {
+    fontSize: 14,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  inputContainer: {
+    marginBottom: 20,
+  },
+  phoneInputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    height: 50,
     borderWidth: 1,
-    borderRadius: 16,
-    marginBottom: 24,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    height: 52,
   },
-  googleIcon: {
-    fontSize: 18,
-    fontWeight: 'bold',
+  phoneIcon: {
     marginRight: 12,
-    color: '#4285F4',
+  },
+  phoneInput: {
+    flex: 1,
+    fontSize: 16,
+    height: '100%',
+  },
+  primaryButton: {
+    height: 52,
+    borderRadius: 12,
+    marginBottom: 16,
+  },
+  linkButton: {
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  linkText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  dividerContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  dividerText: {
+    fontSize: 14,
+  },
+  googleButton: {
+    height: 52,
+    borderWidth: 1,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   googleText: {
     fontSize: 16,
     fontWeight: '500',
   },
-  bottomText: {
-    fontSize: 12,
+  otpMessage: {
+    fontSize: 14,
     textAlign: 'center',
-    lineHeight: 18,
+    marginBottom: 20,
+  },
+  otpInput: {
+    height: 52,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    fontSize: 18,
+    letterSpacing: 2,
   },
 });

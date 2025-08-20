@@ -139,7 +139,7 @@ export default function VehicleInfoScreen() {
       <Stack.Screen 
         options={{
           title: 'Vehicle Information',
-          headerBackTitle: 'Back',
+          headerBackTitle: '',
           headerRight: () => (
             <TouchableOpacity onPress={isEditing ? handleSave : handleEdit}>
               {isEditing ? (

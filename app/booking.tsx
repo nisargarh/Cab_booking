@@ -166,7 +166,7 @@ export default function BookingDetailsScreen() {
       <Stack.Screen 
         options={{
           title: getBookingTypeTitle(),
-          headerBackTitle: 'Back',
+          headerBackTitle: '',
         }}
       />
       

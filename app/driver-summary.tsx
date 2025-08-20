@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/Button';
 import { GlassCard } from '@/components/ui/GlassCard';
 import colors from '@/constants/colors';
 import { useTheme } from '@/hooks/useTheme';
@@ -6,9 +5,9 @@ import { rides } from '@/mocks/rides';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Stack, useRouter } from 'expo-router';
-import { CheckCircle, Clock, DollarSign, MapPin } from 'lucide-react-native';
+import { CheckCircle, ChevronLeft, Clock, DollarSign, MapPin } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { Platform, StyleSheet, Text, View } from 'react-native';
+import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function DriverSummaryScreen() {
   const router = useRouter();
@@ -42,7 +41,7 @@ export default function DriverSummaryScreen() {
       <Stack.Screen 
         options={{
           title: 'Trip Summary',
-          headerBackTitle: 'Back',
+          headerBackTitle: '',
         }}
       />
       
@@ -142,12 +141,23 @@ export default function DriverSummaryScreen() {
           </View>
         </GlassCard>
         
-        <Button
-          title="Back to Dashboard"
+        <TouchableOpacity
           onPress={handleComplete}
-          loading={isSubmitting}
-          style={styles.doneButton}
-        />
+          style={[styles.doneButton, { 
+            backgroundColor: colorScheme.card,
+            borderColor: colorScheme.border,
+            borderWidth: 1,
+            borderRadius: 12, 
+            padding: 12,
+            alignItems: 'center', 
+            justifyContent: 'center',
+            width: 48,
+            height: 48
+          }]}
+          disabled={isSubmitting}
+        >
+          <ChevronLeft size={24} color={colorScheme.text} />
+        </TouchableOpacity>
       </View>
     </LinearGradient>
   );

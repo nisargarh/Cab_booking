@@ -12,13 +12,13 @@ import { Stack, useRouter } from 'expo-router';
 import { Clock, Luggage, Minus, Plus, Users, X } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
-  Modal,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Modal,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 
 interface PassengerInfo {
@@ -275,7 +275,7 @@ export default function HourlyRentalScreen() {
       <Stack.Screen
         options={{
           title: 'Hourly Rentals',
-          headerBackTitle: 'Back',
+          headerBackTitle: '',
         }}
       />
 

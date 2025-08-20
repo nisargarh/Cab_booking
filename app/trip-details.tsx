@@ -10,6 +10,7 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import {
     Calendar,
     Car,
+    ChevronLeft,
     Clock,
     Luggage,
     MessageCircle,
@@ -112,11 +113,22 @@ export default function TripDetailsScreen() {
         <Text style={[styles.errorText, { color: colorScheme.text }]}>
           Trip not found
         </Text>
-        <Button
-          title="Go Back"
-          onPress={() => {}}
-          style={styles.backButton}
-        />
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={[styles.backButton, { 
+            backgroundColor: colorScheme.card,
+            borderColor: colorScheme.border,
+            borderWidth: 1,
+            borderRadius: 12, 
+            padding: 12,
+            alignItems: 'center', 
+            justifyContent: 'center',
+            width: 48,
+            height: 48
+          }]}
+        >
+          <ChevronLeft size={24} color={colorScheme.text} />
+        </TouchableOpacity>
       </LinearGradient>
     );
   }

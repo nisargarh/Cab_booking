@@ -7,7 +7,7 @@ import { UserRole } from '@/types';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { Mail, Phone } from 'lucide-react-native';
+import { Phone } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -20,8 +20,12 @@ import {
   View,
 } from 'react-native';
 
-type LoginMethod = 'email' | 'phone';
-type LoginStep = 'login' | 'otp';
+type SignupStep = 'signup' | 'otp' | 'google-phone' | 'google-otp';
+
+interface GoogleUser {
+  name: string;
+  email: string;
+}
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -29,45 +33,11 @@ export default function LoginScreen() {
   const { selectedRole, setUser } = useAuth();
   const colorScheme = theme === 'dark' ? colors.dark : colors.light;
   
-  const [loginMethod, setLoginMethod] = useState<LoginMethod>('email');
-  const [currentStep, setCurrentStep] = useState<LoginStep>('login');
+  const [currentStep, setCurrentStep] = useState<SignupStep>('signup');
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [otp, setOtp] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
-
-
-  const handleEmailLogin = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-    
-    setIsLoading(true);
-    
-    // Simulate login
-    setTimeout(() => {
-      const user = {
-        id: '123',
-        name: 'John Doe',
-        phone: '1234567890',
-        email: email || 'user@example.com',
-        role: selectedRole as UserRole,
-      };
-      
-      setUser(user);
-      
-      // Navigate directly to appropriate dashboard
-      if (selectedRole === 'rider') {
-        router.replace('(rider-tabs)');
-      } else {
-        router.replace('(driver-tabs)');
-      }
-      
-      setIsLoading(false);
-    }, 1500);
-  };
+  const [googleUser, setGoogleUser] = useState<GoogleUser | null>(null);
 
   const handleSendOtp = () => {
     if (Platform.OS !== 'web') {
@@ -77,7 +47,11 @@ export default function LoginScreen() {
     setIsLoading(true);
     
     setTimeout(() => {
-      setCurrentStep('otp');
+      if (currentStep === 'signup') {
+        setCurrentStep('otp');
+      } else if (currentStep === 'google-phone') {
+        setCurrentStep('google-otp');
+      }
       setIsLoading(false);
     }, 1500);
   };
@@ -92,9 +66,9 @@ export default function LoginScreen() {
     setTimeout(() => {
       const user = {
         id: '123',
-        name: 'John Doe',
+        name: googleUser?.name || 'John Doe',
         phone: phoneNumber || '1234567890',
-        email: 'user@example.com',
+        email: googleUser?.email || 'user@example.com',
         role: selectedRole as UserRole,
       };
       
@@ -109,10 +83,6 @@ export default function LoginScreen() {
       
       setIsLoading(false);
     }, 1500);
-  };
-
-  const handleSignUpRedirect = () => {
-    router.push('(auth)/signup');
   };
 
   const handleGoogleLogin = () => {
@@ -124,249 +94,136 @@ export default function LoginScreen() {
     
     // Simulate Google login
     setTimeout(() => {
-      const user = {
-        id: '123',
+      const googleUserData = {
         name: 'John Doe',
-        phone: '1234567890',
-        email: 'user@gmail.com',
-        role: selectedRole as UserRole,
+        email: 'john.doe@gmail.com',
       };
       
-      setUser(user);
-      
-      // Navigate directly to appropriate dashboard
-      if (selectedRole === 'rider') {
-        router.replace('(rider-tabs)');
-      } else {
-        router.replace('(driver-tabs)');
-      }
-      
+      setGoogleUser(googleUserData);
+      setCurrentStep('google-phone');
       setIsLoading(false);
     }, 1500);
   };
 
-  const renderLogin = () => (
-    <>
-      <Text style={[styles.title, { color: colorScheme.text }]}>
-        Login
-      </Text>
-      
-      <View style={styles.signUpRedirect}>
-        <Text style={[styles.signUpText, { color: colorScheme.subtext }]}>
-          Don&apos;t have an account?{' '}
+  const handleEmailRedirect = () => {
+    // For now, just show a message or redirect to email login
+    router.push('(auth)/signup');
+  };
+
+  const handleChangePhoneNumber = () => {
+    if (currentStep === 'otp') {
+      setCurrentStep('signup');
+    } else if (currentStep === 'google-otp') {
+      setCurrentStep('google-phone');
+    }
+    setOtp('');
+  };
+
+  const handleUseDifferentMethod = () => {
+    setGoogleUser(null);
+    setCurrentStep('signup');
+  };
+
+  const renderSignupScreen = () => (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={[styles.title, { color: colorScheme.text }]}>
+         Login
         </Text>
-        <TouchableOpacity onPress={handleSignUpRedirect}>
-          <Text style={[styles.signUpLink, { color: colorScheme.primary }]}>
-            Sign up
-          </Text>
-        </TouchableOpacity>
+        <Text style={[styles.subtitle, { color: colorScheme.subtext }]}>
+          Login as {selectedRole === 'rider' ? 'Rider' : 'Driver'}
+        </Text>
       </View>
 
-      <View style={styles.methodButtons}>
-        <TouchableOpacity
-          style={[
-            styles.methodButton,
-            loginMethod === 'email' && styles.activeMethod,
-            { 
-              backgroundColor: loginMethod === 'email' ? colorScheme.primary : colorScheme.card, 
-              borderColor: colorScheme.border 
-            }
-          ]}
-          onPress={() => setLoginMethod('email')}
-        >
-          <Mail size={20} color={loginMethod === 'email' ? (theme === 'dark' ? '#000000' : '#FFFFFF') : colorScheme.primary} />
-          <Text style={[
-            styles.methodText, 
-            { color: loginMethod === 'email' ? (theme === 'dark' ? '#000000' : '#FFFFFF') : colorScheme.text }
-          ]}>
-            Email
-          </Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity
-          style={[
-            styles.methodButton,
-            loginMethod === 'phone' && styles.activeMethod,
-            { 
-              backgroundColor: loginMethod === 'phone' ? colorScheme.primary : colorScheme.card, 
-              borderColor: colorScheme.border 
-            }
-          ]}
-          onPress={() => setLoginMethod('phone')}
-        >
-          <Phone size={20} color={loginMethod === 'phone' ? (theme === 'dark' ? '#000000' : '#FFFFFF') : colorScheme.primary} />
-          <Text style={[
-            styles.methodText, 
-            { color: loginMethod === 'phone' ? (theme === 'dark' ? '#000000' : '#FFFFFF') : colorScheme.text }
-          ]}>
-            Phone
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      <GlassCard style={styles.formCard}>
-        {loginMethod === 'email' ? (
-          <>
-            <View style={styles.inputContainer}>
-              <Text style={[styles.inputLabel, { color: colorScheme.text }]}>Email</Text>
-              <TextInput
-                style={[
-                  styles.input,
-                  { 
-                    color: colorScheme.text,
-                    borderColor: colorScheme.border,
-                  }
-                ]}
-                placeholder="Enter your email"
-                placeholderTextColor={colorScheme.subtext}
-                keyboardType="email-address"
-                value={email}
-                onChangeText={setEmail}
-              />
-            </View>
-            
-            <View style={styles.inputContainer}>
-              <Text style={[styles.inputLabel, { color: colorScheme.text }]}>Password</Text>
-              <TextInput
-                style={[
-                  styles.input,
-                  { 
-                    color: colorScheme.text,
-                    borderColor: colorScheme.border,
-                  }
-                ]}
-                placeholder="Enter your password"
-                placeholderTextColor={colorScheme.subtext}
-                secureTextEntry
-                value={password}
-                onChangeText={setPassword}
-              />
-            </View>
-
-            <TouchableOpacity style={styles.forgotPassword}>
-              <Text style={[styles.forgotPasswordText, { color: colorScheme.primary }]}>
-                Forgot your password?
-              </Text>
-            </TouchableOpacity>
-            
-            <Button
-              title="Log In"
-              onPress={handleEmailLogin}
-              loading={isLoading}
-              style={[styles.signInButton, { backgroundColor: colorScheme.primary }]}
-              textStyle={{ color: theme === 'dark' ? '#000000' : '#FFFFFF' }}
+      <GlassCard style={[styles.formCard, { 
+        backgroundColor: colorScheme.card,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+      }]}>
+        <View style={styles.inputContainer}>
+          <View style={styles.phoneInputWrapper}>
+            <Phone size={20} color={colorScheme.subtext} style={styles.phoneIcon} />
+            <TextInput
+              style={[
+                styles.phoneInput,
+                { 
+                  color: colorScheme.text,
+                  borderColor: colorScheme.border,
+                }
+              ]}
+              placeholder="Phone Number"
+              placeholderTextColor={colorScheme.subtext}
+              keyboardType="phone-pad"
+              value={phoneNumber}
+              onChangeText={setPhoneNumber}
             />
-          </>
-        ) : (
-          <>
-            <View style={styles.inputContainer}>
-              <Text style={[styles.inputLabel, { color: colorScheme.text }]}>Phone Number</Text>
-              <View style={styles.phoneInputContainer}>
-                <Text style={[styles.countryCode, { color: colorScheme.text }]}>+91</Text>
-                <TextInput
-                  style={[
-                    styles.phoneInput,
-                    { 
-                      color: colorScheme.text,
-                      borderColor: colorScheme.border,
-                    }
-                  ]}
-                  placeholder="Enter phone number"
-                  placeholderTextColor={colorScheme.subtext}
-                  keyboardType="phone-pad"
-                  value={phoneNumber}
-                  onChangeText={setPhoneNumber}
-                />
-              </View>
-              <Text style={[styles.phoneNote, { color: colorScheme.subtext }]}>
-                We&apos;ll send you a 6-digit verification code
-              </Text>
-            </View>
-            
-            <Button
-              title="Send OTP"
-              onPress={handleSendOtp}
-              loading={isLoading}
-              style={[styles.signInButton, { backgroundColor: colorScheme.primary }]}
-              textStyle={{ color: theme === 'dark' ? '#000000' : '#FFFFFF' }}
-            />
-          </>
-        )}
+          </View>
+        </View>
         
-        <Text style={[styles.orText, { color: colorScheme.subtext }]}>
+        <Button
+          title="Send OTP"
+          onPress={handleSendOtp}
+          loading={isLoading}
+          style={[styles.primaryButton, { backgroundColor: '#000000' }]}
+          textStyle={{ color: '#FFFFFF' }}
+        />
+        
+        
+      </GlassCard>
+
+      <View style={styles.dividerContainer}>
+        <Text style={[styles.dividerText, { color: colorScheme.subtext }]}>
           Or continue with
         </Text>
-        
-        <TouchableOpacity
-          onPress={handleGoogleLogin}
-          style={[styles.googleButton, { borderColor: colorScheme.border }]}
-        >
-          <Text style={styles.googleIcon}>G</Text>
-          <Text style={[styles.googleText, { color: colorScheme.text }]}>
-            Continue with Google
-          </Text>
-        </TouchableOpacity>
+      </View>
 
-        <Text style={[styles.bottomText, { color: colorScheme.subtext }]}>
-          By signing in, you agree to our{' '}
-          <Text style={{ color: colorScheme.primary }}>Terms of Service</Text>
-          {' '}and{' '}
-          <Text style={{ color: colorScheme.primary }}>Privacy Policy</Text>
+      <TouchableOpacity
+        onPress={handleGoogleLogin}
+        style={[styles.googleButton, { 
+          borderColor: '#e0e0e0',
+          backgroundColor: '#ffffff',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+          elevation: 3,
+        }]}
+        disabled={isLoading}
+      >
+        <Text style={[styles.googleText, { color: '#333333' }]}>
+          Google
         </Text>
-      </GlassCard>
-    </>
+      </TouchableOpacity>
+    </View>
   );
 
-  const renderOtpVerification = () => (
-    <>
-      <Text style={[styles.title, { color: colorScheme.text }]}>
-        Login
-      </Text>
-      
-      <View style={styles.signUpRedirect}>
-        <Text style={[styles.signUpText, { color: colorScheme.subtext }]}>
-          Don&apos;t have an account?{' '}
+  const renderOtpScreen = () => (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={[styles.title, { color: colorScheme.text }]}>
+          Verify OTP
         </Text>
-        <TouchableOpacity onPress={handleSignUpRedirect}>
-          <Text style={[styles.signUpLink, { color: colorScheme.primary }]}>
-            Sign up
-          </Text>
-        </TouchableOpacity>
+        <Text style={[styles.subtitle, { color: colorScheme.subtext }]}>
+          Enter the OTP sent to your phone
+        </Text>
       </View>
 
-      <View style={styles.methodButtons}>
-        <TouchableOpacity
-          style={[
-            styles.methodButton,
-            { backgroundColor: colorScheme.card, borderColor: colorScheme.border }
-          ]}
-          onPress={() => setCurrentStep('login')}
-        >
-          <Mail size={20} color={colorScheme.primary} />
-          <Text style={[styles.methodText, { color: colorScheme.text }]}>Email</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity
-          style={[
-            styles.methodButton,
-            styles.activeMethod,
-            { backgroundColor: colorScheme.primary }
-          ]}
-        >
-          <Phone size={20} color={theme === 'dark' ? '#000000' : '#FFFFFF'} />
-          <Text style={[styles.methodText, { color: theme === 'dark' ? '#000000' : '#FFFFFF' }]}>Phone</Text>
-        </TouchableOpacity>
-      </View>
-
-      <GlassCard style={styles.formCard}>
-        <Text style={[styles.otpTitle, { color: colorScheme.text }]}>
-          Enter OTP
-        </Text>
-        <Text style={[styles.otpSubtitle, { color: colorScheme.subtext }]}>
-          Enter 6-digit OTP
+      <GlassCard style={[styles.formCard, { 
+        backgroundColor: colorScheme.card,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+      }]}>
+        <Text style={[styles.otpMessage, { color: colorScheme.subtext }]}>
+          We've sent a verification code to
         </Text>
         
-        <View style={styles.otpContainer}>
+        <View style={styles.inputContainer}>
           <TextInput
             style={[
               styles.otpInput,
@@ -375,68 +232,131 @@ export default function LoginScreen() {
                 borderColor: colorScheme.border,
               }
             ]}
-            placeholder="Enter 6-digit OTP"
+            placeholder="Enter OTP"
             placeholderTextColor={colorScheme.subtext}
             keyboardType="number-pad"
             maxLength={6}
             value={otp}
             onChangeText={setOtp}
+            textAlign="center"
           />
         </View>
-
-        <Text style={[styles.otpNote, { color: colorScheme.subtext }]}>
-          Resend OTP in 1m
-        </Text>
         
         <Button
-          title="Verify & Log In"
+          title="Verify & Login"
           onPress={handleVerifyOtp}
           loading={isLoading}
-          style={[styles.signInButton, { backgroundColor: colorScheme.primary }]}
-          textStyle={{ color: theme === 'dark' ? '#000000' : '#FFFFFF' }}
+          style={[styles.primaryButton, { backgroundColor: '#000000' }]}
+          textStyle={{ color: '#FFFFFF' }}
         />
         
-        <Text style={[styles.orText, { color: colorScheme.subtext }]}>
-          Or continue with
-        </Text>
-        
-        <TouchableOpacity
-          onPress={handleGoogleLogin}
-          style={[styles.googleButton, { borderColor: colorScheme.border }]}
-        >
-          <Text style={styles.googleIcon}>G</Text>
-          <Text style={[styles.googleText, { color: colorScheme.text }]}>
-            Continue with Google
+        <TouchableOpacity onPress={handleChangePhoneNumber} style={styles.linkButton}>
+          <Text style={[styles.linkText, { color: colorScheme.text }]}>
+            Change Phone Number
           </Text>
         </TouchableOpacity>
-
-        <Text style={[styles.bottomText, { color: colorScheme.subtext }]}>
-          By signing in, you agree to our{' '}
-          <Text style={{ color: colorScheme.primary }}>Terms of Service</Text>
-          {' '}and{' '}
-          <Text style={{ color: colorScheme.primary }}>Privacy Policy</Text>
-        </Text>
       </GlassCard>
-    </>
+    </View>
   );
+
+  const renderGooglePhoneScreen = () => (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={[styles.title, { color: colorScheme.text }]}>
+          Welcome
+        </Text>
+        <Text style={[styles.subtitle, { color: colorScheme.subtext }]}>
+          Complete your profile with phone verification
+        </Text>
+      </View>
+
+      <GlassCard style={[styles.singleCard, { 
+        backgroundColor: colorScheme.card,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+      }]}>
+        <View style={styles.userWelcomeSection}>
+          <Text style={[styles.welcomeUserName, { color: colorScheme.text }]}>
+            Welcome, {googleUser?.name}!
+          </Text>
+          <Text style={[styles.userEmail, { color: colorScheme.subtext }]}>
+            {googleUser?.email}
+          </Text>
+        </View>
+
+        <View style={styles.inputContainer}>
+          <View style={styles.phoneInputWrapper}>
+            <Phone size={20} color={colorScheme.subtext} style={styles.phoneIcon} />
+            <TextInput
+              style={[
+                styles.phoneInput,
+                { 
+                  color: colorScheme.text,
+                  borderColor: colorScheme.border,
+                }
+              ]}
+              placeholder="Phone Number"
+              placeholderTextColor={colorScheme.subtext}
+              keyboardType="phone-pad"
+              value={phoneNumber}
+              onChangeText={setPhoneNumber}
+            />
+          </View>
+        </View>
+        
+        <Button
+          title="Send OTP"
+          onPress={handleSendOtp}
+          loading={isLoading}
+          style={[styles.primaryButton, { backgroundColor: '#000000' }]}
+          textStyle={{ color: '#FFFFFF' }}
+        />
+        
+        <TouchableOpacity onPress={handleUseDifferentMethod} style={styles.centeredLinkButton}>
+          <Text style={[styles.centeredLinkText, { color: colorScheme.text }]}>
+            Use different signin method
+          </Text>
+        </TouchableOpacity>
+      </GlassCard>
+    </View>
+  );
+
+  const renderCurrentScreen = () => {
+    switch (currentStep) {
+      case 'signup':
+        return renderSignupScreen();
+      case 'otp':
+        return renderOtpScreen();
+      case 'google-phone':
+        return renderGooglePhoneScreen();
+      case 'google-otp':
+        return renderOtpScreen();
+      default:
+        return renderSignupScreen();
+    }
+  };
 
   return (
     <LinearGradient
       colors={[
-        theme === 'dark' ? '#1a1a1a' : '#f0f0f0',
-        theme === 'dark' ? '#121212' : '#ffffff',
+        theme === 'dark' ? '#1c1c1c' : '#f5f5f5',
+        theme === 'dark' ? '#1c1c1c' : '#f5f5f5'
       ]}
-      style={styles.container}
+      style={styles.gradient}
     >
       <KeyboardAvoidingView
-        style={styles.keyboardAvoid}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+        style={styles.keyboardView}
       >
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <View style={styles.content}>
-            {currentStep === 'login' ? renderLogin() : renderOtpVerification()}
-          </View>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          bounces={false}
+        >
+          {renderCurrentScreen()}
         </ScrollView>
       </KeyboardAvoidingView>
     </LinearGradient>
@@ -444,179 +364,165 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  gradient: {
     flex: 1,
   },
-  keyboardAvoid: {
+  keyboardView: {
     flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
-    padding: 20,
+    paddingHorizontal: 24,
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
+    paddingBottom: 40,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 40,
-    marginBottom: 20,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  content: {
+  container: {
     flex: 1,
     justifyContent: 'center',
+  },
+  header: {
+    marginBottom: 40,
+    alignItems: 'center',
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
     marginBottom: 8,
+    textAlign: 'center',
   },
-  signUpRedirect: {
-    flexDirection: 'row',
-    marginBottom: 32,
-  },
-  signUpText: {
+  subtitle: {
     fontSize: 16,
-  },
-  signUpLink: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  methodButtons: {
-    flexDirection: 'row',
-    marginBottom: 24,
-  },
-  methodButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 16,
-    borderWidth: 1,
-    marginHorizontal: 4,
-  },
-  activeMethod: {
-    // backgroundColor will be set dynamically
-  },
-  methodText: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginLeft: 8,
+    textAlign: 'center',
+    lineHeight: 22,
   },
   formCard: {
     padding: 24,
+    marginBottom: 24,
+    borderRadius: 16,
+  },
+  combinedCard: {
+    padding: 24,
+    marginBottom: 24,
+    borderRadius: 16,
+  },
+  userInfoSection: {
+    alignItems: 'center',
+    paddingVertical: 20,
+    marginBottom: 20,
+  },
+  welcomeUserText: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  userEmailText: {
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  phoneSection: {
+    marginBottom: 20,
+  },
+  centerLinkButton: {
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  centerLinkText: {
+    fontSize: 14,
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  singleCard: {
+    padding: 24,
+    marginBottom: 24,
+    borderRadius: 16,
+  },
+  userWelcomeSection: {
+    alignItems: 'center',
+    marginBottom: 30,
+    paddingTop: 10,
+  },
+  welcomeUserName: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 6,
+    textAlign: 'center',
+  },
+  userEmail: {
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  centeredLinkButton: {
+    alignItems: 'center',
+    paddingVertical: 12,
+    marginTop: 8,
+  },
+  centeredLinkText: {
+    fontSize: 14,
+    fontWeight: '500',
+    textAlign: 'center',
   },
   inputContainer: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
-  inputLabel: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 8,
-  },
-  input: {
-    height: 50,
-    borderWidth: 1,
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    fontSize: 16,
-  },
-  phoneInputContainer: {
+  phoneInputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    height: 52,
   },
-  countryCode: {
-    fontSize: 16,
-    fontWeight: '500',
+  phoneIcon: {
     marginRight: 12,
-    paddingVertical: 15,
   },
   phoneInput: {
     flex: 1,
-    height: 50,
-    borderWidth: 1,
-    borderRadius: 16,
-    paddingHorizontal: 16,
     fontSize: 16,
+    height: '100%',
   },
-  phoneNote: {
-    fontSize: 12,
-    marginTop: 8,
+  primaryButton: {
+    height: 52,
+    borderRadius: 12,
+    marginBottom: 16,
   },
-  forgotPassword: {
-    alignSelf: 'flex-end',
-    marginBottom: 24,
+  linkButton: {
+    alignItems: 'center',
+    paddingVertical: 12,
   },
-  forgotPasswordText: {
+  linkText: {
     fontSize: 14,
     fontWeight: '500',
   },
-  signInButton: {
-    marginBottom: 24,
+  dividerContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
   },
-  orText: {
+  dividerText: {
     fontSize: 14,
-    textAlign: 'center',
-    marginBottom: 16,
   },
   googleButton: {
-    flexDirection: 'row',
+    height: 52,
+    borderWidth: 1,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    height: 50,
-    borderWidth: 1,
-    borderRadius: 16,
-    marginBottom: 24,
-  },
-  googleIcon: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginRight: 12,
-    color: '#4285F4',
   },
   googleText: {
     fontSize: 16,
     fontWeight: '500',
   },
-  bottomText: {
-    fontSize: 12,
-    textAlign: 'center',
-    lineHeight: 18,
-  },
-  otpTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  otpSubtitle: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 24,
-  },
-  otpContainer: {
-    marginBottom: 16,
-  },
-  otpInput: {
-    height: 50,
-    borderWidth: 1,
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    fontSize: 18,
-    textAlign: 'center',
-    letterSpacing: 4,
-  },
-  otpNote: {
+  otpMessage: {
     fontSize: 14,
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: 20,
+  },
+  otpInput: {
+    height: 52,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    fontSize: 18,
+    letterSpacing: 2,
   },
 });

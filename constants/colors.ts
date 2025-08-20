@@ -1,3 +1,4 @@
+
 const colors = {
   light: {
     background: '#FFFFFF',
@@ -9,6 +10,7 @@ const colors = {
     accent: '#000000',
     shadow: 'rgba(0, 0, 0, 0.1)',
     success: '#22C55E',
+    
     error: '#EF4444',
     warning: '#F59E0B',
     info: '#3B82F6',

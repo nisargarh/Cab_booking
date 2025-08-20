@@ -92,7 +92,7 @@ export default function BillingHistoryScreen() {
       <Stack.Screen 
         options={{
           title: 'Billing History',
-          headerBackTitle: 'Back',
+          headerBackTitle: '',
           headerRight: () => (
             <TouchableOpacity style={styles.filterButton}>
               <Filter size={24} color={colorScheme.primary} />
