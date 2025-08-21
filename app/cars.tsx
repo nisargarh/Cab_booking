@@ -1,17 +1,49 @@
-import { CarCard } from '@/components/rider/CarCard';
-import { Button } from '@/components/ui/Button';
-import { GlassCard } from '@/components/ui/GlassCard';
 import colors from '@/constants/colors';
 import { useRides } from '@/hooks/useRides';
 import { useTheme } from '@/hooks/useTheme';
-import { vehicles } from '@/mocks/vehicles';
 import { Vehicle } from '@/types';
 import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Stack, useRouter } from 'expo-router';
-import { Calendar, Clock, MapPin, Users } from 'lucide-react-native';
+import { ArrowLeft, Car, Clock, Users } from 'lucide-react-native';
 import React, { useState } from 'react';
-import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+// Mock vehicle data based on the screenshot
+const vehicles: Vehicle[] = [
+  {
+    id: '1',
+    name: 'Sedan',
+    type: 'sedan',
+    description: 'Comfortable and economical',
+    passengers: 4,
+    price: 450,
+    estimatedTime: '5 min arrival',
+    image: 'sedan',
+    features: ['AC', 'GPS Tracking', 'Safe & Secure']
+  },
+  {
+    id: '2',
+    name: 'SUV',
+    type: 'suv',
+    description: 'Spacious for groups',
+    passengers: 6,
+    price: 300,
+    estimatedTime: '7 min arrival',
+    image: 'suv',
+    features: ['AC', 'GPS Tracking', 'Extra Space']
+  },
+  {
+    id: '3',
+    name: 'Premium',
+    type: 'premium',
+    description: 'Luxury experience',
+    passengers: 4,
+    price: 700,
+    estimatedTime: '10 min arrival',
+    image: 'premium',
+    features: ['AC', 'GPS Tracking', 'Luxury Interior']
+  }
+];
 
 export default function CarSelectionScreen() {
   const router = useRouter();
@@ -22,7 +54,6 @@ export default function CarSelectionScreen() {
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   
   const handleVehicleSelect = (vehicle: Vehicle) => {
-    console.log('Vehicle selected:', vehicle.name);
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
@@ -31,11 +62,8 @@ export default function CarSelectionScreen() {
   
   const handleContinue = () => {
     if (!selectedVehicle) {
-      console.log('No vehicle selected');
       return;
     }
-    
-    console.log('Continuing with vehicle:', selectedVehicle.name);
     
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -44,151 +72,118 @@ export default function CarSelectionScreen() {
     setVehicle(selectedVehicle);
     router.push('/payment');
   };
-  
-  // Create a default ride if none exists to prevent blocking the flow
-  const rideData = currentRide || {
-    pickup: { id: '1', name: 'Default Pickup', address: 'Default pickup location', latitude: 0, longitude: 0 },
-    dropoff: { id: '2', name: 'Default Destination', address: 'Default destination', latitude: 0, longitude: 0 },
-    date: new Date().toISOString().split('T')[0],
-    time: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
-    passengers: 1
+
+  const handleBack = () => {
+    router.back();
+  };
+
+  const getVehicleIcon = (type: string) => {
+    return <Car size={40} color="#22C55E" />;
   };
   
   return (
-    <LinearGradient
-      colors={[
-        theme === 'dark' ? '#1a1a1a' : '#f0f0f0',
-        theme === 'dark' ? '#121212' : '#ffffff',
-      ]}
-      style={styles.container}
-    >
+    <View style={[styles.container, { backgroundColor: colorScheme.background }]}>
       <Stack.Screen 
         options={{
-          title: 'Select Car',
-          headerBackTitle: '',
+          headerShown: false,
         }}
       />
       
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <GlassCard style={styles.summaryCard}>
-          <Text style={[styles.summaryTitle, { color: colorScheme.text }]}>
-            Trip Summary
+      {/* Custom Header */}
+      <View style={[styles.header, { backgroundColor: colorScheme.background }]}>
+        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+          <ArrowLeft size={24} color={colorScheme.text} />
+        </TouchableOpacity>
+        <Text style={[styles.headerTitle, { color: colorScheme.text }]}>Choose Your Vehicle</Text>
+        <View style={styles.placeholder} />
+      </View>
+
+      <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>
+          <Text style={[styles.subtitle, { color: colorScheme.subtext }]}>
+            Select the perfect vehicle for your journey
+          </Text>
+
+          <Text style={[styles.sectionTitle, { color: colorScheme.text }]}>
+            Choose Your Vehicle
           </Text>
           
-          <View style={styles.summaryItem}>
-            <MapPin size={16} color={colorScheme.success} />
-            <Text style={[styles.summaryText, { color: colorScheme.text }]}>
-              {rideData.pickup?.name || 'Pickup Location'}
-            </Text>
-          </View>
+          <Text style={[styles.sectionSubtitle, { color: colorScheme.subtext }]}>
+            Select the perfect ride for your journey
+          </Text>
           
-          <View style={styles.summaryItem}>
-            <MapPin size={16} color={colorScheme.error} />
-            <Text style={[styles.summaryText, { color: colorScheme.text }]}>
-              {rideData.dropoff?.name || 'Destination'}
-            </Text>
+          <View style={styles.vehiclesContainer}>
+            {vehicles.map((vehicle) => (
+              <TouchableOpacity
+                key={vehicle.id}
+                style={[
+                  styles.vehicleCard,
+                  { backgroundColor: colorScheme.card },
+                  selectedVehicle?.id === vehicle.id && { borderColor: '#22C55E', borderWidth: 2 }
+                ]}
+                onPress={() => handleVehicleSelect(vehicle)}
+              >
+                <View style={styles.vehicleHeader}>
+                  <View style={[styles.vehicleIconContainer, { backgroundColor: '#22C55E20' }]}>
+                    {getVehicleIcon(vehicle.type)}
+                  </View>
+                  <View style={styles.vehicleInfo}>
+                    <Text style={[styles.vehicleName, { color: colorScheme.text }]}>
+                      {vehicle.name}
+                    </Text>
+                    <Text style={[styles.vehicleDescription, { color: colorScheme.subtext }]}>
+                      {vehicle.description}
+                    </Text>
+                    <View style={styles.vehicleDetails}>
+                      <View style={styles.detailItem}>
+                        <Users size={16} color={colorScheme.subtext} />
+                        <Text style={[styles.detailText, { color: colorScheme.subtext }]}>
+                          {vehicle.passengers} passengers
+                        </Text>
+                      </View>
+                      <View style={styles.detailItem}>
+                        <Clock size={16} color={colorScheme.subtext} />
+                        <Text style={[styles.detailText, { color: colorScheme.subtext }]}>
+                          {vehicle.estimatedTime}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                  <View style={styles.priceContainer}>
+                    <Text style={[styles.price, { color: '#22C55E' }]}>
+                      ₹{vehicle.price}
+                    </Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            ))}
           </View>
-          
-          <View style={styles.summaryRow}>
-            <View style={styles.summaryItem}>
-              <Calendar size={16} color={colorScheme.primary} />
-              <Text style={[styles.summaryText, { color: colorScheme.text }]}>
-                {rideData.date ? new Date(rideData.date).toLocaleDateString('en-US', {
-                  weekday: 'short',
-                  month: 'short',
-                  day: 'numeric'
-                }) : 'Today'}
+
+          {selectedVehicle ? (
+            <TouchableOpacity
+              style={[styles.continueButton, { backgroundColor: '#22C55E' }]}
+              onPress={handleContinue}
+            >
+              <Text style={styles.continueButtonText}>
+                Continue with {selectedVehicle.name}
               </Text>
-            </View>
-            
-            <View style={styles.summaryItem}>
-              <Clock size={16} color={colorScheme.primary} />
-              <Text style={[styles.summaryText, { color: colorScheme.text }]}>
-                {rideData.time || 'Now'}
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={[
+                styles.backButtonBottom,
+                { backgroundColor: colorScheme.card }
+              ]}
+              onPress={handleBack}
+            >
+              <Text style={[styles.backButtonText, { color: colorScheme.text }]}>
+                Back
               </Text>
-            </View>
-            
-            <View style={styles.summaryItem}>
-              <Users size={16} color={colorScheme.primary} />
-              <Text style={[styles.summaryText, { color: colorScheme.text }]}>
-                {rideData.passengers || 1} {(rideData.passengers || 1) === 1 ? 'person' : 'people'}
-              </Text>
-            </View>
-          </View>
-        </GlassCard>
-        
-        <Text style={[styles.sectionTitle, { color: colorScheme.text }]}>
-          Available Cars
-        </Text>
-        
-        <View style={styles.carsContainer}>
-          {vehicles.map((vehicle) => (
-            <CarCard
-              key={vehicle.id}
-              vehicle={vehicle}
-              onSelect={handleVehicleSelect}
-              isSelected={selectedVehicle?.id === vehicle.id}
-            />
-          ))}
+            </TouchableOpacity>
+          )}
         </View>
-        
-        {selectedVehicle && (
-          <GlassCard 
-            style={styles.fareCard}
-            tint="accent"
-          >
-            <Text style={[styles.fareTitle, { color: colorScheme.text }]}>
-              Fare Details
-            </Text>
-            
-            <View style={styles.fareRow}>
-              <Text style={[styles.fareLabel, { color: colorScheme.text }]}>
-                Base Fare
-              </Text>
-              <Text style={[styles.fareValue, { color: colorScheme.text }]}>
-                ${selectedVehicle.price.toFixed(2)}
-              </Text>
-            </View>
-            
-            <View style={styles.fareRow}>
-              <Text style={[styles.fareLabel, { color: colorScheme.text }]}>
-                Taxes & Fees
-              </Text>
-              <Text style={[styles.fareValue, { color: colorScheme.text }]}>
-                ${(selectedVehicle.price * 0.1).toFixed(2)}
-              </Text>
-            </View>
-            
-            <View style={[styles.divider, { backgroundColor: colorScheme.border }]} />
-            
-            <View style={styles.fareRow}>
-              <Text style={[styles.totalLabel, { color: colorScheme.text }]}>
-                Total Fare
-              </Text>
-              <Text style={[styles.totalValue, { color: colorScheme.text }]}>
-                ${(selectedVehicle.price * 1.1).toFixed(2)}
-              </Text>
-            </View>
-            
-            <View style={styles.advanceContainer}>
-              <Text style={[styles.advanceText, { color: colorScheme.text }]}>
-                Pay only 25% (${(selectedVehicle.price * 1.1 * 0.25).toFixed(2)}) now to confirm booking
-              </Text>
-            </View>
-          </GlassCard>
-        )}
-        
-        <Button
-          title={selectedVehicle ? `Continue with ${selectedVehicle.name}` : "Select a car to continue"}
-          onPress={handleContinue}
-          disabled={!selectedVehicle}
-          style={[
-            styles.continueButton,
-            ...(selectedVehicle ? [{ backgroundColor: colorScheme.primary }] : [])
-          ]}
-        />
       </ScrollView>
-    </LinearGradient>
+    </View>
   );
 }
 
@@ -196,94 +191,128 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  scrollContent: {
-    padding: 20,
-    paddingBottom: 40,
-  },
-  summaryCard: {
-    padding: 16,
-    marginBottom: 24,
-  },
-  summaryTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 12,
-  },
-  summaryItem: {
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
-  },
-  summaryText: {
-    marginLeft: 8,
-    fontSize: 14,
-  },
-  summaryRow: {
-    flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 8,
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    paddingBottom: 20,
+  },
+  backButton: {
+    padding: 8,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  placeholder: {
+    width: 40,
+  },
+  scrollContainer: {
+    flex: 1,
+  },
+  content: {
+    padding: 20,
+  },
+  subtitle: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 30,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginBottom: 16,
-  },
-  carsContainer: {
-    marginBottom: 24,
-  },
-  fareCard: {
-    padding: 16,
-    marginBottom: 24,
-  },
-  fareTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 12,
-  },
-  fareRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    fontSize: 24,
+    fontWeight: 'bold',
     marginBottom: 8,
   },
-  fareLabel: {
-    fontSize: 14,
-  },
-  fareValue: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  divider: {
-    height: 1,
-    marginVertical: 8,
-  },
-  totalLabel: {
+  sectionSubtitle: {
     fontSize: 16,
-    fontWeight: '600',
+    marginBottom: 30,
   },
-  totalValue: {
+  vehiclesContainer: {
+    marginBottom: 30,
+  },
+  vehicleCard: {
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  vehicleHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  vehicleIconContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+  },
+  vehicleInfo: {
+    flex: 1,
+  },
+  vehicleName: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '600',
+    marginBottom: 4,
   },
-  advanceContainer: {
-    marginTop: 12,
-    padding: 8,
-    borderRadius: 8,
-  },
-  advanceText: {
+  vehicleDescription: {
     fontSize: 14,
-    textAlign: 'center',
+    marginBottom: 8,
+  },
+  vehicleDetails: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  detailItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  detailText: {
+    fontSize: 12,
+  },
+  priceContainer: {
+    alignItems: 'flex-end',
+  },
+  price: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  backButtonBottom: {
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  backButtonText: {
+    fontSize: 16,
     fontWeight: '500',
   },
   continueButton: {
-    marginTop: 8,
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginTop: 20,
   },
-  errorText: {
+  continueButtonText: {
     fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 16,
+    fontWeight: '500',
   },
-  errorButton: {
-    width: 200,
-    alignSelf: 'center',
+  continueButtonDisabled: {
+    backgroundColor: '#ccc',
   },
+  continueButtonTextDisabled: {
+    color: '#666',
+  },
+  continueButtonTextEnabled: {
+    color: '#fff',
+  },
+  
 });

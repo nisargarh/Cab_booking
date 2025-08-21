@@ -51,16 +51,11 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
     
     setBookingType(type);
     
-    // Navigate to specialized screens
-    if (type === 'airport') {
-      router.push('/airport-transfer');
-    } else if (type === 'outstation') {
-      router.push('/outstation');
-    } else if (type === 'hourly') {
-      router.push('/hourly-rental');
-    } else {
-      router.push('/booking');
-    }
+    // Navigate to home page with the selected tab
+    router.push({
+      pathname: '/(rider-tabs)',
+      params: { activeTab: type }
+    });
   };
   
   return (

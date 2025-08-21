@@ -3,6 +3,7 @@ import { create } from 'zustand';
 
 type RideState = {
   currentRide: Partial<Ride> | null;
+  selectedVehicle: Vehicle | null;
   rides: Ride[];
   pastRides: Ride[];
   setBookingType: (type: BookingType) => void;
@@ -11,6 +12,7 @@ type RideState = {
   setDropoff: (location: Location) => void;
   setDateTime: (date: string, time: string) => void;
   setPassengers: (count: number) => void;
+  setHours: (hours: string) => void;
   setVehicle: (vehicle: Vehicle) => void;
   setPaymentMethod: (method: 'card' | 'upi') => void;
   confirmBooking: (rating?: number, review?: string) => void;
@@ -21,6 +23,7 @@ type RideState = {
 
 export const useRideStore = create<RideState>((set) => ({
   currentRide: null,
+  selectedVehicle: null,
   rides: [],
   pastRides: [],
   
@@ -69,6 +72,7 @@ export const useRideStore = create<RideState>((set) => ({
       const total = subtotal + tax;
       
       return { 
+        selectedVehicle: vehicle,
         currentRide: { 
           ...state.currentRide, 
           vehicle,
@@ -160,7 +164,7 @@ export const useRideStore = create<RideState>((set) => ({
       ),
     })),
   
-  resetRide: () => set({ currentRide: null }),
+  resetRide: () => set({ currentRide: null, selectedVehicle: null }),
 }));
 
 export const useRides = () => {

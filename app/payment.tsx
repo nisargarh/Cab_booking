@@ -1,731 +1,398 @@
-import { Button } from '@/components/ui/Button';
-import { GlassCard } from '@/components/ui/GlassCard';
 import colors from '@/constants/colors';
 import { useRides } from '@/hooks/useRides';
 import { useTheme } from '@/hooks/useTheme';
 import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Stack, useRouter } from 'expo-router';
-import {
-    CheckCircle,
-    Clock,
-    CreditCard,
-    MapPin,
-    Smartphone,
-    User,
-    Users
-} from 'lucide-react-native';
-import React, { useEffect, useRef, useState } from 'react';
-import {
-    Alert,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
-} from 'react-native';
+import { ArrowLeft, CreditCard, MapPin, Shield, Smartphone } from 'lucide-react-native';
+import React, { useState } from 'react';
+import { Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-type PaymentMethod = 'card' | 'upi';
+type PaymentMethod = 'upi' | 'card' | 'wallet' | 'razorpay';
+type PaymentAmount = 'partial' | 'full';
 
 export default function PaymentScreen() {
   const router = useRouter();
   const { theme } = useTheme();
-  const { currentRide, setPaymentMethod, confirmBooking } = useRides();
+  const { currentRide, selectedVehicle } = useRides();
   const colorScheme = theme === 'dark' ? colors.dark : colors.light;
   
-  const [selectedPayment, setSelectedPayment] = useState<PaymentMethod>('card');
-  const [showCardForm, setShowCardForm] = useState(false);
-  const [showUPIForm, setShowUPIForm] = useState(false);
-  const [paymentProcessing, setPaymentProcessing] = useState(false);
-  const [paymentCompleted, setPaymentCompleted] = useState(false);
-  
-  // ScrollView ref for controlling scroll position
-  const scrollViewRef = useRef<ScrollView>(null);
-  
-  // Card form state
-  const [cardNumber, setCardNumber] = useState('');
-  const [expiryDate, setExpiryDate] = useState('');
-  const [cvv, setCvv] = useState('');
-  
-  // UPI form state
-  const [upiId, setUpiId] = useState('');
-  const [selectedUPIApp, setSelectedUPIApp] = useState('');
-  
-  // Create default ride data if not exists
-  const rideData = currentRide || {
-    pickup: { name: 'Kuvempunagar, Mysuru' },
-    dropoff: { name: '783 Shopping Center, Mall District' },
-    vehicle: { name: 'Premium', type: 'Premium' },
-    passengers: 1,
-    bookingType: 'city',
-    fare: {
-      base: 630,
-      distance: 63,
-      tax: 113,
-      total: 806,
-      advancePayment: 202,
-      remainingPayment: 604,
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod>('upi');
+  const [selectedPaymentAmount, setSelectedPaymentAmount] = useState<PaymentAmount>('partial');
+
+  // Get service name based on booking type
+  const getServiceName = (bookingType: string) => {
+    switch (bookingType) {
+      case 'city':
+        return 'City Ride';
+      case 'airport':
+        return 'Airport Taxi';
+      case 'outstation':
+        return 'Outstation';
+      case 'hourly':
+        return 'Hourly Rental';
+      default:
+        return 'City Ride';
     }
   };
-  
+
+  // Get formatted date and time
+  const getFormattedDateTime = () => {
+    if (currentRide?.date && currentRide?.time) {
+      const date = new Date(currentRide.date);
+      const formattedDate = date.toLocaleDateString('en-GB');
+      return `${formattedDate}, ${currentRide.time}`;
+    }
+    return '21/08/2025, 12:30:00';
+  };
+
+  // Get duration or distance info based on service type
+  const getDurationOrDistance = () => {
+    const bookingType = currentRide?.bookingType || 'city';
+    const tripType = currentRide?.tripType || 'one-way';
+    
+    switch (bookingType) {
+      case 'hourly':
+        return currentRide?.hours || '4 hours'; // Use stored hours selection
+      case 'outstation':
+        // For outstation, show duration based on trip type
+        return tripType === 'round-trip' ? '2 days (Round Trip)' : '1 day (One Way)';
+      case 'airport':
+        // For airport, show estimated time based on trip type
+        return tripType === 'round-trip' ? '90 min (Round Trip)' : '45 min (One Way)';
+      case 'city':
+      default:
+        return '25 min'; // Estimated city ride time
+    }
+  };
+
+  // Dynamic trip data based on current ride
+  const tripData = {
+    service: getServiceName(currentRide?.bookingType || 'city'),
+    vehicle: selectedVehicle?.name || currentRide?.vehicle?.name || 'Premium',
+    pickup: currentRide?.pickup?.address || currentRide?.pickup?.name || 'Pickup Location',
+    dropoff: currentRide?.dropoff?.address || currentRide?.dropoff?.name || 'Drop Location',
+    scheduled: getFormattedDateTime(),
+    passengers: currentRide?.passengers || 1,
+    duration: getDurationOrDistance(),
+    totalFare: currentRide?.fare?.total || selectedVehicle?.price || 700,
+    bookingType: currentRide?.bookingType || 'city'
+  };
+
+  const partialAmount = Math.round(tripData.totalFare * 0.25); // 25%
+  const remainingAmount = tripData.totalFare - partialAmount;
+
+  const handleBack = () => {
+    router.back();
+  };
+
   const handlePaymentMethodSelect = (method: PaymentMethod) => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    
-    setSelectedPayment(method);
-    
-    if (method === 'card') {
-      setShowCardForm(true);
-      setShowUPIForm(false);
-    } else {
-      setShowUPIForm(true);
-      setShowCardForm(false);
+    setSelectedPaymentMethod(method);
+  };
+
+  const handlePaymentAmountSelect = (amount: PaymentAmount) => {
+    if (Platform.OS !== 'web') {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
+    setSelectedPaymentAmount(amount);
   };
-  
-  const formatCardNumber = (text: string) => {
-    const cleaned = text.replace(/\s/g, '');
-    const match = cleaned.match(/.{1,4}/g);
-    return match ? match.join(' ') : cleaned;
-  };
-  
-  const formatExpiryDate = (text: string) => {
-    const cleaned = text.replace(/\D/g, '');
-    if (cleaned.length >= 2) {
-      return cleaned.substring(0, 2) + '/' + cleaned.substring(2, 4);
-    }
-    return cleaned;
-  };
-  
-  const validatePaymentForm = () => {
-    if (selectedPayment === 'card') {
-      if (!cardNumber || cardNumber.replace(/\s/g, '').length < 16) {
-        Alert.alert('Invalid Card', 'Please enter a valid card number');
-        return false;
-      }
-      if (!expiryDate || expiryDate.length < 5) {
-        Alert.alert('Invalid Expiry', 'Please enter a valid expiry date');
-        return false;
-      }
-      if (!cvv || cvv.length < 3) {
-        Alert.alert('Invalid CVV', 'Please enter a valid CVV');
-        return false;
-      }
-    } else if (selectedPayment === 'upi') {
-      if (!upiId.trim()) {
-        Alert.alert('Invalid UPI ID', 'Please enter a valid UPI ID');
-        return false;
-      }
-    }
-    return true;
-  };
-  
-  const handlePayment = async () => {
-    if (!validatePaymentForm()) return;
-    
-    setPaymentProcessing(true);
-    
+
+  const handlePayNow = () => {
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
     
-    // Simulate payment processing
-    setTimeout(() => {
-      setPaymentProcessing(false);
-      setPaymentCompleted(true);
-      
-      if (Platform.OS !== 'web') {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      }
-      
-      setPaymentMethod(selectedPayment);
-      confirmBooking();
-    }, 2000);
+    // Navigate to Razorpay or payment processing
+    // For now, just show an alert
+    alert('Payment processing... (Razorpay integration will be added later)');
   };
-  
-  // Scroll to top when payment is completed
-  useEffect(() => {
-    if (paymentCompleted && scrollViewRef.current) {
-      scrollViewRef.current.scrollTo({ y: 0, animated: true });
+
+  const getPaymentMethodIcon = (method: PaymentMethod) => {
+    switch (method) {
+      case 'upi':
+        return <Smartphone size={24} color="#22C55E" />;
+      case 'card':
+        return <CreditCard size={24} color="#22C55E" />;
+      case 'wallet':
+        return <Smartphone size={24} color="#22C55E" />;
+      case 'razorpay':
+        return <Shield size={24} color="#22C55E" />;
+      default:
+        return <CreditCard size={24} color="#22C55E" />;
     }
-  }, [paymentCompleted]);
-  
-  const handleViewTripDetails = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    router.push('/(rider-tabs)/trips');
   };
-  
-  const handleBookAnotherRide = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+  const getPaymentMethodDescription = (method: PaymentMethod) => {
+    switch (method) {
+      case 'upi':
+        return 'PhonePe, GooglePay, Paytm';
+      case 'card':
+        return 'Visa, Mastercard, RuPay';
+      case 'wallet':
+        return 'Paytm, MobiKwik, Amazon Pay';
+      case 'razorpay':
+        return 'Your payment information is encrypted and secure. Powered by Razorpay\'s industry standard security.';
+      default:
+        return '';
     }
-    router.push('/(rider-tabs)/services');
   };
-  
-  const handleDownloadReceipt = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    Alert.alert('Receipt Downloaded', 'Your receipt has been downloaded successfully');
-    // Here you would implement actual receipt download functionality
-  };
-  
-  if (paymentCompleted) {
-    return (
-      <LinearGradient
-        colors={[
-          theme === 'dark' ? '#1a1a1a' : '#f0f0f0',
-          theme === 'dark' ? '#121212' : '#ffffff',
-        ]}
-        style={styles.container}
-      >
-        <Stack.Screen 
-          options={{
-            title: 'Payment Successful',
-            headerBackTitle: '',
-          }}
-        />
-        
-        <ScrollView 
-          ref={scrollViewRef}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* Success Header */}
-          <View style={styles.successHeader}>
-            <CheckCircle size={60} color={colorScheme.success} />
-            <Text style={[styles.successTitle, { color: colorScheme.success }]}>
-              Payment Successful!
-            </Text>
-            <Text style={[styles.successSubtitle, { color: colorScheme.text }]}>
-              Your booking has been confirmed
-            </Text>
-            <Text style={[styles.bookingId, { color: colorScheme.subtext }]}>
-              Booking ID: booking_{Date.now().toString().slice(-8)}
-            </Text>
-          </View>
-          
-          {/* Trip Info */}
-          <GlassCard style={styles.tripInfoCard}>
-            <View style={styles.tripHeader}>
-              <Text style={[styles.tripType, { color: colorScheme.text }]}>
-                {rideData.bookingType === 'airport' ? 'Airport Taxi' : 
-                 rideData.bookingType === 'outstation' ? 'Outstation' :
-                 rideData.bookingType === 'hourly' ? 'Hourly Rental' : 'City Ride'}
-              </Text>
-              <View style={styles.tripDetails}>
-                <Text style={[styles.vehicleType, { color: colorScheme.text }]}>
-                  {rideData.vehicle?.name || 'Premium'}
-                </Text>
-                <View style={styles.passengerInfo}>
-                  <Users size={16} color={colorScheme.primary} />
-                  <Text style={[styles.passengerText, { color: colorScheme.text }]}>
-                    {rideData.passengers || 1} passenger
-                  </Text>
-                </View>
-              </View>
-            </View>
-          </GlassCard>
-          
-          {/* Route Details */}
-          <GlassCard style={styles.routeCard}>
-            <View style={styles.routeHeader}>
-              <MapPin size={20} color={colorScheme.primary} />
-              <Text style={[styles.routeTitle, { color: colorScheme.text }]}>
-                Route Details
-              </Text>
-            </View>
-            
-            <View style={styles.routeItem}>
-              <View style={styles.routeMarker}>
-                <View style={[styles.pickupDot, { backgroundColor: colorScheme.success }]} />
-              </View>
-              <View style={styles.routeContent}>
-                <Text style={[styles.routeLabel, { color: colorScheme.subtext }]}>
-                  PICKUP
-                </Text>
-                <Text style={[styles.routeLocation, { color: colorScheme.text }]}>
-                  {rideData.pickup?.name || 'Kuvempunagar, Mysuru'}
-                </Text>
-              </View>
-            </View>
-            
-            <View style={styles.routeItem}>
-              <View style={styles.routeMarker}>
-                <View style={[styles.dropDot, { backgroundColor: colorScheme.error }]} />
-              </View>
-              <View style={styles.routeContent}>
-                <Text style={[styles.routeLabel, { color: colorScheme.subtext }]}>
-                  DROP
-                </Text>
-                <Text style={[styles.routeLocation, { color: colorScheme.text }]}>
-                  {rideData.dropoff?.name || '783 Shopping Center, Mall District'}
-                </Text>
-              </View>
-            </View>
-          </GlassCard>
-          
-          {/* Payment Summary */}
-          <GlassCard style={styles.paymentSummaryCard}>
-            <View style={styles.summaryHeader}>
-              <CreditCard size={20} color={colorScheme.primary} />
-              <Text style={[styles.summaryTitle, { color: colorScheme.text }]}>
-                Payment Summary
-              </Text>
-            </View>
-            
-            <View style={styles.summaryRow}>
-              <Text style={[styles.summaryLabel, { color: colorScheme.text }]}>
-                Base Fare
-              </Text>
-              <Text style={[styles.summaryValue, { color: colorScheme.text }]}>
-                ₹{rideData.fare?.base || 630}
-              </Text>
-            </View>
-            
-            <View style={styles.summaryRow}>
-              <Text style={[styles.summaryLabel, { color: colorScheme.text }]}>
-                Platform Fees
-              </Text>
-              <Text style={[styles.summaryValue, { color: colorScheme.text }]}>
-                ₹{rideData.fare?.distance || 63}
-              </Text>
-            </View>
-            
-            <View style={styles.summaryRow}>
-              <Text style={[styles.summaryLabel, { color: colorScheme.text }]}>
-                GST (18%)
-              </Text>
-              <Text style={[styles.summaryValue, { color: colorScheme.text }]}>
-                ₹{rideData.fare?.tax || 113}
-              </Text>
-            </View>
-            
-            <View style={[styles.summaryRow, styles.totalRow]}>
-              <Text style={[styles.totalLabel, { color: colorScheme.text }]}>
-                Total Amount
-              </Text>
-              <Text style={[styles.totalValue, { color: colorScheme.text }]}>
-                ₹{rideData.fare?.total || 806}
-              </Text>
-            </View>
-            
-            <View style={[styles.summaryRow, styles.paidRow]}>
-              <Text style={[styles.paidLabel, { color: colorScheme.success }]}>
-                Paid Now (25%)
-              </Text>
-              <Text style={[styles.paidValue, { color: colorScheme.success }]}>
-                ₹{rideData.fare?.advancePayment || 202}
-              </Text>
-            </View>
-            
-            <Text style={[styles.remainingText, { color: colorScheme.subtext }]}>
-              Remaining ₹{rideData.fare?.remainingPayment || 604} to be paid after ride completion
-            </Text>
-          </GlassCard>
-          
-          {/* Safety Info */}
-          <GlassCard style={styles.safetyCard}>
-            <View style={styles.safetyHeader}>
-              <View style={styles.safetyIcon}>
-                <User size={24} color={colorScheme.primary} />
-              </View>
-              <View style={styles.safetyContent}>
-                <Text style={[styles.safetyTitle, { color: colorScheme.text }]}>
-                  Safety First
-                </Text>
-                <Text style={[styles.safetyText, { color: colorScheme.subtext }]}>
-                  Your ride is tracked in real-time. Driver details will be shared shortly.
-                </Text>
-              </View>
-            </View>
-          </GlassCard>
-          
-          {/* Action Buttons */}
-          <View style={styles.actionButtons}>
-            <View style={styles.topButtonContainer}>
-              <Button
-                title="View Trip Details"
-                onPress={handleViewTripDetails}
-                style={[styles.secondaryButton, { borderColor: colorScheme.border, backgroundColor: 'transparent' }]}
-                textStyle={{ color: colorScheme.text }}
-                variant="outlined"
-              />
-            </View>
-            
-            <View style={styles.secondaryButtons}>
-              <Button
-                title="Book Another Ride"
-                onPress={handleBookAnotherRide}
-                style={[styles.secondaryButton, { borderColor: colorScheme.border, backgroundColor: 'transparent' }]}
-                textStyle={{ color: colorScheme.text }}
-                variant="outlined"
-              />
-              
-              <Button
-                title="Download Receipt"
-                onPress={handleDownloadReceipt}
-                style={[styles.secondaryButton, { borderColor: colorScheme.border, backgroundColor: 'transparent' }]}
-                textStyle={{ color: colorScheme.text }}
-                variant="outlined"
-              />
-            </View>
-          </View>
-          
-          {/* Driver Assignment Status */}
-          <View style={styles.driverStatus}>
-            <View style={styles.statusIndicator}>
-              <Clock size={16} color={colorScheme.warning} />
-              <Text style={[styles.statusText, { color: colorScheme.warning }]}>
-                Driver Assignment in Progress
-              </Text>
-            </View>
-            <Text style={[styles.statusSubtext, { color: colorScheme.subtext }]}>
-              You will receive SMS updates about your ride. Support available 24/7.
-            </Text>
-          </View>
-        </ScrollView>
-      </LinearGradient>
-    );
-  }
-  
+
   return (
-    <LinearGradient
-      colors={[
-        theme === 'dark' ? '#1a1a1a' : '#f0f0f0',
-        theme === 'dark' ? '#121212' : '#ffffff',
-      ]}
-      style={styles.container}
-    >
+    <View style={[styles.container, { backgroundColor: colorScheme.background }]}>
       <Stack.Screen 
         options={{
-          title: 'Payment',
-          headerBackTitle: '',
+          headerShown: false,
         }}
       />
       
-      <ScrollView 
-        ref={scrollViewRef}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Trip Summary */}
-        <GlassCard style={styles.summaryCard}>
-          <Text style={[styles.cardTitle, { color: colorScheme.text }]}>
-            Trip Summary
-          </Text>
+      {/* Custom Header */}
+      <View style={[styles.header, { backgroundColor: colorScheme.background }]}>
+        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+          <ArrowLeft size={24} color={colorScheme.text} />
+        </TouchableOpacity>
+        <Text style={[styles.headerTitle, { color: colorScheme.text }]}>Payment</Text>
+        <View style={styles.placeholder} />
+      </View>
+
+      <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+        <View style={styles.content}>
           
-          <View style={styles.summaryItem}>
-            <View style={[styles.locationDot, { backgroundColor: colorScheme.success }]} />
-            <View style={styles.locationInfo}>
-              <Text style={[styles.locationLabel, { color: colorScheme.subtext }]}>
-                Pickup
-              </Text>
-              <Text style={[styles.locationText, { color: colorScheme.text }]}>
-                {rideData.pickup?.name || 'Kuvempunagar, Mysuru'}
-              </Text>
-            </View>
-          </View>
-          
-          <View style={styles.summaryItem}>
-            <View style={[styles.locationDot, { backgroundColor: colorScheme.error }]} />
-            <View style={styles.locationInfo}>
-              <Text style={[styles.locationLabel, { color: colorScheme.subtext }]}>
-                Drop
-              </Text>
-              <Text style={[styles.locationText, { color: colorScheme.text }]}>
-                {rideData.dropoff?.name || '783 Shopping Center, Mall District'}
-              </Text>
-            </View>
-          </View>
-          
-          <View style={styles.tripMeta}>
-            <View style={styles.metaItem}>
-              <Text style={[styles.metaText, { color: colorScheme.primary }]}>
-                {rideData.vehicle?.name || 'Premium'}
-              </Text>
-            </View>
-            <View style={styles.metaItem}>
-              <Users size={16} color={colorScheme.primary} />
-              <Text style={[styles.metaText, { color: colorScheme.text }]}>
-                {rideData.passengers || 1} passenger
-              </Text>
-            </View>
-          </View>
-        </GlassCard>
-        
-        {/* Payment Breakdown */}
-        <GlassCard style={styles.breakdownCard}>
-          <Text style={[styles.cardTitle, { color: colorScheme.text }]}>
-            Payment Breakdown
-          </Text>
-          
-          <View style={styles.breakdownRow}>
-            <Text style={[styles.breakdownLabel, { color: colorScheme.text }]}>
-              Base Fare
-            </Text>
-            <Text style={[styles.breakdownValue, { color: colorScheme.text }]}>
-              ₹{rideData.fare?.base || 630}
-            </Text>
-          </View>
-          
-          <View style={styles.breakdownRow}>
-            <Text style={[styles.breakdownLabel, { color: colorScheme.text }]}>
-              Platform Fees
-            </Text>
-            <Text style={[styles.breakdownValue, { color: colorScheme.text }]}>
-              ₹{rideData.fare?.distance || 63}
-            </Text>
-          </View>
-          
-          <View style={styles.breakdownRow}>
-            <Text style={[styles.breakdownLabel, { color: colorScheme.text }]}>
-              GST (18%)
-            </Text>
-            <Text style={[styles.breakdownValue, { color: colorScheme.text }]}>
-              ₹{rideData.fare?.tax || 113}
-            </Text>
-          </View>
-          
-          <View style={[styles.breakdownRow, styles.totalBreakdownRow]}>
-            <Text style={[styles.totalBreakdownLabel, { color: colorScheme.text }]}>
-              Total Amount
-            </Text>
-            <Text style={[styles.totalBreakdownValue, { color: colorScheme.text }]}>
-              ₹{rideData.fare?.total || 806}
-            </Text>
-          </View>
-          
-          {/* Prepayment System */}
-          <View style={[styles.prepaymentCard, { backgroundColor: colorScheme.primary + '20' }]}>
-            <View style={styles.prepaymentRow}>
-              <View style={styles.prepaymentDot} />
-              <Text style={[styles.prepaymentText, { color: colorScheme.primary }]}>
-                Prepayment System
-              </Text>
+          {/* Trip Summary Card */}
+          <View style={[styles.card, { backgroundColor: colorScheme.card }]}>
+            <View style={styles.cardHeader}>
+              <MapPin size={20} color={colorScheme.text} />
+              <Text style={[styles.cardTitle, { color: colorScheme.text }]}>Trip Summary</Text>
             </View>
             
-            <View style={styles.prepaymentDetails}>
-              <View style={styles.prepaymentItem}>
-                <Text style={[styles.prepaymentLabel, { color: colorScheme.text }]}>
-                  Pay Now (25%)
-                </Text>
-                <Text style={[styles.prepaymentAmount, { color: colorScheme.primary }]}>
-                  ₹{rideData.fare?.advancePayment || 202}
+            <View style={styles.summaryRow}>
+              <Text style={[styles.summaryLabel, { color: colorScheme.subtext }]}>Service</Text>
+              <Text style={[styles.summaryValue, { color: colorScheme.text }]}>{tripData.service}</Text>
+            </View>
+            
+            <View style={styles.summaryRow}>
+              <Text style={[styles.summaryLabel, { color: colorScheme.subtext }]}>Vehicle</Text>
+              <Text style={[styles.summaryValue, { color: colorScheme.text }]}>{tripData.vehicle}</Text>
+            </View>
+            
+            <View style={styles.summaryRow}>
+              <Text style={[styles.summaryLabel, { color: colorScheme.subtext }]}>Pickup</Text>
+              <Text style={[styles.summaryValue, { color: colorScheme.text }]}>{tripData.pickup}</Text>
+            </View>
+            
+            {/* Show dropoff for all services except hourly rental */}
+            {tripData.bookingType !== 'hourly' && (
+              <View style={styles.summaryRow}>
+                <Text style={[styles.summaryLabel, { color: colorScheme.subtext }]}>Drop-off</Text>
+                <Text style={[styles.summaryValue, { color: colorScheme.text }]}>{tripData.dropoff}</Text>
+              </View>
+            )}
+            
+            {/* Show trip type for services that support it */}
+            {(tripData.bookingType === 'airport' || tripData.bookingType === 'outstation') && (
+              <View style={styles.summaryRow}>
+                <Text style={[styles.summaryLabel, { color: colorScheme.subtext }]}>Trip Type</Text>
+                <Text style={[styles.summaryValue, { color: colorScheme.text }]}>
+                  {currentRide?.tripType === 'round-trip' ? 'Round Trip' : 'One Way'}
                 </Text>
               </View>
-              
-              <View style={styles.prepaymentItem}>
-                <Text style={[styles.prepaymentLabel, { color: colorScheme.text }]}>
-                  Pay After Ride
-                </Text>
-                <Text style={[styles.prepaymentAmount, { color: colorScheme.text }]}>
-                  ₹{rideData.fare?.remainingPayment || 604}
-                </Text>
-              </View>
+            )}
+            
+            <View style={styles.summaryRow}>
+              <Text style={[styles.summaryLabel, { color: colorScheme.subtext }]}>Scheduled</Text>
+              <Text style={[styles.summaryValue, { color: colorScheme.text }]}>{tripData.scheduled}</Text>
+            </View>
+            
+            <View style={styles.summaryRow}>
+              <Text style={[styles.summaryLabel, { color: colorScheme.subtext }]}>Passengers</Text>
+              <Text style={[styles.summaryValue, { color: colorScheme.text }]}>{tripData.passengers}</Text>
+            </View>
+            
+            <View style={styles.summaryRow}>
+              <Text style={[styles.summaryLabel, { color: colorScheme.subtext }]}>
+                {tripData.bookingType === 'hourly' ? 'Duration' : 
+                 tripData.bookingType === 'outstation' ? 'Duration' : 'Est. Time'}
+              </Text>
+              <Text style={[styles.summaryValue, { color: colorScheme.text }]}>{tripData.duration}</Text>
+            </View>
+            
+            <View style={[styles.summaryRow, styles.totalRow]}>
+              <Text style={[styles.totalLabel, { color: colorScheme.text }]}>Total Fare</Text>
+              <Text style={[styles.totalValue, { color: '#22C55E' }]}>₹{tripData.totalFare}</Text>
             </View>
           </View>
-        </GlassCard>
-        
-        {/* Payment Method */}
-        <GlassCard style={styles.paymentMethodCard}>
-          <Text style={[styles.cardTitle, { color: colorScheme.text }]}>
-            Payment Method
-          </Text>
-          
-          {/* Payment Options */}
+
+          {/* Choose Payment Amount */}
+          <View style={[styles.card, { backgroundColor: colorScheme.card }]}>
+            <Text style={[styles.cardTitle, { color: colorScheme.text }]}>Choose Payment Amount</Text>
+            
+            <TouchableOpacity
+              style={[
+                styles.paymentAmountOption,
+                { backgroundColor: colorScheme.background },
+                selectedPaymentAmount === 'partial' && { borderColor: '#22C55E', borderWidth: 2 }
+              ]}
+              onPress={() => handlePaymentAmountSelect('partial')}
+            >
+              <View style={styles.radioButton}>
+                <View style={[
+                  styles.radioInner,
+                  selectedPaymentAmount === 'partial' && { backgroundColor: '#22C55E' }
+                ]} />
+              </View>
+              <View style={styles.paymentAmountInfo}>
+                <Text style={[styles.paymentAmountTitle, { color: colorScheme.text }]}>
+                  Partial Payment (25%)
+                </Text>
+                <Text style={[styles.paymentAmountSubtitle, { color: colorScheme.subtext }]}>
+                  Pay remaining after ride
+                </Text>
+              </View>
+              <Text style={[styles.paymentAmountValue, { color: '#22C55E' }]}>
+                ₹{partialAmount}
+              </Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={[
+                styles.paymentAmountOption,
+                { backgroundColor: colorScheme.background },
+                selectedPaymentAmount === 'full' && { borderColor: '#22C55E', borderWidth: 2 }
+              ]}
+              onPress={() => handlePaymentAmountSelect('full')}
+            >
+              <View style={styles.radioButton}>
+                <View style={[
+                  styles.radioInner,
+                  selectedPaymentAmount === 'full' && { backgroundColor: '#22C55E' }
+                ]} />
+              </View>
+              <View style={styles.paymentAmountInfo}>
+                <Text style={[styles.paymentAmountTitle, { color: colorScheme.text }]}>
+                  Full Payment
+                </Text>
+                <Text style={[styles.paymentAmountSubtitle, { color: colorScheme.subtext }]}>
+                  Pay complete fare now
+                </Text>
+              </View>
+              <Text style={[styles.paymentAmountValue, { color: '#22C55E' }]}>
+                ₹{tripData.totalFare}
+              </Text>
+            </TouchableOpacity>
+            
+            <Text style={[styles.remainingText, { color: colorScheme.subtext }]}>
+              Remaining ₹{remainingAmount} will be collected after ride completion
+            </Text>
+          </View>
+
+          {/* Select Payment Method */}
+          <View style={[styles.card, { backgroundColor: colorScheme.card }]}>
+            <Text style={[styles.cardTitle, { color: colorScheme.text }]}>Select Payment Method</Text>
+            
+            {/* UPI */}
+            <TouchableOpacity
+              style={[
+                styles.paymentMethodOption,
+                selectedPaymentMethod === 'upi' && { borderColor: '#22C55E', borderWidth: 2 }
+              ]}
+              onPress={() => handlePaymentMethodSelect('upi')}
+            >
+              <View style={styles.radioButton}>
+                <View style={[
+                  styles.radioInner,
+                  selectedPaymentMethod === 'upi' && { backgroundColor: '#22C55E' }
+                ]} />
+              </View>
+              <View style={[styles.paymentMethodIcon, { backgroundColor: '#22C55E20' }]}>
+                {getPaymentMethodIcon('upi')}
+              </View>
+              <View style={styles.paymentMethodInfo}>
+                <Text style={[styles.paymentMethodTitle, { color: colorScheme.text }]}>UPI</Text>
+                <Text style={[styles.paymentMethodSubtitle, { color: colorScheme.subtext }]}>
+                  {getPaymentMethodDescription('upi')}
+                </Text>
+              </View>
+            </TouchableOpacity>
+            
+            {/* Credit/Debit Card */}
+            <TouchableOpacity
+              style={[
+                styles.paymentMethodOption,
+                selectedPaymentMethod === 'card' && { borderColor: '#22C55E', borderWidth: 2 }
+              ]}
+              onPress={() => handlePaymentMethodSelect('card')}
+            >
+              <View style={styles.radioButton}>
+                <View style={[
+                  styles.radioInner,
+                  selectedPaymentMethod === 'card' && { backgroundColor: '#22C55E' }
+                ]} />
+              </View>
+              <View style={[styles.paymentMethodIcon, { backgroundColor: '#22C55E20' }]}>
+                {getPaymentMethodIcon('card')}
+              </View>
+              <View style={styles.paymentMethodInfo}>
+                <Text style={[styles.paymentMethodTitle, { color: colorScheme.text }]}>Credit/Debit Card</Text>
+                <Text style={[styles.paymentMethodSubtitle, { color: colorScheme.subtext }]}>
+                  {getPaymentMethodDescription('card')}
+                </Text>
+              </View>
+            </TouchableOpacity>
+            
+            {/* Digital Wallet */}
+            <TouchableOpacity
+              style={[
+                styles.paymentMethodOption,
+                selectedPaymentMethod === 'wallet' && { borderColor: '#22C55E', borderWidth: 2 }
+              ]}
+              onPress={() => handlePaymentMethodSelect('wallet')}
+            >
+              <View style={styles.radioButton}>
+                <View style={[
+                  styles.radioInner,
+                  selectedPaymentMethod === 'wallet' && { backgroundColor: '#22C55E' }
+                ]} />
+              </View>
+              <View style={[styles.paymentMethodIcon, { backgroundColor: '#22C55E20' }]}>
+                {getPaymentMethodIcon('wallet')}
+              </View>
+              <View style={styles.paymentMethodInfo}>
+                <Text style={[styles.paymentMethodTitle, { color: colorScheme.text }]}>Digital Wallet</Text>
+                <Text style={[styles.paymentMethodSubtitle, { color: colorScheme.subtext }]}>
+                  {getPaymentMethodDescription('wallet')}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+
+          {/* Secure Payment by Razorpay */}
+          <View style={[styles.securityCard, { backgroundColor: colorScheme.card }]}>
+            <View style={styles.securityHeader}>
+              <View style={[styles.securityIcon, { backgroundColor: '#22C55E20' }]}>
+                <Shield size={20} color="#22C55E" />
+              </View>
+              <Text style={[styles.securityTitle, { color: colorScheme.text }]}>
+                Secure Payment by Razorpay
+              </Text>
+            </View>
+            <Text style={[styles.securityText, { color: colorScheme.subtext }]}>
+              {getPaymentMethodDescription('razorpay')}
+            </Text>
+          </View>
+
+          {/* Pay Now Button */}
           <TouchableOpacity
-            style={[
-              styles.paymentOption,
-              selectedPayment === 'card' && { 
-                borderColor: colorScheme.primary,
-                backgroundColor: colorScheme.primary + '10'
-              }
-            ]}
-            onPress={() => handlePaymentMethodSelect('card')}
+            style={[styles.payButton, { backgroundColor: '#22C55E' }]}
+            onPress={handlePayNow}
           >
-            <View style={styles.paymentOptionContent}>
-              <CreditCard size={24} color={colorScheme.primary} />
-              <View style={styles.paymentOptionText}>
-                <Text style={[styles.paymentOptionTitle, { color: colorScheme.text }]}>
-                  Credit/Debit Card
-                </Text>
-                <Text style={[styles.paymentOptionSubtitle, { color: colorScheme.subtext }]}>
-                  Visa, Mastercard, Rupay
-                </Text>
-              </View>
-            </View>
-            <View style={[
-              styles.radioButton,
-              { borderColor: colorScheme.border },
-              selectedPayment === 'card' && { backgroundColor: colorScheme.primary }
-            ]}>
-              {selectedPayment === 'card' && (
-                <CheckCircle size={16} color={colorScheme.background} />
-              )}
-            </View>
+            <Text style={styles.payButtonText}>
+              Pay ₹{selectedPaymentAmount === 'partial' ? partialAmount : tripData.totalFare} Now
+            </Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity
-            style={[
-              styles.paymentOption,
-              selectedPayment === 'upi' && { 
-                borderColor: colorScheme.primary,
-                backgroundColor: colorScheme.primary + '10'
-              }
-            ]}
-            onPress={() => handlePaymentMethodSelect('upi')}
-          >
-            <View style={styles.paymentOptionContent}>
-              <Smartphone size={24} color={colorScheme.primary} />
-              <View style={styles.paymentOptionText}>
-                <Text style={[styles.paymentOptionTitle, { color: colorScheme.text }]}>
-                  UPI Payment
-                </Text>
-                <Text style={[styles.paymentOptionSubtitle, { color: colorScheme.subtext }]}>
-                  Google Pay, PhonePe, Paytm
-                </Text>
-              </View>
-            </View>
-            <View style={[
-              styles.radioButton,
-              { borderColor: colorScheme.border },
-              selectedPayment === 'upi' && { backgroundColor: colorScheme.primary }
-            ]}>
-              {selectedPayment === 'upi' && (
-                <CheckCircle size={16} color={colorScheme.background} />
-              )}
-            </View>
-          </TouchableOpacity>
-          
-          {/* Card Form */}
-          {showCardForm && (
-            <View style={styles.paymentForm}>
-              <Text style={[styles.formTitle, { color: colorScheme.text }]}>
-                Card Number
-              </Text>
-              <TextInput
-                style={[styles.formInput, { 
-                  color: colorScheme.text, 
-                  borderColor: colorScheme.border,
-                  backgroundColor: colorScheme.surface
-                }]}
-                placeholder="1234 5678 9012 3456"
-                placeholderTextColor={colorScheme.subtext}
-                value={cardNumber}
-                onChangeText={(text) => setCardNumber(formatCardNumber(text))}
-                keyboardType="numeric"
-                maxLength={19}
-              />
-              
-              <View style={styles.formRow}>
-                <View style={styles.formColumn}>
-                  <Text style={[styles.formTitle, { color: colorScheme.text }]}>
-                    Expiry Date
-                  </Text>
-                  <TextInput
-                    style={[styles.formInput, { 
-                      color: colorScheme.text, 
-                      borderColor: colorScheme.border,
-                      backgroundColor: colorScheme.surface
-                    }]}
-                    placeholder="MM/YY"
-                    placeholderTextColor={colorScheme.subtext}
-                    value={expiryDate}
-                    onChangeText={(text) => setExpiryDate(formatExpiryDate(text))}
-                    keyboardType="numeric"
-                    maxLength={5}
-                  />
-                </View>
-                
-                <View style={styles.formColumn}>
-                  <Text style={[styles.formTitle, { color: colorScheme.text }]}>
-                    CVV
-                  </Text>
-                  <TextInput
-                    style={[styles.formInput, { 
-                      color: colorScheme.text, 
-                      borderColor: colorScheme.border,
-                      backgroundColor: colorScheme.surface
-                    }]}
-                    placeholder="123"
-                    placeholderTextColor={colorScheme.subtext}
-                    value={cvv}
-                    onChangeText={setCvv}
-                    keyboardType="numeric"
-                    maxLength={4}
-                    secureTextEntry
-                  />
-                </View>
-              </View>
-            </View>
-          )}
-          
-          {/* UPI Form */}
-          {showUPIForm && (
-            <View style={styles.paymentForm}>
-              <Text style={[styles.formTitle, { color: colorScheme.text }]}>
-                UPI ID
-              </Text>
-              <TextInput
-                style={[styles.formInput, { 
-                  color: colorScheme.text, 
-                  borderColor: colorScheme.border,
-                  backgroundColor: colorScheme.surface
-                }]}
-                placeholder="yourname@upi"
-                placeholderTextColor={colorScheme.subtext}
-                value={upiId}
-                onChangeText={setUpiId}
-                keyboardType="email-address"
-              />
-              <Text style={[styles.formSubtext, { color: colorScheme.subtext }]}>
-                Enter your UPI ID (eg: yourname@paytm)
-              </Text>
-              
-              <View style={styles.upiApps}>
-                {['Paytm', 'PhonePe', 'GPay'].map((app) => (
-                  <TouchableOpacity
-                    key={app}
-                    style={[
-                      styles.upiApp,
-                      { borderColor: colorScheme.border },
-                      selectedUPIApp === app && { 
-                        borderColor: colorScheme.primary,
-                        backgroundColor: colorScheme.primary + '20'
-                      }
-                    ]}
-                    onPress={() => setSelectedUPIApp(app)}
-                  >
-                    <Text style={[styles.upiAppText, { color: colorScheme.text }]}>
-                      {app}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-          )}
-        </GlassCard>
-        
-        {/* Pay Button */}
-        <Button
-          title={paymentProcessing ? 'Processing Payment...' : `₹ Pay ₹${rideData.fare?.advancePayment || 202} Now`}
-          onPress={handlePayment}
-          disabled={paymentProcessing || (!showCardForm && !showUPIForm)}
-          size="large"
-          style={[styles.payButton, { backgroundColor: '#000000' }]}
-        />
-        
-        <Text style={[styles.paymentNote, { color: colorScheme.subtext }]}>
-          Remaining ₹{rideData.fare?.remainingPayment || 604} to be paid after ride completion
-        </Text>
+        </View>
       </ScrollView>
-    </LinearGradient>
+    </View>
   );
 }
 
@@ -733,337 +400,55 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  scrollContent: {
-    padding: 20,
-    paddingBottom: 40,
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    paddingBottom: 20,
   },
-  // Trip Summary Styles
-  summaryCard: {
-    padding: 16,
+  backButton: {
+    padding: 8,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  placeholder: {
+    width: 40,
+  },
+  scrollContainer: {
+    flex: 1,
+  },
+  content: {
+    padding: 20,
+  },
+  card: {
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 16,
   },
   cardTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 16,
-  },
-  summaryItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  locationDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: 12,
-  },
-  locationInfo: {
-    flex: 1,
-  },
-  locationLabel: {
-    fontSize: 12,
-    fontWeight: '500',
-    marginBottom: 2,
-  },
-  locationText: {
-    fontSize: 14,
-    fontWeight: '400',
-  },
-  tripMeta: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 8,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  metaItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  metaText: {
-    fontSize: 14,
-    fontWeight: '500',
-    marginLeft: 4,
-  },
-  // Payment Breakdown Styles
-  breakdownCard: {
-    padding: 16,
-    marginBottom: 16,
-  },
-  breakdownRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  breakdownLabel: {
-    fontSize: 14,
-  },
-  breakdownValue: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  totalBreakdownRow: {
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-    paddingTop: 8,
-    marginTop: 8,
-  },
-  totalBreakdownLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  totalBreakdownValue: {
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  // Prepayment System Styles
-  prepaymentCard: {
-    padding: 12,
-    borderRadius: 8,
-    marginTop: 12,
-  },
-  prepaymentRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  prepaymentDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#00CED1',
-    marginRight: 8,
-  },
-  prepaymentText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  prepaymentDetails: {
-    marginLeft: 14,
-  },
-  prepaymentItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 4,
-  },
-  prepaymentLabel: {
-    fontSize: 12,
-  },
-  prepaymentAmount: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  // Payment Method Styles
-  paymentMethodCard: {
-    padding: 16,
-    marginBottom: 16,
-  },
-  paymentOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 16,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    marginBottom: 12,
-  },
-  paymentOptionContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  paymentOptionText: {
-    marginLeft: 12,
-  },
-  paymentOptionTitle: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 2,
-  },
-  paymentOptionSubtitle: {
-    fontSize: 12,
-  },
-  radioButton: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  // Form Styles
-  paymentForm: {
-    marginTop: 16,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  formTitle: {
-    fontSize: 14,
-    fontWeight: '500',
-    marginBottom: 8,
-  },
-  formInput: {
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    marginBottom: 16,
-  },
-  formRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  formColumn: {
-    flex: 1,
-    marginHorizontal: 4,
-  },
-  formSubtext: {
-    fontSize: 12,
-    marginTop: -12,
-    marginBottom: 16,
-  },
-  // UPI Apps Styles
-  upiApps: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: 16,
-  },
-  upiApp: {
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  upiAppText: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  // Pay Button Styles
-  payButton: {
-    marginTop: 8,
-    paddingVertical: 16,
-  },
-  paymentNote: {
-    fontSize: 12,
-    textAlign: 'center',
-    marginTop: 8,
-  },
-  // Success Page Styles
-  successHeader: {
-    alignItems: 'center',
-    marginBottom: 24,
-    paddingVertical: 20,
-  },
-  successTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginTop: 16,
-    marginBottom: 4,
-  },
-  successSubtitle: {
-    fontSize: 16,
-    marginBottom: 8,
-  },
-  bookingId: {
-    fontSize: 14,
-  },
-  // Trip Info Card
-  tripInfoCard: {
-    padding: 16,
-    marginBottom: 16,
-  },
-  tripHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  tripType: {
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  tripDetails: {
-    alignItems: 'flex-end',
-  },
-  vehicleType: {
-    fontSize: 14,
-    fontWeight: '500',
-    marginBottom: 4,
-  },
-  passengerInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  passengerText: {
-    fontSize: 12,
-    marginLeft: 4,
-  },
-  // Route Details
-  routeCard: {
-    padding: 16,
-    marginBottom: 16,
-  },
-  routeHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  routeTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 8,
-  },
-  routeItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  routeMarker: {
-    marginRight: 12,
-  },
-  pickupDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  dropDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  routeContent: {
-    flex: 1,
-  },
-  routeLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    marginBottom: 2,
-  },
-  routeLocation: {
-    fontSize: 14,
-  },
-  // Payment Summary
-  paymentSummaryCard: {
-    padding: 16,
-    marginBottom: 16,
-  },
-  summaryHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  summaryTitle: {
-    fontSize: 16,
     fontWeight: '600',
     marginLeft: 8,
   },
   summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    alignItems: 'center',
+    marginBottom: 12,
   },
   summaryLabel: {
     fontSize: 14,
@@ -1074,113 +459,125 @@ const styles = StyleSheet.create({
   },
   totalRow: {
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-    paddingTop: 8,
+    borderTopColor: '#E5E7EB',
+    paddingTop: 12,
     marginTop: 8,
-    marginBottom: 8,
   },
   totalLabel: {
     fontSize: 16,
     fontWeight: '600',
   },
   totalValue: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
-  paidRow: {
-    backgroundColor: 'rgba(0, 255, 0, 0.1)',
-    padding: 8,
-    borderRadius: 6,
-    marginBottom: 8,
-  },
-  paidLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  paidValue: {
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  remainingText: {
-    fontSize: 12,
-    textAlign: 'center',
-    fontStyle: 'italic',
-  },
-  // Safety Card
-  safetyCard: {
-    padding: 16,
-    marginBottom: 20,
-    backgroundColor: 'rgba(255, 255, 0, 0.1)',
-  },
-  safetyHeader: {
+  paymentAmountOption: {
     flexDirection: 'row',
     alignItems: 'center',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
-  safetyIcon: {
+  paymentMethodOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  radioButton: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#E5E7EB',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginRight: 12,
   },
-  safetyContent: {
+  radioInner: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  paymentAmountInfo: {
     flex: 1,
   },
-  safetyTitle: {
+  paymentAmountTitle: {
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 4,
   },
-  safetyText: {
+  paymentAmountSubtitle: {
     fontSize: 14,
   },
-  // Action Buttons
-  actionButtons: {
+  paymentAmountValue: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  remainingText: {
+    fontSize: 12,
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  paymentMethodIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  paymentMethodInfo: {
+    flex: 1,
+  },
+  paymentMethodTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  paymentMethodSubtitle: {
+    fontSize: 14,
+  },
+  securityCard: {
+    borderRadius: 12,
+    padding: 16,
     marginBottom: 20,
   },
-  topButtonContainer: {
-    flexDirection: 'row',
-    marginBottom: 12,
-  },
-  primaryButton: {
-    paddingVertical: 16,
-    marginBottom: 12,
-    minHeight: 56,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  secondaryButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  secondaryButton: {
-    flex: 1,
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingVertical: 12,
-    alignItems: 'center',
-    marginHorizontal: 4,
-  },
-  secondaryButtonText: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  // Driver Status
-  driverStatus: {
-    alignItems: 'center',
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  statusIndicator: {
+  securityHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 8,
   },
-  statusText: {
-    fontSize: 14,
-    fontWeight: '500',
-    marginLeft: 8,
+  securityIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
   },
-  statusSubtext: {
-    fontSize: 12,
-    textAlign: 'center',
-    lineHeight: 16,
+  securityTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  securityText: {
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  payButton: {
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  payButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });

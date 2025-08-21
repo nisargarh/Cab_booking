@@ -81,6 +81,7 @@ export type Ride = {
   date: string;
   time: string;
   passengers: number;
+  hours?: string;
   passengerInfo: PassengerInfo[];
   vehicle?: Vehicle;
   status: RideStatus;
