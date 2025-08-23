@@ -7,7 +7,7 @@ import { UserRole } from '@/types';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { Phone } from 'lucide-react-native';
+import { Phone, User as UserIcon } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
   KeyboardAvoidingView,
@@ -34,6 +34,7 @@ export default function LoginScreen() {
   const colorScheme = theme === 'dark' ? colors.dark : colors.light;
   
   const [currentStep, setCurrentStep] = useState<SignupStep>('signup');
+  const [fullName, setFullName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [otp, setOtp] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -56,6 +57,11 @@ export default function LoginScreen() {
     }, 1500);
   };
 
+  const isSignupFormValid = () => {
+    const digits = phoneNumber.replace(/\D/g, '');
+    return fullName.trim().length >= 2 && digits.length >= 8;
+  };
+
   const handleVerifyOtp = () => {
     if (Platform.OS !== 'web') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -66,7 +72,7 @@ export default function LoginScreen() {
     setTimeout(() => {
       const user = {
         id: '123',
-        name: googleUser?.name || 'John Doe',
+        name: (fullName && fullName.trim()) || googleUser?.name || 'John Doe',
         phone: phoneNumber || '1234567890',
         email: googleUser?.email || 'user@example.com',
         role: selectedRole as UserRole,
@@ -143,6 +149,27 @@ export default function LoginScreen() {
         shadowRadius: 4,
         elevation: 3,
       }]}>
+        {/* Full Name above Phone */}
+        <View style={styles.inputContainer}>
+          <View style={styles.phoneInputWrapper}>
+            <UserIcon size={20} color={colorScheme.subtext} style={styles.phoneIcon} />
+            <TextInput
+              style={[
+                styles.phoneInput,
+                { 
+                  color: colorScheme.text,
+                  borderColor: colorScheme.border,
+                }
+              ]}
+              placeholder="Full Name"
+              placeholderTextColor={colorScheme.subtext}
+              value={fullName}
+              onChangeText={setFullName}
+              returnKeyType="next"
+            />
+          </View>
+        </View>
+
         <View style={styles.inputContainer}>
           <View style={styles.phoneInputWrapper}>
             <Phone size={20} color={colorScheme.subtext} style={styles.phoneIcon} />
@@ -159,6 +186,7 @@ export default function LoginScreen() {
               keyboardType="phone-pad"
               value={phoneNumber}
               onChangeText={setPhoneNumber}
+              returnKeyType="done"
             />
           </View>
         </View>
@@ -167,7 +195,8 @@ export default function LoginScreen() {
           title="Send OTP"
           onPress={handleSendOtp}
           loading={isLoading}
-          style={[styles.primaryButton, { backgroundColor: '#000000' }]}
+          disabled={!isSignupFormValid()}
+          style={[styles.primaryButton, { backgroundColor: '#000000', opacity: isSignupFormValid() ? 1 : 0.6 }]}
           textStyle={{ color: '#FFFFFF' }}
         />
         
@@ -372,36 +401,41 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal: 24,
-    paddingTop: Platform.OS === 'ios' ? 60 : 40,
-    paddingBottom: 40,
+    minHeight: '100%',
+    paddingHorizontal: 20,
+    paddingVertical: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop:100,
   },
   container: {
     flex: 1,
-    justifyContent: 'center',
+    width: '100%',
+    maxWidth: 560,
   },
   header: {
-    marginBottom: 40,
+    marginBottom: 24,
     alignItems: 'center',
   },
   title: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 8,
+    marginBottom: 6,
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: 20,
   },
   formCard: {
-    padding: 24,
-    marginBottom: 24,
+   
+    marginBottom: 20,
+    width: '100%',
     borderRadius: 16,
   },
   combinedCard: {
-    padding: 24,
+    // padding: 24,
     marginBottom: 24,
     borderRadius: 16,
   },
@@ -433,14 +467,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   singleCard: {
-    padding: 24,
+    // padding: 24,
     marginBottom: 24,
     borderRadius: 16,
   },
   userWelcomeSection: {
     alignItems: 'center',
     marginBottom: 30,
-    paddingTop: 10,
+    // paddingTop: 10,
   },
   welcomeUserName: {
     fontSize: 18,

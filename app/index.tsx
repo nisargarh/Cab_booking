@@ -1,72 +1,60 @@
-import { GlassCard } from '@/components/ui/GlassCard';
-import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import colors from '@/constants/colors';
-import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
-import { UserRole } from '@/types';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { Car, User } from 'lucide-react-native';
-import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Car } from 'lucide-react-native';
+import React, { useEffect, useRef } from 'react';
+import { PanResponder, StyleSheet, Text, View } from 'react-native';
 
-export default function RoleSelectionScreen() {
+export default function LandingScreen() {
   const router = useRouter();
   const { theme } = useTheme();
-  const { setSelectedRole } = useAuth();
   const colorScheme = theme === 'dark' ? colors.dark : colors.light;
-  
-  const handleRoleSelect = (role: UserRole) => {
-    setSelectedRole(role);
-    router.push('(auth)/auth-selection');
-  };
+
+  // Auto redirect after 6 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      router.replace('(auth)/auth-selection');
+    }, 6000);
+    return () => clearTimeout(timer);
+  }, [router]);
+
+  // Redirect on horizontal swipe
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, gesture) => Math.abs(gesture.dx) > 20,
+      onPanResponderRelease: (_, gesture) => {
+        if (Math.abs(gesture.dx) > 20) {
+          router.replace('(auth)/auth-selection');
+        }
+      },
+    })
+  ).current;
 
   return (
     <LinearGradient
       colors={[
-        theme === 'dark' ? '#1a1a1a' : '#f0f0f0',
+        theme === 'dark' ? '#121212' : '#ffffff',
         theme === 'dark' ? '#121212' : '#ffffff',
       ]}
       style={styles.container}
+      {...panResponder.panHandlers}
     >
-      <View style={styles.themeToggleContainer}>
-        <ThemeToggle />
-      </View>
-      
       <View style={styles.content}>
-        <Text style={[styles.title, { color: colorScheme.text }]}>
-          SDM Cab Booking
-        </Text>
-        <Text style={[styles.subtitle, { color: colorScheme.subtext }]}>
-          Your city, your ride. Experience seamless transportation with modern convenience.
-        </Text>
-        
-        <View style={styles.cardsContainer}>
-          <TouchableOpacity
-            style={styles.cardWrapper}
-            onPress={() => handleRoleSelect('rider')}
-            activeOpacity={0.9}
-          >
-            <GlassCard style={styles.roleCard}>
-              <User size={40} color={colorScheme.primary} />
-              <Text style={[styles.roleTitle, { color: colorScheme.text }]}>
-                Rider
-              </Text>
-            </GlassCard>
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            style={styles.cardWrapper}
-            onPress={() => handleRoleSelect('driver')}
-            activeOpacity={0.9}
-          >
-            <GlassCard style={styles.roleCard}>
-              <Car size={40} color={colorScheme.primary} />
-              <Text style={[styles.roleTitle, { color: colorScheme.text }]}>
-                Driver
-              </Text>
-            </GlassCard>
-          </TouchableOpacity>
+        {/* Green icon in soft circle */}
+        <View style={[styles.iconCircle, { backgroundColor: theme === 'dark' ? 'rgba(0,255,127,0.1)' : 'rgba(16,185,129,0.12)' }]}> 
+          <Car size={48} color={colorScheme.primary} />
+        </View>
+
+        {/* Title & subtitle */}
+        <Text style={[styles.title, { color: colorScheme.text }]}>SDM Cab Booking</Text>
+        <Text style={[styles.subtitle, { color: colorScheme.subtext }]}>Your Ride, Your Way</Text>
+
+        {/* Pagination dots */}
+        <View style={styles.dotsRow}>
+          <View style={[styles.dot, { backgroundColor: colorScheme.primary }]} />
+          <View style={[styles.dot, { backgroundColor: colorScheme.primary, opacity: 0.9 }]} />
+          <View style={[styles.dot, { backgroundColor: colorScheme.primary, opacity: 0.9 }]} />
         </View>
       </View>
     </LinearGradient>
@@ -77,52 +65,38 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  themeToggleContainer: {
-    position: 'absolute',
-    top: 50,
-    right: 20,
-    zIndex: 10,
-  },
   content: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    justifyContent: 'center',
+    paddingHorizontal: 24,
   },
-
+  iconCircle: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
+  },
   title: {
-    fontSize: 32,
-    fontWeight: 'bold',
+    fontSize: 28,
+    fontWeight: '800',
     textAlign: 'center',
-    marginBottom: 8,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
     textAlign: 'center',
-    marginBottom: 40,
+    marginTop: 6,
+    marginBottom: 32,
   },
-  cardsContainer: {
-    width: '100%',
-    maxWidth: 400,
+  dotsRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 12, // Small gap between rider and driver cards
+    gap: 8,
   },
-  cardWrapper: {
-    flex: 1, // Equal width for both cards
-    maxWidth: 180, // Prevent cards from getting too wide
-  },
-  roleCard: {
-    padding: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    aspectRatio: 1, // Make cards square
-    borderRadius: 20,
-    minHeight: 160,
-  },
-  roleTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginTop: 12,
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
 });

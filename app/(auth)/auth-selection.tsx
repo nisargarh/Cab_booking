@@ -1,9 +1,10 @@
 import { Button } from '@/components/ui/Button';
 import colors from '@/constants/colors';
+import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { Car, MapPin, Shield } from 'lucide-react-native';
+import { Car, MapPin, Shield, User } from 'lucide-react-native';
 import React from 'react';
 import {
   StyleSheet,
@@ -14,16 +15,11 @@ import {
 export default function AuthSelectionScreen() {
   const router = useRouter();
   const { theme } = useTheme();
-  // const { } = useAuth();
+  const { setSelectedRole } = useAuth();
   const colorScheme = theme === 'dark' ? colors.dark : colors.light;
 
-
-
-  const handleSignUp = () => {
-    router.push('(auth)/signup');
-  };
-
-  const handleLogin = () => {
+  const goToLoginForRole = (role: 'rider' | 'driver') => {
+    setSelectedRole(role);
     router.push('(auth)/login');
   };
 
@@ -55,36 +51,25 @@ export default function AuthSelectionScreen() {
           </View>
         </View>
 
-        <Text style={[styles.title, { color: colorScheme.text }]}>
-          SDM Cab Booking
-        </Text>
-        
-        <Text style={[styles.subtitle, { color: colorScheme.subtext }]}>
-          Your city, your ride. Experience seamless transportation with modern convenience.
-        </Text>
+        <Text style={[styles.title, { color: colorScheme.text }]}>SDM Cab Booking</Text>
+        <Text style={[styles.subtitle, { color: colorScheme.subtext }]}>Your city, your ride. Experience seamless transportation with modern convenience.</Text>
 
         <View style={styles.buttonsContainer}>
           <Button
-            title="Sign Up"
-            onPress={handleSignUp}
-            style={[
-              styles.buttonBase,
-              styles.primaryButton, 
-              { backgroundColor: colorScheme.primary }
-            ]}
-            textStyle={{ color: theme === 'dark' ? '#000000' : '#FFFFFF' }}
+            title="Rider"
+            onPress={() => goToLoginForRole('rider')}
+            style={[styles.buttonBase, styles.primaryButton, { backgroundColor: colorScheme.primary }]}
+            textStyle={{ color: theme === 'dark' ? '#000000' : '#FFFFFF', fontWeight: '700' }}
+            leftIcon={<User size={18}   color={theme === 'dark' ? '#000000' : '#FFFFFF'} />}
           />
           
           <Button
-            title="Login"
-            onPress={handleLogin}
-            style={[
-              styles.buttonBase,
-              styles.secondaryButton, 
-              { borderColor: colorScheme.border }
-            ]}
-            textStyle={{ color: colorScheme.text }}
+            title="Driver"
+            onPress={() => goToLoginForRole('driver')}
+            style={[styles.buttonBase, styles.secondaryButton, { borderColor: colorScheme.border }]}
+            textStyle={{ color: colorScheme.text, fontWeight: '700' }}
             variant="outlined"
+            leftIcon={<Car size={18} color={colorScheme.text} />}
           />
         </View>
 
@@ -108,15 +93,9 @@ export default function AuthSelectionScreen() {
         </View>
 
         <View style={styles.serviceLabels}>
-          <Text style={[styles.serviceLabel, { color: colorScheme.subtext }]}>
-            Car Booking
-          </Text>
-          <Text style={[styles.serviceLabel, { color: colorScheme.subtext }]}>
-            Live Tracking
-          </Text>
-          <Text style={[styles.serviceLabel, { color: colorScheme.subtext }]}>
-            Safe Rides
-          </Text>
+          <Text style={[styles.serviceLabel, { color: colorScheme.subtext }]}>Car Booking</Text>
+          <Text style={[styles.serviceLabel, { color: colorScheme.subtext }]}>Live Tracking</Text>
+          <Text style={[styles.serviceLabel, { color: colorScheme.subtext }]}>Safe Rides</Text>
         </View>
       </View>
     </LinearGradient>
@@ -126,21 +105,6 @@ export default function AuthSelectionScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 50,
-    marginHorizontal: 20,
-    marginBottom: 20,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   content: {
     flex: 1,
@@ -171,34 +135,11 @@ const styles = StyleSheet.create({
     opacity: 0.8,
     borderRadius: 2,
   },
-  building1: {
-    width: 15,
-    height: 35,
-    left: 15,
-  },
-  building2: {
-    width: 18,
-    height: 50,
-    left: 35,
-  },
-  building3: {
-    width: 20,
-    height: 40,
-    left: 58,
-  },
-  building4: {
-    width: 16,
-    height: 55,
-    left: 83,
-  },
-  car: {
-    width: 18,
-    height: 10,
-    borderRadius: 5,
-    position: 'absolute',
-    bottom: 8,
-    right: 20,
-  },
+  building1: { width: 15, height: 35, left: 15 },
+  building2: { width: 18, height: 50, left: 35 },
+  building3: { width: 20, height: 40, left: 58 },
+  building4: { width: 16, height: 55, left: 83 },
+  car: { width: 18, height: 10, borderRadius: 5, position: 'absolute', bottom: 8, right: 20 },
   pin: {
     position: 'absolute',
     width: 24,
@@ -208,14 +149,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  pin1: {
-    top: 20,
-    left: 40,
-  },
-  pin2: {
-    top: 30,
-    right: 30,
-  },
+  pin1: { top: 20, left: 40 },
+  pin2: { top: 30, right: 30 },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
@@ -234,18 +169,19 @@ const styles = StyleSheet.create({
     maxWidth: 300,
     marginBottom: 40,
     flexDirection: 'column',
-    alignItems: 'center', // Center align the buttons
-    gap: 16, // Add gap between buttons
+    alignItems: 'center',
+    gap: 16,
   },
   buttonBase: {
-    width: 280, // Fixed width for both buttons
-    height: 48, // Fixed height for both buttons
-    paddingHorizontal: 0, // Override any internal padding
-    minWidth: 280, // Ensure minimum width
-    maxWidth: 280, // Ensure maximum width
+    width: 280,
+    height: 48,
+    paddingHorizontal: 0,
+    minWidth: 280,
+    maxWidth: 280,
+    borderRadius: 24,
   },
   primaryButton: {
-    backgroundColor: '#00CED1',
+    backgroundColor: '#00D084',
   },
   secondaryButton: {
     backgroundColor: 'transparent',
@@ -258,12 +194,12 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   serviceIcon: {
-    width: 44,
+    width: 60,
     height: 44,
     borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
-    marginHorizontal: 12,
+    marginHorizontal: 25,
   },
   serviceLabels: {
     flexDirection: 'row',
@@ -274,6 +210,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: 'center',
     marginHorizontal: 10,
-    width: 60,
+    width: 90,
   },
 });

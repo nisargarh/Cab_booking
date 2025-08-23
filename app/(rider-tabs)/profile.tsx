@@ -500,7 +500,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   infoCard: {
-    padding: 16,
+    // padding: 16,
     marginBottom: 16,
   },
   cardHeader: {
@@ -542,7 +542,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   statsCard: {
-    padding: 16,
+    // padding: 16,
     marginBottom: 16,
   },
   statsContainer: {
@@ -562,7 +562,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   addressesCard: {
-    padding: 16,
+    // padding: 16,
     marginBottom: 24,
   },
   addressItem: {

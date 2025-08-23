@@ -837,13 +837,14 @@ const styles = StyleSheet.create({
 
   statusFilterContainer: {
     flexDirection: 'row',
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
     paddingBottom: 16,
+    paddingTop: 10,
     gap: 6,
     justifyContent: 'space-between',
   },
   statusFilterButton: {
-    paddingHorizontal: 12,
+    paddingHorizontal: 6,
     paddingVertical: 10,
     borderRadius: 25,
     borderWidth: 1,
@@ -863,9 +864,9 @@ const styles = StyleSheet.create({
   tripCardContainer: {
     marginBottom: 16,
   },
-  tripCard: {
-    padding: 16,
-  },
+  // tripCard: {
+  //   padding: 16,
+  // },
   tripHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
