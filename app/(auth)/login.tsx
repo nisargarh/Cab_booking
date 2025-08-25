@@ -152,7 +152,7 @@ export default function LoginScreen() {
         {/* Full Name above Phone */}
         <View style={styles.inputContainer}>
           <View style={styles.phoneInputWrapper}>
-            <UserIcon size={20} color={colorScheme.subtext} style={styles.phoneIcon} />
+            <UserIcon size={20} color={'#22C55E'} style={styles.phoneIcon} />
             <TextInput
               style={[
                 styles.phoneInput,
@@ -172,7 +172,7 @@ export default function LoginScreen() {
 
         <View style={styles.inputContainer}>
           <View style={styles.phoneInputWrapper}>
-            <Phone size={20} color={colorScheme.subtext} style={styles.phoneIcon} />
+            <Phone size={20} color={'#22C55E'} style={styles.phoneIcon} />
             <TextInput
               style={[
                 styles.phoneInput,
@@ -196,7 +196,7 @@ export default function LoginScreen() {
           onPress={handleSendOtp}
           loading={isLoading}
           disabled={!isSignupFormValid()}
-          style={[styles.primaryButton, { backgroundColor: '#000000', opacity: isSignupFormValid() ? 1 : 0.6 }]}
+          style={[styles.primaryButton, { backgroundColor: '#22C55E', opacity: isSignupFormValid() ? 1 : 0.6 }]}
           textStyle={{ color: '#FFFFFF' }}
         />
         
@@ -212,8 +212,8 @@ export default function LoginScreen() {
       <TouchableOpacity
         onPress={handleGoogleLogin}
         style={[styles.googleButton, { 
-          borderColor: '#e0e0e0',
-          backgroundColor: '#ffffff',
+          borderColor: '#22C55E',
+          backgroundColor: 'white',
           shadowColor: '#000',
           shadowOffset: { width: 0, height: 2 },
           shadowOpacity: 0.1,
@@ -222,7 +222,7 @@ export default function LoginScreen() {
         }]}
         disabled={isLoading}
       >
-        <Text style={[styles.googleText, { color: '#333333' }]}>
+        <Text style={[styles.googleText, { color: '#22C55E' }]}>
           Google
         </Text>
       </TouchableOpacity>
@@ -258,7 +258,7 @@ export default function LoginScreen() {
               styles.otpInput,
               { 
                 color: colorScheme.text,
-                borderColor: colorScheme.border,
+                borderColor: '#E5E7EB',
               }
             ]}
             placeholder="Enter OTP"
@@ -275,7 +275,7 @@ export default function LoginScreen() {
           title="Verify & Login"
           onPress={handleVerifyOtp}
           loading={isLoading}
-          style={[styles.primaryButton, { backgroundColor: '#000000' }]}
+          style={[styles.primaryButton, { backgroundColor: '#22C55E' }]}
           textStyle={{ color: '#FFFFFF' }}
         />
         
@@ -318,7 +318,7 @@ export default function LoginScreen() {
 
         <View style={styles.inputContainer}>
           <View style={styles.phoneInputWrapper}>
-            <Phone size={20} color={colorScheme.subtext} style={styles.phoneIcon} />
+            <Phone size={20} color={'#22C55E'} style={styles.phoneIcon} />
             <TextInput
               style={[
                 styles.phoneInput,
@@ -340,7 +340,7 @@ export default function LoginScreen() {
           title="Send OTP"
           onPress={handleSendOtp}
           loading={isLoading}
-          style={[styles.primaryButton, { backgroundColor: '#000000' }]}
+          style={[styles.primaryButton, { backgroundColor: '#22C55E' }]}
           textStyle={{ color: '#FFFFFF' }}
         />
         
@@ -506,6 +506,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 16,
     height: 52,
+    backgroundColor: '#FFFFFF',
+    borderColor: '#E5E7EB',
   },
   phoneIcon: {
     marginRight: 12,

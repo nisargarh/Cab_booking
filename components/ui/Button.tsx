@@ -73,8 +73,16 @@ export const Button: React.FC<ButtonProps> = ({
       ...textSizeStyles[size],
     };
 
-    // Check if custom backgroundColor is provided in style
-    const customBgColor = style && typeof style === 'object' && 'backgroundColor' in style ? style.backgroundColor : null;
+    // Check if custom backgroundColor is provided in style (supports array)
+    const customBgColor = (() => {
+      const stylesArray = Array.isArray(style) ? style : [style];
+      for (const s of stylesArray) {
+        if (s && typeof s === 'object' && 'backgroundColor' in s && (s as any).backgroundColor) {
+          return (s as any).backgroundColor as string;
+        }
+      }
+      return null;
+    })();
 
     switch (variant) {
       case 'outlined':
@@ -117,8 +125,16 @@ export const Button: React.FC<ButtonProps> = ({
   );
 
   if (variant === 'filled') {
-    // Check if custom backgroundColor is provided in style
-    const customBgColor = style && typeof style === 'object' && 'backgroundColor' in style ? style.backgroundColor : null;
+    // Check if custom backgroundColor is provided in style (supports array)
+    const customBgColor = (() => {
+      const stylesArray = Array.isArray(style) ? style : [style];
+      for (const s of stylesArray) {
+        if (s && typeof s === 'object' && 'backgroundColor' in s && (s as any).backgroundColor) {
+          return (s as any).backgroundColor as string;
+        }
+      }
+      return null;
+    })();
     
     if (customBgColor) {
       // Use solid color background instead of gradient
@@ -135,11 +151,25 @@ export const Button: React.FC<ButtonProps> = ({
       );
     }
     
+    // Strip backgroundColor from style array/obj to let gradient show
+    const styleWithoutBg = (() => {
+      if (!style) return { backgroundColor: 'transparent' };
+      const stylesArray = Array.isArray(style) ? style : [style];
+      const cleaned = stylesArray.map((s) => {
+        if (s && typeof s === 'object' && 'backgroundColor' in s) {
+          const { backgroundColor, ...rest } = s as any;
+          return rest as any;
+        }
+        return s as any;
+      });
+      return cleaned;
+    })();
+
     return (
       <TouchableOpacity
         onPress={onPress}
         disabled={disabled || loading}
-        style={[getContainerStyle(), { backgroundColor: 'transparent' }, style && Object.fromEntries(Object.entries(style).filter(([key]) => key !== 'backgroundColor'))]}
+        style={[getContainerStyle(), { backgroundColor: 'transparent' }, styleWithoutBg]}
         activeOpacity={0.8}
         {...props}
       >

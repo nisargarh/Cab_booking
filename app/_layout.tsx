@@ -67,6 +67,9 @@ function RootLayoutNav() {
           headerShown: false,
         }}
       />
+      <Stack.Screen name="(auth)/auth-selection" options={{ headerShown: false }} />
+      <Stack.Screen name="(auth)/signup" options={{ headerShown: false }} />
+      <Stack.Screen name="(auth)/onboarding" options={{ headerShown: false }} />
       <Stack.Screen
         name="(rider-tabs)"
         options={{

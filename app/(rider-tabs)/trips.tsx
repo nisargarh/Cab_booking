@@ -26,7 +26,7 @@ export default function TripsScreen() {
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [dateModalVisible, setDateModalVisible] = useState(false);
-  const [selectedDateRange, setSelectedDateRange] = useState<'daily' | 'weekly' | 'monthly' | 'yearly' | 'custom'>('yearly');
+  const [selectedDateRange, setSelectedDateRange] = useState<'daily' | 'weekly' | 'monthly' | 'yearly'>('daily');
   const [tripDetailsModalVisible, setTripDetailsModalVisible] = useState(false);
   const [liveTrackingModalVisible, setLiveTrackingModalVisible] = useState(false);
   const [paymentSummaryModalVisible, setPaymentSummaryModalVisible] = useState(false);
@@ -56,7 +56,7 @@ export default function TripsScreen() {
     setDateModalVisible(true);
   };
 
-  const handleDateRangeSelect = (range: 'daily' | 'weekly' | 'monthly' | 'yearly' | 'custom') => {
+  const handleDateRangeSelect = (range: 'daily' | 'weekly' | 'monthly' | 'yearly') => {
     setSelectedDateRange(range);
     setDateModalVisible(false);
   };
@@ -417,7 +417,73 @@ export default function TripsScreen() {
     }
   };
 
-  const filteredTrips = getFilteredTrips();
+  // Date utilities
+  const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const endOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
+  const startOfWeek = (d: Date) => {
+    const day = d.getDay(); // 0=Sun
+    const diff = d.getDate() - day; // start Sunday
+    return new Date(d.getFullYear(), d.getMonth(), diff);
+  };
+  const endOfWeek = (d: Date) => {
+    const start = startOfWeek(d);
+    return new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6, 23, 59, 59, 999);
+  };
+  const startOfMonth = (d: Date) => new Date(d.getFullYear(), d.getMonth(), 1);
+  const endOfMonth = (d: Date) => new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59, 999);
+  const startOfYear = (d: Date) => new Date(d.getFullYear(), 0, 1);
+  const endOfYear = (d: Date) => new Date(d.getFullYear(), 11, 31, 23, 59, 59, 999);
+
+  // Custom range state
+  const [customRangeVisible, setCustomRangeVisible] = useState(false);
+  const [customStartDate, setCustomStartDate] = useState<Date | null>(null);
+  const [customEndDate, setCustomEndDate] = useState<Date | null>(null);
+
+  const parseTripDate = (trip: Ride) => {
+    // Trip dates can be ISO (YYYY-MM-DD) or formatted like 'Jul 24, 2025'
+    // Combine with time when available
+    const dateStr = trip.date;
+    const timeStr = trip.time || '00:00';
+    const parsed = new Date(`${dateStr} ${timeStr}`);
+    if (!isNaN(parsed.getTime())) return parsed;
+    // Fallback: parse date only
+    const dateOnly = new Date(dateStr);
+    if (!isNaN(dateOnly.getTime())) return dateOnly;
+    // Last fallback: try Date.parse directly
+    const byParse = new Date(Date.parse(dateStr));
+    return byParse;
+  };
+
+  const within = (d: Date, start: Date, end: Date) => d.getTime() >= start.getTime() && d.getTime() <= end.getTime();
+
+  const getDateRangeBounds = () => {
+    const now = new Date();
+    switch (selectedDateRange) {
+      case 'daily':
+        return { start: startOfDay(now), end: endOfDay(now) };
+      case 'weekly':
+        return { start: startOfWeek(now), end: endOfWeek(now) };
+      case 'monthly':
+        return { start: startOfMonth(now), end: endOfMonth(now) };
+      case 'yearly':
+        return { start: startOfYear(now), end: endOfYear(now) };
+      case 'custom':
+        if (customStartDate && customEndDate) {
+          return { start: startOfDay(customStartDate), end: endOfDay(customEndDate) };
+        }
+        // If not set, default to today so list isn’t empty
+        return { start: startOfDay(now), end: endOfDay(now) };
+      default:
+        return { start: startOfYear(now), end: endOfYear(now) };
+    }
+  };
+
+  const filteredTrips = getFilteredTrips().filter((trip) => {
+    const d = parseTripDate(trip);
+    if (isNaN(d.getTime())) return false;
+    const { start, end } = getDateRangeBounds();
+    return within(d, start, end);
+  });
 
   // Helper function to get trip status based on time
   const getTripStatus = (trip: Ride) => {
@@ -566,7 +632,7 @@ export default function TripsScreen() {
         <AppHeader 
           title="My Trips" 
           onMenuPress={handleMenuPress}
-          showMenu={false}
+          showMenu={true}
         />
         
         <LinearGradient
@@ -619,10 +685,10 @@ export default function TripsScreen() {
               onPress={handleDateFilterPress}
             >
               <Text style={[styles.dateFilterText, { color: colorScheme.text }]}>
-                {selectedDateRange === 'yearly' ? 'This Year' : 
-                 selectedDateRange === 'monthly' ? 'This Month' :
+                {selectedDateRange === 'daily' ? 'Today' : 
                  selectedDateRange === 'weekly' ? 'This Week' :
-                 selectedDateRange === 'daily' ? 'Today' : 'Custom Range'}
+                 selectedDateRange === 'monthly' ? 'This Month' :
+                 'This Year'}
               </Text>
               <ChevronDown size={16} color={colorScheme.text} />
             </TouchableOpacity>
@@ -731,7 +797,7 @@ export default function TripsScreen() {
                 Select Date Range
               </Text>
               
-              {['daily', 'weekly', 'monthly', 'yearly', 'custom'].map((range) => (
+              {['daily', 'weekly', 'monthly', 'yearly'].map((range) => (
                 <TouchableOpacity
                   key={range}
                   style={[
@@ -744,11 +810,10 @@ export default function TripsScreen() {
                     styles.modalOptionText,
                     selectedDateRange === range && styles.modalOptionTextSelected
                   ]}>
-                    {range === 'daily' ? 'Daily' :
-                     range === 'weekly' ? 'Weekly' :
-                     range === 'monthly' ? 'Monthly' :
-                     range === 'yearly' ? 'Yearly' :
-                     'Custom Range'}
+                    {range === 'daily' ? 'Today' :
+                     range === 'weekly' ? 'This Week' :
+                     range === 'monthly' ? 'This Month' :
+                     'This Year'}
                   </Text>
                   {selectedDateRange === range && (
                     <View style={styles.selectedIndicator} />
@@ -762,6 +827,63 @@ export default function TripsScreen() {
               >
                 <Text style={styles.applyButtonText}>Apply Filter</Text>
               </TouchableOpacity>
+
+              {/* Custom Range Calendar Flow */}
+              {selectedDateRange === 'custom' && (
+                <View style={{ marginTop: 12 }}>
+                  <Text style={{ textAlign: 'center', marginBottom: 8, color: '#333' }}>
+                    {customStartDate && customEndDate
+                      ? `${customStartDate.toLocaleDateString()} → ${customEndDate.toLocaleDateString()}`
+                      : customStartDate
+                        ? `Start: ${customStartDate.toLocaleDateString()} — Select end date`
+                        : 'Select start date'}
+                  </Text>
+                  <CustomCalendar
+                    visible={customRangeVisible}
+                    onClose={() => setCustomRangeVisible(false)}
+                    onDateSelect={(pickedDate) => {
+                      if (!customStartDate || (customStartDate && customEndDate)) {
+                        // Start a new selection
+                        setCustomStartDate(pickedDate);
+                        setCustomEndDate(null);
+                        // Reopen to pick end
+                        setTimeout(() => setCustomRangeVisible(true), 0);
+                      } else {
+                        // Pick end date (ensure end >= start)
+                        const end = pickedDate < customStartDate ? customStartDate : pickedDate;
+                        setCustomEndDate(end);
+                        setCustomRangeVisible(false);
+                      }
+                    }}
+                    selectedDate={customEndDate || customStartDate || new Date()}
+                    minimumDate={new Date(2000, 0, 1)}
+                    title={!customStartDate || (customStartDate && customEndDate) ? 'Select Start Date' : 'Select End Date'}
+                  />
+
+                  {(!customStartDate || !customEndDate) && (
+                    <TouchableOpacity
+                      style={[styles.applyButton, { backgroundColor: '#A7A7A7', marginTop: 8 }]}
+                      onPress={() => setCustomRangeVisible(true)}
+                    >
+                      <Text style={styles.applyButtonText}>
+                        {customStartDate ? 'Pick End Date' : 'Pick Start Date'}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+
+                  {customStartDate && customEndDate && (
+                    <TouchableOpacity
+                      style={[styles.applyButton, { backgroundColor: '#22C55E', marginTop: 8 }]}
+                      onPress={() => {
+                        // Closing the select modal already applies the filter via state
+                        setDateModalVisible(false);
+                      }}
+                    >
+                      <Text style={styles.applyButtonText}>Apply Custom Range</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              )}
             </View>
           </View>
         </View>

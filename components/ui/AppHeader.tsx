@@ -1,9 +1,10 @@
 import colors from '@/constants/colors';
+import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
 import * as Haptics from 'expo-haptics';
-import { Menu, Moon, Sun } from 'lucide-react-native';
+import { User } from 'lucide-react-native';
 import React from 'react';
-import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 interface AppHeaderProps {
   title: string;
@@ -12,8 +13,9 @@ interface AppHeaderProps {
 }
 
 export function AppHeader({ title, onMenuPress, showMenu = true }: AppHeaderProps) {
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
   const colorScheme = theme === 'dark' ? colors.dark : colors.light;
+  const { user } = useAuth();
 
   const handleMenuPress = () => {
     if (Platform.OS !== 'web') {
@@ -22,36 +24,27 @@ export function AppHeader({ title, onMenuPress, showMenu = true }: AppHeaderProp
     onMenuPress();
   };
 
-  const handleThemeToggle = () => {
-    if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    toggleTheme();
-  };
+
 
   return (
     <View style={[styles.header, { backgroundColor: colorScheme.background }]}>
-      <View style={styles.leftContainer}>
-        {showMenu ? (
-          <TouchableOpacity onPress={handleMenuPress} style={styles.menuButton}>
-            <Menu size={24} color={colorScheme.text} />
-          </TouchableOpacity>
-        ) : (
-          <View style={styles.menuButton} />
-        )}
-        
-        <Text style={[styles.headerTitle, { color: colorScheme.text }]}>
-          {title}
-        </Text>
-      </View>
-      
-      <TouchableOpacity onPress={handleThemeToggle} style={styles.themeButton}>
-        {theme === 'dark' ? (
-          <Sun size={24} color={colorScheme.text} />
-        ) : (
-          <Moon size={24} color={colorScheme.text} />
-        )}
-      </TouchableOpacity>
+      {showMenu ? (
+        <TouchableOpacity onPress={handleMenuPress} style={styles.menuButton}>
+          <View style={[styles.avatar, { borderColor: colorScheme.border, backgroundColor: colorScheme.surface }]}> 
+            {user?.profileImage ? (
+              <Image source={{ uri: user.profileImage }} style={styles.avatarImage} />
+            ) : user?.name ? (
+              <Text style={[styles.avatarInitial, { color: colorScheme.text }]}>
+                {user.name.charAt(0).toUpperCase()}
+              </Text>
+            ) : (
+              <User size={22} color={colorScheme.text} />
+            )}
+          </View>
+        </TouchableOpacity>
+      ) : (
+        <View style={styles.menuButton} />
+      )}
     </View>
   );
 }
@@ -60,10 +53,10 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     paddingHorizontal: 20,
-    paddingTop: 50,
-    paddingBottom: 16,
+    paddingTop: 30,
+    paddingBottom: 6,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0,0,0,0.1)',
   },
@@ -73,8 +66,26 @@ const styles = StyleSheet.create({
   },
   menuButton: {
     padding: 4,
-    width: 32,
-    marginRight: 16,
+    width: 44,
+    marginLeft: 16,
+  },
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  avatarInitial: {
+    fontSize: 14,
+    fontWeight: '600',
   },
   headerTitle: {
     fontSize: 20,

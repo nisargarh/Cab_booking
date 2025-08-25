@@ -10,14 +10,14 @@ import { useRouter } from 'expo-router';
 import { Phone } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 type SignupStep = 'signup' | 'otp' | 'google-phone' | 'google-otp';
@@ -166,7 +166,7 @@ export default function SignUpScreen() {
           title="Send OTP"
           onPress={handleSendOtp}
           loading={isLoading}
-          style={[styles.primaryButton, { backgroundColor: '#000000' }]}
+          style={[styles.primaryButton, { backgroundColor: '#22C55E' }]}
           textStyle={{ color: '#FFFFFF' }}
         />
         
@@ -249,7 +249,7 @@ export default function SignUpScreen() {
           title="Verify & Sign Up"
           onPress={handleVerifyOtp}
           loading={isLoading}
-          style={[styles.primaryButton, { backgroundColor: '#000000' }]}
+          style={[styles.primaryButton, { backgroundColor: '#22C55E' }]}
           textStyle={{ color: '#FFFFFF' }}
         />
         
@@ -314,7 +314,7 @@ export default function SignUpScreen() {
           title="Send OTP"
           onPress={handleSendOtp}
           loading={isLoading}
-          style={[styles.primaryButton, { backgroundColor: '#000000' }]}
+          style={[styles.primaryButton, { backgroundColor: '#22C55E' }]}
           textStyle={{ color: '#FFFFFF' }}
         />
         
@@ -382,6 +382,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
+    
   },
   header: {
     marginBottom: 40,
@@ -418,6 +419,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 6,
     textAlign: 'center',
+    
   },
   userEmail: {
     fontSize: 14,
@@ -443,6 +445,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 16,
     height: 52,
+    backgroundColor: '#FFFFFF',
+    borderColor: '#E5E7EB',
   },
   phoneIcon: {
     marginRight: 12,

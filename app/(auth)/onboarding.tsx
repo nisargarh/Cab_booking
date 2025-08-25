@@ -30,7 +30,7 @@ const onboardingData = [
     subtitle: 'Book rides across your city with just a few taps. Choose from a variety of vehicles to suit your needs.',
     icons: [
       { Icon: MapPin, color: '#00CED1' },
-      { Icon: Car, color: '#00CED1' },
+      { Icon: Car, color: '#22C55E' },
     ],
   },
   {
@@ -39,7 +39,7 @@ const onboardingData = [
     subtitle: 'From quick city rides to airport transfers and hourly rentals, we\'ve got all your transportation needs covered.',
     icons: [
       { Icon: Plane, color: '#9C27B0' },
-      { Icon: Car, color: '#00CED1' },
+      { Icon: Car, color: '#22C55E' },
       { Icon: Clock, color: '#FF9800' },
       { Icon: Shield, color: '#4CAF50' },
       { Icon: Users, color: '#E91E63' },
@@ -180,8 +180,8 @@ export default function OnboardingScreen() {
               style={[
                 styles.indicator,
                 {
-                  backgroundColor: index === currentPage ? '#00CED1' : colorScheme.border,
-                  width: index === currentPage ? 24 : 8,
+                  backgroundColor: index === currentPage ? '#22C55E' : '#BBF7D0',
+                  width: 8,
                 }
               ]}
             />
