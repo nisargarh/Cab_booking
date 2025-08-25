@@ -6,8 +6,8 @@ const colors = {
     text: '#000000',
     subtext: '#666666',
     border: 'rgba(0, 0, 0, 0.15)',
-    primary: '#000000',
-    accent: '#000000',
+    primary: '#16A34A',
+    accent: '#16A34A',
     shadow: 'rgba(0, 0, 0, 0.1)',
     success: '#22C55E',
     

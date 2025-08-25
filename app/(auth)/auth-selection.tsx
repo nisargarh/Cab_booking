@@ -7,9 +7,9 @@ import { useRouter } from 'expo-router';
 import { Car, MapPin, Shield, User } from 'lucide-react-native';
 import React from 'react';
 import {
-  StyleSheet,
-  Text,
-  View
+    StyleSheet,
+    Text,
+    View
 } from 'react-native';
 
 export default function AuthSelectionScreen() {
@@ -26,8 +26,8 @@ export default function AuthSelectionScreen() {
   return (
     <LinearGradient
       colors={[
-        theme === 'dark' ? '#1a1a1a' : '#f0f0f0',
-        theme === 'dark' ? '#121212' : '#ffffff',
+        theme === 'dark' ? '#1a1a1a' : '#FFFFFF',
+        theme === 'dark' ? '#121212' : '#FFFFFF',
       ]}
       style={styles.container}
     >

@@ -56,32 +56,75 @@ export default function ProfileScreen() {
   ]);
   
   const pickImage = async () => {
+    // Ask for permissions
     if (Platform.OS !== 'web') {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      
-      if (status !== 'granted') {
-        Alert.alert('Permission needed', 'Sorry, we need camera roll permissions to change profile picture!');
+      const { status: libStatus } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      const { status: camStatus } = await ImagePicker.requestCameraPermissionsAsync();
+      if (libStatus !== 'granted' && camStatus !== 'granted') {
+        Alert.alert('Permission needed', 'Camera or Media Library permission is required.');
         return;
       }
     }
-    
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-      });
-      
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        if (Platform.OS !== 'web') {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        }
-        setProfileImage(result.assets[0].uri);
-      }
-    } catch (error) {
-      console.error('Error picking image:', error);
-    }
+
+    // Offer options: Camera, Gallery, Files
+    Alert.alert(
+      'Update Photo',
+      'Choose a source',
+      [
+        { text: 'Camera', onPress: async () => {
+            try {
+              const res = await ImagePicker.launchCameraAsync({
+                allowsEditing: true,
+                aspect: [1, 1],
+                quality: 0.8,
+              });
+              if (!res.canceled && res.assets?.length) {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+                setProfileImage(res.assets[0].uri);
+              }
+            } catch (e) { console.error(e); }
+          }
+        },
+        { text: 'Gallery', onPress: async () => {
+            try {
+              const res = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                aspect: [1, 1],
+                quality: 0.8,
+              });
+              if (!res.canceled && res.assets?.length) {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+                setProfileImage(res.assets[0].uri);
+              }
+            } catch (e) { console.error(e); }
+          }
+        },
+        { text: 'Files', onPress: async () => {
+            // For now reuse gallery picker; if DocumentPicker is added, swap implementation
+            try {
+              const res = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                aspect: [1, 1],
+                quality: 0.8,
+              });
+              if (!res.canceled && res.assets?.length) {
+                if (Platform.OS !== 'web') {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                }
+                setProfileImage(res.assets[0].uri);
+              }
+            } catch (e) { console.error(e); }
+          }
+        },
+        { text: 'Cancel', style: 'cancel' },
+      ]
+    );
   };
   
   const handleSave = () => {
@@ -166,8 +209,8 @@ export default function ProfileScreen() {
         
         <LinearGradient
           colors={[
-            theme === 'dark' ? '#1a1a1a' : '#f0f0f0',
-            theme === 'dark' ? '#121212' : '#ffffff',
+            theme === 'dark' ? '#1a1a1a' : '#FFFFFF',
+            theme === 'dark' ? '#121212' : '#FFFFFF',
           ]}
           style={styles.gradientContainer}
         >

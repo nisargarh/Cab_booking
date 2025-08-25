@@ -285,8 +285,8 @@ export default function OutstationScreen() {
   return (
     <LinearGradient
       colors={[
-        theme === 'dark' ? '#1a1a1a' : '#f0f0f0',
-        theme === 'dark' ? '#121212' : '#ffffff',
+        theme === 'dark' ? '#1a1a1a' : '#FFFFFF',
+        theme === 'dark' ? '#121212' : '#FFFFFF',
       ]}
       style={styles.container}
     >

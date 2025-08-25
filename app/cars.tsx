@@ -4,7 +4,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { Vehicle } from '@/types';
 import * as Haptics from 'expo-haptics';
 import { Stack, useRouter } from 'expo-router';
-import { ArrowLeft, Car, Clock, Users } from 'lucide-react-native';
+import { Car, Clock, Users } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -91,18 +91,18 @@ export default function CarSelectionScreen() {
       
       {/* Custom Header */}
       <View style={[styles.header, { backgroundColor: colorScheme.background }]}>
-        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+        {/* <TouchableOpacity onPress={handleBack} style={styles.backButton}>
           <ArrowLeft size={24} color={colorScheme.text} />
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: colorScheme.text }]}>Choose Your Vehicle</Text>
-        <View style={styles.placeholder} />
+        <View style={styles.placeholder} /> */}
       </View>
 
       <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
         <View style={styles.content}>
-          <Text style={[styles.subtitle, { color: colorScheme.subtext }]}>
+          {/* <Text style={[styles.subtitle, { color: colorScheme.subtext }]}>
             Select the perfect vehicle for your journey
-          </Text>
+          </Text> */}
 
           <Text style={[styles.sectionTitle, { color: colorScheme.text }]}>
             Choose Your Vehicle

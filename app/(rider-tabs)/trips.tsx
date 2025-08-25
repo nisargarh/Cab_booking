@@ -1,3 +1,4 @@
+
 import { AppHeader } from '@/components/ui/AppHeader';
 import { DrawerMenu } from '@/components/ui/DrawerMenu';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -15,7 +16,6 @@ import { useRouter } from 'expo-router';
 import { ChevronDown, Filter } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { FlatList, Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-
 export default function TripsScreen() {
   const { theme } = useTheme();
   const { pastRides, rides: allRides } = useRides();
@@ -634,11 +634,11 @@ export default function TripsScreen() {
           onMenuPress={handleMenuPress}
           showMenu={true}
         />
-        
+
         <LinearGradient
           colors={[
-            theme === 'dark' ? '#1a1a1a' : '#f0f0f0',
-            theme === 'dark' ? '#121212' : '#ffffff',
+            theme === 'dark' ? '#1a1a1a' : '#FFFFFF',
+            theme === 'dark' ? '#121212' : '#FFFFFF',
           ]}
           style={styles.gradientContainer}
         >

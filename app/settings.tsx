@@ -5,15 +5,15 @@ import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import {
-  Bell,
-  ChevronRight,
-  CreditCard,
-  FileText,
-  Globe,
-  HelpCircle,
-  Shield,
-  Star,
-  Volume2
+    Bell,
+    ChevronRight,
+    CreditCard,
+    FileText,
+    Globe,
+    HelpCircle,
+    Shield,
+    Star,
+    Volume2
 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Platform, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
@@ -97,8 +97,8 @@ export default function SettingsScreen() {
   return (
     <LinearGradient
       colors={[
-        theme === 'dark' ? '#1a1a1a' : '#f0f0f0',
-        theme === 'dark' ? '#121212' : '#ffffff',
+        theme === 'dark' ? '#1a1a1a' : '#FFFFFF',
+        theme === 'dark' ? '#121212' : '#FFFFFF',
       ]}
       style={styles.container}
     >

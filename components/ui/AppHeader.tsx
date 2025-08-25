@@ -1,21 +1,19 @@
 import colors from '@/constants/colors';
-import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/hooks/useTheme';
 import * as Haptics from 'expo-haptics';
-import { User } from 'lucide-react-native';
+import { MoreVertical } from 'lucide-react-native';
 import React from 'react';
-import { Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 interface AppHeaderProps {
-  title: string;
+  title?: string;
   onMenuPress: () => void;
   showMenu?: boolean;
 }
 
-export function AppHeader({ title, onMenuPress, showMenu = true }: AppHeaderProps) {
+export function AppHeader({ onMenuPress, showMenu = true }: AppHeaderProps) {
   const { theme } = useTheme();
   const colorScheme = theme === 'dark' ? colors.dark : colors.light;
-  const { user } = useAuth();
 
   const handleMenuPress = () => {
     if (Platform.OS !== 'web') {
@@ -24,23 +22,19 @@ export function AppHeader({ title, onMenuPress, showMenu = true }: AppHeaderProp
     onMenuPress();
   };
 
-
-
   return (
-    <View style={[styles.header, { backgroundColor: colorScheme.background }]}>
+    <View style={[styles.header, { backgroundColor: colorScheme.background, borderBottomColor: colorScheme.border }]}>
+      <View style={styles.leftContainer}>
+        <Image
+          // Path: C:\\Users\\dell\\Desktop\\Cab_booking\\assets\\images\\sdm.png
+          source={require('../../assets/images/sdm.png')}
+          style={styles.logo}
+        />
+      </View>
+
       {showMenu ? (
         <TouchableOpacity onPress={handleMenuPress} style={styles.menuButton}>
-          <View style={[styles.avatar, { borderColor: colorScheme.border, backgroundColor: colorScheme.surface }]}> 
-            {user?.profileImage ? (
-              <Image source={{ uri: user.profileImage }} style={styles.avatarImage} />
-            ) : user?.name ? (
-              <Text style={[styles.avatarInitial, { color: colorScheme.text }]}>
-                {user.name.charAt(0).toUpperCase()}
-              </Text>
-            ) : (
-              <User size={22} color={colorScheme.text} />
-            )}
-          </View>
+          <MoreVertical size={22} color={colorScheme.primary} />
         </TouchableOpacity>
       ) : (
         <View style={styles.menuButton} />
@@ -53,47 +47,24 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-end',
-    paddingHorizontal: 20,
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
     paddingTop: 30,
     paddingBottom: 6,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.1)',
   },
   leftContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
+  logo: {
+    width: 60,
+    height: 40,
+    borderRadius: 6,
+  },
   menuButton: {
     padding: 4,
     width: 44,
-    marginLeft: 16,
-  },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    overflow: 'hidden',
-  },
-  avatarImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  avatarInitial: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  themeButton: {
-    padding: 4,
-    width: 32,
-    alignItems: 'center',
+    alignItems: 'flex-end',
   },
 });
